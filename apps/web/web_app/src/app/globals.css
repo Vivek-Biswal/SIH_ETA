@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --color-canvas-black: #09090B;
+  --color-surface-zinc: #18181B;
+  --color-surface-zinc-light: #27272A;
+  --color-whisper-border: rgba(255, 255, 255, 0.1);
+  --color-pure-white: #FFFFFF;
+  --color-muted-steel: #A1A1AA;
+  --color-live-green: #22C55E;
+  --color-warning-amber: #F59E0B;
+  --color-critical-red: #EF4444;
+  --color-brand-blue: #3B82F6;
+}
+
+@theme {
+  --color-canvas-black: #09090B;
+  --color-surface-zinc: #18181B;
+  --color-surface-zinc-light: #27272A;
+  --color-whisper-border: rgba(255, 255, 255, 0.1);
+  --color-pure-white: #FFFFFF;
+  --color-muted-steel: #A1A1AA;
+  --color-live-green: #22C55E;
+  --color-warning-amber: #F59E0B;
+  --color-critical-red: #EF4444;
+  --color-brand-blue: #3B82F6;
+  
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: var(--font-geist), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: var(--color-canvas-black);
+  color: var(--color-pure-white);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular figures for monospace elements */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbar matching dark cockpit theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-canvas-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-zinc-light);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-steel);
+}
