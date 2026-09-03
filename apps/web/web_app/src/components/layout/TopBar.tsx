@@ -6,30 +6,38 @@ import { Search, User } from 'lucide-react';
 
 export const TopBar: React.FC = () => {
   return (
-    <header className="h-14 bg-[#18181B] border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0">
-      {/* Global Quick Search */}
-      <div className="flex items-center gap-3 w-96">
-        <div className="relative w-full">
+    <header className="h-14 bg-[#18181B] border-b border-white/10 px-4 md:px-6 flex items-center justify-between flex-shrink-0">
+      {/* Global Quick Search & Mobile Menu */}
+      <div className="flex items-center gap-3 flex-1 md:w-96 md:flex-none">
+        <button className="md:hidden p-1.5 text-[#A1A1AA] hover:text-white rounded hover:bg-white/5 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <div className="relative w-full max-w-sm hidden sm:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA]" />
           <input
             type="text"
-            placeholder="Search train number, station (e.g. 12301, CNB)..."
+            placeholder="Search train, station..."
             className="w-full bg-[#09090B] border border-white/10 rounded px-3 py-1.5 pl-9 text-xs text-white placeholder-[#A1A1AA] focus:outline-none focus:border-[#3B82F6] font-mono"
           />
         </div>
       </div>
 
       {/* Right Telemetry Controls */}
-      <div className="flex items-center gap-4">
-        <StatusBadge type="LIVE" label="FEED ACTIVE" pulse />
+      <div className="flex items-center gap-3 md:gap-4">
+        <div className="hidden sm:block">
+          <StatusBadge type="LIVE" label="FEED ACTIVE" pulse />
+        </div>
+        <div className="sm:hidden">
+          <StatusBadge type="LIVE" label="LIVE" pulse />
+        </div>
 
-        <div className="h-4 w-px bg-white/10" />
+        <div className="hidden sm:block h-4 w-px bg-white/10" />
 
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded bg-white/10 flex items-center justify-center text-white text-xs border border-white/10 font-mono">
             OP
           </div>
-          <div className="flex flex-col text-left">
+          <div className="hidden md:flex flex-col text-left">
             <span className="text-xs font-medium text-white leading-tight">
               Control Room
             </span>

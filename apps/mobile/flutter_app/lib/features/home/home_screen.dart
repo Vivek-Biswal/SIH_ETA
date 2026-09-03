@@ -104,8 +104,25 @@ class HomeScreen extends ConsumerWidget {
                   child: CircularProgressIndicator(color: AppColors.brandBlue),
                 ),
               ),
-              error: (err, _) => Center(
-                child: Text('Error loading trains: $err', style: AppTypography.bodyMedium),
+              error: (err, _) => Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.criticalRedBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.criticalRed.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: AppColors.criticalRed),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Failed to connect to ETA intelligence network. Retrying...',
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.criticalRed),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               data: (trains) => ListView.separated(
                 shrinkWrap: true,
