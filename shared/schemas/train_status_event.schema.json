@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Train Status Event",
+  "description": "Event published when a train's running status is updated",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "position_update"
+    },
+    "train_number": {
+      "type": "string",
+      "pattern": "^\\d{5}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_station": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["code", "name"]
+    },
+    "delay_minutes": {
+      "type": "integer"
+    },
+    "next_station": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["code", "name"]
+    },
+    "predicted_next_arrival": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["type", "train_number", "timestamp", "current_station", "delay_minutes", "next_station"]
+}

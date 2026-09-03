@@ -1,0 +1,44 @@
+# Shared Constants
+# This file defines cross-system constants that should remain synchronized.
+
+# ---------------------------------------------------------
+# Enumerations
+# ---------------------------------------------------------
+
+# Train Types
+TRAIN_TYPES = [
+    "Rajdhani",
+    "Shatabdi",
+    "Duronto",
+    "Vande Bharat",
+    "Mail",
+    "Express",
+    "Passenger",
+    "Special"
+]
+
+# Delay Factors (used in ML model and UI explanations)
+DELAY_FACTORS = {
+    "HISTORICAL": "historical_delay",
+    "WEATHER": "weather",
+    "CONGESTION": "network_congestion",
+    "TRAFFIC": "route_traffic",
+    "CREW": "crew_change",
+    "PLATFORM": "platform_availability",
+    "OTHER": "other"
+}
+
+# ---------------------------------------------------------
+# Thresholds and Configs
+# ---------------------------------------------------------
+
+# Maximum allowed prediction horizon (in hours)
+MAX_PREDICTION_HORIZON_HOURS = 48
+
+# Threshold for "delayed" status (minutes)
+DELAY_THRESHOLD_MINUTES = 15
+
+# Cache TTLs (seconds)
+CACHE_TTL_ETA = 60
+CACHE_TTL_POSITION = 300
+CACHE_TTL_STATION_INFO = 86400

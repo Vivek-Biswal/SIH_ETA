@@ -1,0 +1,688 @@
+# API Contract — SIH ETA (SIH26028)
+# Version: 1.0.0-draft
+# Last Updated: 2026-09-03
+#
+# This file is the SINGLE SOURCE OF TRUTH for all API contracts.
+# Any team that changes an endpoint MUST update this file and notify all teams.
+#
+# Format: OpenAPI 3.1.0 (YAML)
+# Auto-generated interactive docs available at: http://localhost:8000/docs
+# ==============================================================================
+
+openapi: 3.1.0
+
+info:
+  title: SIH ETA API
+  description: |
+    Dynamic Train ETA Prediction API for SIH26028 — Ministry of Railways.
+
+    **Base URL:** `http://localhost:8000` (development)
+
+    **Authentication:** Bearer JWT token required on all endpoints except `/health` and `/api/v1/auth/*`.
+
+    **Versioning:** All endpoints are prefixed with `/api/v1/`. Breaking changes will introduce `/api/v2/`.
+  version: 1.0.0-draft
+  contact:
+    name: SIH ETA Team
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.sih-eta.example.com
+    description: Production (TBD)
+
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: trains
+    description: Train search, status, and ETA
+  - name: stations
+    description: Station information
+  - name: network
+    description: Railway network intelligence
+  - name: health
+    description: Service health checks
+
+# ==============================================================================
+# PATHS
+# ==============================================================================
+
+paths:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # HEALTH
+  # ──────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [health]
+      summary: Service health check
+      operationId: health_check
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # AUTHENTICATION
+  # ──────────────────────────────────────────────────────────────────────────
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Authenticate user and receive JWT tokens
+      operationId: auth_login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh access token
+      operationId: auth_refresh
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # TRAINS
+  # ──────────────────────────────────────────────────────────────────────────
+  /api/v1/trains/search:
+    get:
+      tags: [trains]
+      summary: Search trains between source and destination stations
+      operationId: trains_search
+      parameters:
+        - name: from_station
+          in: query
+          required: true
+          description: Source station code (e.g., NDLS, BCT, MAS)
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 10
+        - name: to_station
+          in: query
+          required: true
+          description: Destination station code
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: false
+          description: Travel date (ISO 8601 format). Defaults to today.
+          schema:
+            type: string
+            format: date
+            example: "2026-09-05"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of trains matching the search criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/trains/{train_number}/status:
+    get:
+      tags: [trains]
+      summary: Get live running status of a train
+      operationId: trains_get_status
+      parameters:
+        - name: train_number
+          in: path
+          required: true
+          description: 5-digit Indian Railways train number
+          schema:
+            type: string
+            pattern: '^\d{5}$'
+            example: "12301"
+        - name: date
+          in: query
+          required: false
+          description: Date for which to fetch status. Defaults to today.
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Train running status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/trains/{train_number}/eta:
+    get:
+      tags: [trains]
+      summary: Get ML-predicted ETA for remaining stations
+      operationId: trains_get_eta
+      description: |
+        Returns AI/ML-predicted Expected Time of Arrival for all remaining stations
+        on the train's route. Predictions account for historical delay patterns,
+        current running status, weather, and network congestion.
+      parameters:
+        - name: train_number
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{5}$'
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ML-predicted ETA for remaining stations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ETAResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # STATIONS
+  # ──────────────────────────────────────────────────────────────────────────
+  /api/v1/stations/{station_code}:
+    get:
+      tags: [stations]
+      summary: Get station details
+      operationId: stations_get
+      parameters:
+        - name: station_code
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "NDLS"
+      responses:
+        '200':
+          description: Station details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/stations/search:
+    get:
+      tags: [stations]
+      summary: Search stations by name or code
+      operationId: stations_search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query (station name or code prefix)
+          schema:
+            type: string
+            minLength: 2
+      responses:
+        '200':
+          description: Matching stations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationSearchResponse'
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # NETWORK INTELLIGENCE
+  # ──────────────────────────────────────────────────────────────────────────
+  /api/v1/network/status:
+    get:
+      tags: [network]
+      summary: Get network-wide congestion and delay summary
+      operationId: network_get_status
+      responses:
+        '200':
+          description: Network status overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkStatusResponse'
+
+  /api/v1/network/routes/{route_id}/congestion:
+    get:
+      tags: [network]
+      summary: Get congestion score for a specific route
+      operationId: network_get_route_congestion
+      parameters:
+        - name: route_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Route congestion data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteCongestionResponse'
+
+# ==============================================================================
+# COMPONENTS
+# ==============================================================================
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+
+    # ── Common ──────────────────────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: "NOT_FOUND"
+        message:
+          type: string
+          example: "Train 12301 not found"
+        detail:
+          type: object
+          description: Additional error context (optional)
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # ── Authentication ──────────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        expires_in:
+          type: integer
+          description: Access token expiry in seconds
+
+    RefreshTokenRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    # ── Train Search ─────────────────────────────────────────────────────────
+    TrainSearchResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        trains:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrainSummary'
+
+    TrainSummary:
+      type: object
+      properties:
+        train_number:
+          type: string
+          example: "12301"
+        train_name:
+          type: string
+          example: "Rajdhani Express"
+        from_station:
+          $ref: '#/components/schemas/StationRef'
+        to_station:
+          $ref: '#/components/schemas/StationRef'
+        departure_time:
+          type: string
+          format: time
+          example: "16:55"
+        arrival_time:
+          type: string
+          format: time
+          example: "10:00"
+        days_of_run:
+          type: array
+          items:
+            type: string
+            enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+        train_type:
+          type: string
+          enum: [Rajdhani, Shatabdi, Duronto, Mail, Express, Passenger, Special]
+
+    # ── Train Status ─────────────────────────────────────────────────────────
+    TrainStatusResponse:
+      type: object
+      properties:
+        train_number:
+          type: string
+        train_name:
+          type: string
+        date:
+          type: string
+          format: date
+        current_station:
+          $ref: '#/components/schemas/StationRef'
+        last_known_location:
+          $ref: '#/components/schemas/LastKnownLocation'
+        overall_delay_minutes:
+          type: integer
+          description: Delay at last known station in minutes (negative = early)
+        status:
+          type: string
+          enum: [on_time, delayed, early, cancelled, not_started, completed]
+        route:
+          type: array
+          items:
+            $ref: '#/components/schemas/StationRunningStatus'
+
+    LastKnownLocation:
+      type: object
+      properties:
+        station:
+          $ref: '#/components/schemas/StationRef'
+        actual_departure_time:
+          type: string
+          format: date-time
+        delay_minutes:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+
+    StationRunningStatus:
+      type: object
+      properties:
+        station:
+          $ref: '#/components/schemas/StationRef'
+        scheduled_arrival:
+          type: string
+          format: time
+        scheduled_departure:
+          type: string
+          format: time
+        actual_arrival:
+          type: string
+          format: time
+          nullable: true
+        actual_departure:
+          type: string
+          format: time
+          nullable: true
+        delay_minutes:
+          type: integer
+          nullable: true
+        has_departed:
+          type: boolean
+        platform:
+          type: string
+          nullable: true
+
+    # ── ETA ──────────────────────────────────────────────────────────────────
+    ETAResponse:
+      type: object
+      properties:
+        train_number:
+          type: string
+        train_name:
+          type: string
+        date:
+          type: string
+          format: date
+        prediction_generated_at:
+          type: string
+          format: date-time
+        model_version:
+          type: string
+          description: Version identifier of the ML model used
+        overall_delay_minutes:
+          type: integer
+          description: Predicted total delay at final destination
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Model's confidence in this prediction (0-1)
+        remaining_stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StationETA'
+        delay_factors:
+          type: array
+          items:
+            $ref: '#/components/schemas/DelayFactor'
+          description: Top contributing factors to the predicted delay
+
+    StationETA:
+      type: object
+      properties:
+        station:
+          $ref: '#/components/schemas/StationRef'
+        scheduled_arrival:
+          type: string
+          format: date-time
+        predicted_arrival:
+          type: string
+          format: date-time
+        predicted_delay_minutes:
+          type: integer
+        prediction_confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    DelayFactor:
+      type: object
+      properties:
+        factor:
+          type: string
+          enum: [historical_delay, weather, network_congestion, route_traffic, crew_change, platform_availability]
+        contribution_minutes:
+          type: integer
+        description:
+          type: string
+
+    # ── Stations ──────────────────────────────────────────────────────────────
+    StationRef:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "NDLS"
+        name:
+          type: string
+          example: "New Delhi"
+
+    StationResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+        zone:
+          type: string
+          description: Indian Railways zone (e.g., NR, SR, WR)
+        latitude:
+          type: number
+          format: float
+        longitude:
+          type: number
+          format: float
+        platform_count:
+          type: integer
+        is_junction:
+          type: boolean
+
+    StationSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StationRef'
+
+    # ── Network ───────────────────────────────────────────────────────────────
+    NetworkStatusResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        overall_health:
+          type: string
+          enum: [normal, moderately_congested, severely_congested]
+        active_trains:
+          type: integer
+        delayed_trains:
+          type: integer
+        delay_percentage:
+          type: number
+          format: float
+        congestion_hotspots:
+          type: array
+          items:
+            $ref: '#/components/schemas/CongestionHotspot'
+
+    CongestionHotspot:
+      type: object
+      properties:
+        route_segment:
+          type: string
+          description: "e.g., 'NDLS-CNB'"
+        congestion_level:
+          type: string
+          enum: [low, medium, high, critical]
+        affected_trains:
+          type: integer
+        average_delay_minutes:
+          type: integer
+
+    RouteCongestionResponse:
+      type: object
+      properties:
+        route_id:
+          type: string
+        congestion_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        average_delay_minutes:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - BearerAuth: []
