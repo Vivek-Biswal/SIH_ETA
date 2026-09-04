@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/services/train_repository.dart';
+import '../../core/network/api_client.dart';
 import '../../shared/widgets/eta_display.dart';
 import '../../shared/widgets/station_timeline.dart';
 
@@ -32,7 +33,20 @@ class TrainDetailsScreen extends ConsumerWidget {
         error: (err, _) => Center(
           child: Text('Failed to load ETA telemetry: $err', style: AppTypography.bodyMedium),
         ),
-        data: (eta) {
+        data: (apiResult) {
+          if (apiResult.status == ApiResultStatus.error) {
+            return Center(
+              child: Text('Failed to load ETA telemetry: ${apiResult.errorMessage}', style: AppTypography.bodyMedium),
+            );
+          }
+
+          final eta = apiResult.data;
+          if (eta == null) {
+            return Center(
+              child: Text('No ETA data available.', style: AppTypography.bodyMedium),
+            );
+          }
+
           final stops = eta.remainingStations.map((s) {
             return StationStop(
               stationCode: s.station.code,
@@ -66,7 +80,7 @@ class TrainDetailsScreen extends ConsumerWidget {
                   scheduledTime: '19:55',
                   predictedTime: '20:47',
                   delayMinutes: eta.overallDelayMinutes,
-                  confidence: eta.confidenceScore,
+                  confidence: eta.confidenceScore ?? 0.0,
                 ),
 
                 const SizedBox(height: 24),

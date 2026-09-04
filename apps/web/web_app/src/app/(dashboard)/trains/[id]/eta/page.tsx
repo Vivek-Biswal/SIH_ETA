@@ -63,7 +63,7 @@ export default function EtaAnalysisPage({
         />
         <KpiCard
           title="Model Confidence Score"
-          value={`${(eta.confidence_score * 100).toFixed(0)}%`}
+          value={`${((eta.confidence_score ?? 0) * 100).toFixed(0)}%`}
           subtitle="High feature reliability"
           status="SUCCESS"
         />
@@ -87,7 +87,7 @@ export default function EtaAnalysisPage({
               header: 'Station',
               render: (s) => (
                 <div>
-                  <span className="font-bold text-white mr-2">{s.station.code}</span>
+                  <div className="text-xl font-bold text-white mt-1">{(eta?.confidence_score ?? 0) * 100}%</div>
                   <span className="text-[#A1A1AA] text-xs">{s.station.name}</span>
                 </div>
               ),
@@ -122,7 +122,7 @@ export default function EtaAnalysisPage({
               align: 'right',
               render: (s) => (
                 <span className="text-[#A1A1AA]">
-                  {(s.prediction_confidence * 100).toFixed(0)}%
+                  {((s.prediction_confidence ?? 0) * 100).toFixed(0)}%
                 </span>
               ),
             },

@@ -137,7 +137,7 @@ export default function TrainStatusDetailsPage({
                     )}
                   </div>
                   <div className="text-xs text-[#A1A1AA] font-mono mt-0.5">
-                    Confidence: {(stop.prediction_confidence * 100).toFixed(0)}%
+                    Confidence: {((stop.prediction_confidence ?? 0) * 100).toFixed(0)}%
                   </div>
                 </div>
 

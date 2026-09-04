@@ -188,3 +188,69 @@ export const mockCongestionSegments: RouteCongestionSegment[] = [
     status: 'NORMAL'
   }
 ];
+
+export const mockDelayDna = {
+  train_id: "12301",
+  contributors: [
+    {
+      factor: "network_congestion",
+      contribution_minutes: 38,
+      description: "Severe block congestion on NDLS-CNB electrified quadruple track"
+    },
+    {
+      factor: "historical_delay",
+      contribution_minutes: 14,
+      description: "Average turnaround delay observed on Thursday monsoon operations"
+    }
+  ],
+  data_state: "mock"
+};
+
+export const mockRecovery = {
+  current_delay: 52,
+  expected_recovery: 20,
+  expected_remaining_delay: 32,
+  confidence: 0.85,
+  data_state: "mock"
+};
+
+export const mockPropagation = {
+  source_train: "12301",
+  affected_train: "12259",
+  affected_station: "CNB",
+  predicted_delay: 15,
+  time_window: "2h",
+  risk: "medium",
+  confidence: 0.72,
+  data_state: "mock"
+};
+
+export const mockBottlenecks = [
+  {
+    location: "NDLS",
+    time_window: "2h",
+    risk: "high",
+    affected_trains: 8,
+    reason: "Platform unavailability and crossing conflicts",
+    confidence: 0.9,
+    data_state: "mock"
+  },
+  {
+    location: "CNB",
+    time_window: "4h",
+    risk: "medium",
+    affected_trains: 3,
+    reason: "Speed restriction on bridge approach",
+    confidence: 0.75,
+    data_state: "mock"
+  }
+];
+
+export const mockScenario = {
+  scenario_id: "sim_123",
+  status: "completed",
+  results: {
+    impact: "minimal",
+    estimated_resolution: "45 mins"
+  }
+};

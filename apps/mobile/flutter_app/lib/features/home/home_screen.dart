@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/services/train_repository.dart';
+import '../../core/network/api_client.dart';
 import '../../shared/widgets/status_badge.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -124,13 +125,44 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              data: (trains) => ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: trains.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, idx) {
-                  final t = trains[idx];
+              data: (apiResult) {
+                if (apiResult.status == ApiResultStatus.error) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.criticalRedBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.criticalRed.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: AppColors.criticalRed),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            apiResult.errorMessage ?? 'Failed to connect to ETA intelligence network.',
+                            style: AppTypography.bodyMedium.copyWith(color: AppColors.criticalRed),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final trains = apiResult.data ?? [];
+                if (trains.isEmpty) {
+                  return Center(
+                    child: Text('No live trains at the moment.', style: AppTypography.bodyMedium),
+                  );
+                }
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: trains.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, idx) {
+                    final t = trains[idx];
                   final isDelayed = t.delayMinutes > 0;
 
                   return InkWell(
@@ -201,7 +233,8 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   );
                 },
-              ),
+                );
+              },
             ),
           ],
         ),
