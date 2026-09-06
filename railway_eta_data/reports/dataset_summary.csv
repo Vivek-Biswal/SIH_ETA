@@ -1,0 +1,7 @@
+source_name,source_url,file_name,file_format,ingestion_date,record_count
+Railpull,https://github.com/shwetankg07/railpull,delays.json,json,2026-09-07T00:03:31.398893,444
+Railpull,https://github.com/shwetankg07/railpull,poller-status.json,json,2026-09-07T00:03:31.407117,1
+Railpull,https://github.com/shwetankg07/railpull,major_stations.json,json,2026-09-07T00:03:31.447339,250
+Datameet Indian Railways,https://github.com/datameet/railways,schedules.json,json,2026-09-07T00:03:50.079505,417080
+Datameet Indian Railways,https://github.com/datameet/railways,stations.json,json,2026-09-07T00:03:51.565063,8990
+Datameet Indian Railways,https://github.com/datameet/railways,trains.json,json,2026-09-07T00:03:52.769463,5208

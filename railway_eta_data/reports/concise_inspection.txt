@@ -1,0 +1,19 @@
+=== stations.json ===
+Format: GeoJSON FeatureCollection
+Number of records: 8990
+Sample properties: ['state', 'code', 'name', 'zone', 'address']
+Missing values: {'state': 4593, 'code': 0, 'name': 1, 'zone': 4532, 'address': 4593}
+
+=== trains.json ===
+Format: GeoJSON FeatureCollection
+Number of records: 5208
+Sample properties: ['third_ac', 'arrival', 'from_station_code', 'name', 'zone', 'chair_car', 'first_class', 'duration_m', 'sleeper', 'from_station_name', 'number', 'departure', 'return_train', 'to_station_code', 'second_ac', 'classes', 'to_station_name', 'duration_h', 'type', 'first_ac', 'distance']
+Missing values: {'third_ac': 0, 'arrival': 0, 'from_station_code': 0, 'name': 1, 'zone': 15, 'chair_car': 0, 'first_class': 0, 'duration_m': 15, 'sleeper': 0, 'from_station_name': 0, 'number': 0, 'departure': 0, 'return_train': 599, 'to_station_code': 0, 'second_ac': 0, 'classes': 5208, 'to_station_name': 0, 'duration_h': 15, 'type': 15, 'first_ac': 0, 'distance': 15}
+
+=== schedules.json ===
+Format: JSON List
+Number of records: 417080
+Keys: ['arrival', 'day', 'train_name', 'station_name', 'station_code', 'id', 'train_number', 'departure']
+Sample: {"arrival": "None", "day": 1, "train_name": "Falaknuma Lingampalli MMTS", "station_name": "KACHEGUDA FALAKNUMA", "station_code": "FM", "id": 302214, "train_number": "47154", "departure": "07:55:00"}
+Missing values: {'arrival': 0, 'day': 22561, 'train_name': 8, 'station_name': 2, 'station_code': 0, 'id': 0, 'train_number': 0, 'departure': 0}
+
