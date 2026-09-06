@@ -2,6 +2,21 @@ import { ETAResponse, TrainStatus, NetworkZoneStatus, RouteCongestionSegment } f
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 
+type NetworkStatusResponse = {
+  congestion_hotspots?: Array<{
+    route_segment: string;
+    congestion_level: 'critical' | 'high' | 'medium' | string;
+    affected_trains: number;
+    average_delay_minutes: number;
+  }>;
+};
+
+type RouteCongestionResponse = {
+  route_id: string;
+  congestion_score: number;
+  average_delay_minutes: number;
+};
+
 export class RailwayApiService {
   static async getTrainStatus(trainNo: string): Promise<TrainStatus> {
     const res = await fetch(`${API_BASE_URL}/trains/${trainNo}/status`);
@@ -22,19 +37,49 @@ export class RailwayApiService {
     const res = await fetch(`${API_BASE_URL}/trains/search?from_station=${fromStation}&to_station=${toStation}`);
     if (!res.ok) throw new Error('Failed to search trains');
     const data = await res.json();
-    return data.data || [];
+    return data.trains ?? data.data ?? [];
   }
 
   static async getNetworkStatus(): Promise<NetworkZoneStatus[]> {
     const res = await fetch(`${API_BASE_URL}/network/status`);
     if (!res.ok) throw new Error('Failed to fetch network status');
-    return res.json();
+    const data: NetworkStatusResponse = await res.json();
+
+    return (data.congestion_hotspots ?? []).map((hotspot, index) => ({
+      zone_code: `SEG-${index + 1}`,
+      zone_name: hotspot.route_segment,
+      active_trains: hotspot.affected_trains,
+      delayed_trains: hotspot.affected_trains,
+      critical_conflicts: hotspot.congestion_level === 'critical' ? 1 : 0,
+      avg_delay_minutes: hotspot.average_delay_minutes,
+      status:
+        hotspot.congestion_level === 'critical'
+          ? 'DISRUPTED'
+          : hotspot.congestion_level === 'high'
+            ? 'CONGESTED'
+            : 'HEALTHY',
+    }));
   }
 
   static async getRouteCongestion(routeId: string = "NDLS-GZB"): Promise<RouteCongestionSegment[]> {
     const res = await fetch(`${API_BASE_URL}/network/routes/${routeId}/congestion`);
     if (!res.ok) throw new Error('Failed to fetch route congestion');
-    return res.json();
+    const data: RouteCongestionResponse = await res.json();
+    const [from_station, to_station] = data.route_id.split('-', 2);
+
+    return [{
+      segment_id: data.route_id,
+      from_station,
+      to_station,
+      active_trains: 0,
+      congestion_score: data.congestion_score,
+      status:
+        data.congestion_score >= 80
+          ? 'CONFLICT'
+          : data.congestion_score >= 50
+            ? 'CONGESTED'
+            : 'NORMAL',
+    }];
   }
 
   // --- New Core Intelligence Endpoints ---

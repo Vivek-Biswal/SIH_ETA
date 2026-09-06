@@ -41,19 +41,25 @@ export default function LiveFeedPage() {
   const wsRef = React.useRef<WebSocket | null>(null);
 
   React.useEffect(() => {
-    let reconnectTimeout: NodeJS.Timeout;
+    let isActive = true;
+    let reconnectTimeout: NodeJS.Timeout | undefined;
 
     const connectWebSocket = () => {
+      if (!isActive) return;
+
       setStatus('CONNECTING');
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/trains/live';
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (!isActive || ws !== wsRef.current) return;
         setStatus('CONNECTED');
       };
 
       ws.onmessage = (event) => {
+        if (!isActive || ws !== wsRef.current) return;
+
         try {
           const data = JSON.parse(event.data);
           
@@ -94,11 +100,13 @@ export default function LiveFeedPage() {
       };
 
       ws.onclose = () => {
+        if (!isActive || ws !== wsRef.current) return;
         setStatus('DISCONNECTED');
         reconnectTimeout = setTimeout(connectWebSocket, 5000);
       };
 
       ws.onerror = (error) => {
+        if (!isActive || ws !== wsRef.current) return;
         console.error("WebSocket error:", error);
         ws.close();
       };
@@ -107,9 +115,17 @@ export default function LiveFeedPage() {
     connectWebSocket();
 
     return () => {
-      clearTimeout(reconnectTimeout);
-      if (wsRef.current) {
-        wsRef.current.close();
+      isActive = false;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+
+      const ws = wsRef.current;
+      if (ws) {
+        ws.onopen = null;
+        ws.onmessage = null;
+        ws.onclose = null;
+        ws.onerror = null;
+        ws.close();
+        wsRef.current = null;
       }
     };
   }, []);
