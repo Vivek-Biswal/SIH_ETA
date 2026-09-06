@@ -9,12 +9,12 @@ This inventory documents all the legitimate publicly available data sources curr
 
 | SOURCE | SOURCE URL | PUBLICLY AVAILABLE? | FREE? | PERMISSION REQUIRED? | FILE | FORMAT | RECORD COUNT | DATE RANGE | DATA TYPE | KEY FIELDS | LIMITATIONS |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `stations.json` | JSON | ~5,000+ | Static (Unknown) | STATIC | `code`, `name`, `zone`, `state` | No live data. |
-| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `trains.json` | JSON | ~12,000+ | Static (Unknown) | STATIC | `number`, `name`, `type`, `zone` | No live data. |
-| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `schedules.json` | JSON | ~1.3M+ | Static (Unknown) | STATIC | `train_number`, `station_code`, `arrival`, `departure`, `day`, `distance` | Timetables only; no actual arrivals. |
-| Railpull | `https://github.com/shwetankg07/railpull` | YES | YES | NO | `delays.json` | JSON | ~400+ | Snapshot | LIVE_SNAPSHOT | `train_number`, `d` (delay) | No location data. Single snapshot. |
-| RailRadar | `https://railradar.in/docs/live-train-status` | YES | YES | YES (API Key) | N/A | API/JSON | N/A | Live | LIVE_SNAPSHOT | `train_number`, `current_status`, `delay_minutes`, `current_position_station` | Highly rate limited (1000/mo free). |
-| DA323 Delay Datasets | `https://github.com/ankitaanand28/...` | YES | YES | NO | `Train_Route/*.csv` | CSV | Varies (~15-40 per train) | 2023-2024 (Approx) | HISTORICAL_AGGREGATED | `Station`, `Average_Delay(min)`, `Significant Delay` % | Aggregated stats only. No individual journeys or actual timestamps. |
+| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `stations.json` | JSON | 8,990 | Static (Unknown) | STATIC | `code`, `name`, `zone`, `state` | No live data. |
+| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `trains.json` | JSON | 5,208 | Static (Unknown) | STATIC | `number`, `name`, `type`, `zone` | No live data. |
+| Datameet | `https://github.com/datameet/railways` | YES | YES | NO | `schedules.json` | JSON | 416,636 | Static (Unknown) | STATIC | `train_number`, `station_code`, `arrival`, `departure`, `day`, `distance` | Timetables only; no actual arrivals. |
+| Railpull | `https://github.com/shwetankg07/railpull` | YES | YES | NO | `delays.json` | JSON | 444 | Snapshot | LIVE_SNAPSHOT | `train_number`, `d` (delay) | No location data. Single snapshot. |
+| RailRadar | `https://railradar.in/docs/live-train-status` | YES | YES | YES (API Key) | N/A | API/JSON | 0 | Live | LIVE_SNAPSHOT | `train_number`, `current_status`, `delay_minutes` | API client implemented. No data collected yet. |
+| DA323 Delay Datasets | `https://github.com/ankitaanand28/...` | YES | YES | NO | `Train_Route/*.csv` | CSV | 1,479 | 2023-2024 (Approx) | HISTORICAL_AGGREGATED | `Station`, `Average_Delay(min)`, `Significant Delay` % | Aggregated stats only. No individual journeys or actual timestamps. |
 
 > [!WARNING]
 > The **DA323 IndianRailwayTrainDelayDatasets** provides historical data, but it is strictly **aggregated statistics** (e.g., average delay at a station). It does not contain individual train journeys or exact timestamps of actual arrivals.

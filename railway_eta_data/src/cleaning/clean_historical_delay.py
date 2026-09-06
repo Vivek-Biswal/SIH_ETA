@@ -6,16 +6,10 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cleaning.decision_log import DecisionLog
 
-def clean_historical_delay():
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    data_dir = os.path.join(base_dir, 'data', 'raw', 'public_historical_delay', 'Dataset', 'Train_Route')
-    output_csv = os.path.join(base_dir, 'data', 'processed', 'public_historical_delay_clean.csv')
-    decision_log_csv = os.path.join(base_dir, 'data', 'processed', 'public_historical_delay_decision_log.csv')
-    
+def clean_historical_delay(input_dir, output_csv, log):
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     
-    dlog = DecisionLog()
-    files = glob.glob(os.path.join(data_dir, '*.csv'))
+    files = glob.glob(os.path.join(input_dir, '*.csv'))
     
     all_records = []
     
@@ -24,7 +18,7 @@ def clean_historical_delay():
         try:
             df = pd.read_csv(f)
         except Exception as e:
-            dlog.add(
+            log.add(
                 record_id=f"file#{os.path.basename(f)}",
                 source="historical_delay",
                 issue_type="FILE_READ_ERROR",
@@ -42,7 +36,7 @@ def clean_historical_delay():
             
             # Check station
             if not station_code or station_code == 'nan':
-                dlog.add(record_id, "historical_delay", "MISSING_STATION", "EXCLUDE", "Station code is missing", str(row.get('Station')))
+                log.add(record_id, "historical_delay", "MISSING_STATION", "EXCLUDE", "Station code is missing", str(row.get('Station')))
                 continue
                 
             # Function to parse numeric percentages safely
@@ -64,7 +58,7 @@ def clean_historical_delay():
             pct_canc = parse_numeric(row.get("Cancelled/Unknown"))
             
             if avg_delay is None:
-                dlog.add(record_id, "historical_delay", "MISSING_DELAY", "EXCLUDE", "Average delay is missing/invalid", str(row.get('Average_Delay(min)')))
+                log.add(record_id, "historical_delay", "MISSING_DELAY", "EXCLUDE", "Average delay is missing/invalid", str(row.get('Average_Delay(min)')))
                 continue
                 
             # Clean record
@@ -87,7 +81,7 @@ def clean_historical_delay():
         final_df.drop_duplicates(inplace=True)
         after_count = len(final_df)
         if before_count > after_count:
-            dlog.add(
+            log.add(
                 "global_duplicate_check",
                 "historical_delay",
                 "DUPLICATE_RECORDS",
@@ -99,9 +93,4 @@ def clean_historical_delay():
         print(f"Cleaned data saved to {output_csv} ({len(final_df)} records)")
     else:
         print("No valid records found!")
-        
-    dlog.save(decision_log_csv)
-    print("Decision summary:", dlog.summary())
 
-if __name__ == "__main__":
-    clean_historical_delay()

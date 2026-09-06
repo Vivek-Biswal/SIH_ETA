@@ -8,10 +8,10 @@ This document serves as the final audit of the SIH Indian Train ETA Prediction P
 
 | SOURCE | FILE | RAW RECORD COUNT | CLEAN RECORD COUNT | DATA TYPE | DUPLICATES REMOVED | REASON FOR ANY COUNT CHANGE |
 |---|---|---|---|---|---|---|
-| Datameet | `stations.json` / `stations_clean.csv` | 8,990 | 8,990 | STATIC | 0 | Cleaned without removing any valid stations. |
-| Datameet | `trains.json` / `trains_clean.csv` | 5,208 | 5,208 | STATIC | 0 | Cleaned without removing any valid trains. |
-| Datameet | `schedules.json` / `schedules_clean.csv` | 417,080 | 416,636 | STATIC | 444 | Exact duplicates or highly corrupted records were excluded during cleaning. |
-| Railpull | `delays.json` / `delays_clean.csv` | 444 | 444 | LIVE_SNAPSHOT | 0 | One exact snapshot of 444 trains parsed directly. |
+| Datameet | `stations.json` / `stations_clean.json` | 8,990 | 8,990 | STATIC | 0 | Cleaned without removing any valid stations. |
+| Datameet | `trains.json` / `trains_clean.json` | 5,208 | 5,208 | STATIC | 0 | Cleaned without removing any valid trains. |
+| Datameet | `schedules.json` / `schedules_clean.json` | 417,080 | 416,636 | STATIC | 444 | Exact duplicates or highly corrupted records were excluded during cleaning. |
+| Railpull | `delays.json` / `delays_clean.json` | 444 | 444 | LIVE_SNAPSHOT | 0 | One exact snapshot of 444 trains parsed directly. |
 | DA323 | `Train_Route/*.csv` / `public_historical_delay_clean.csv` | 1,479 | 1,479 | HISTORICAL_AGGREGATED | 0 | Read directly from 42 separate train route CSVs. |
 
 ### Corrected Final Totals
@@ -25,7 +25,7 @@ This document serves as the final audit of the SIH Indian Train ETA Prediction P
 
 | FEATURE | SOURCE | ACTUALLY COLLECTED? | AVAILABLE NOW? | EVIDENCE FILE | STATUS |
 |---|---|---|---|---|---|
-| Current Delay | Railpull `delays.json` | YES | YES | `data/processed/delays_clean.csv` | AVAILABLE |
+| Current Delay | Railpull `delays.json` | YES | YES | `data/processed/delays_clean.json` | AVAILABLE |
 | Current Speed | RailRadar API | NO | NO | No stored API response | NOT YET AVAILABLE |
 
 **Conclusion:** "Current Speed" is strictly a feature supported by the RailRadar client code (`railradar_client.py`). It has **not** been collected. The only live dataset we actually have (`delays.json`) does **not** contain speed. Therefore, current speed is NOT yet available for modeling.

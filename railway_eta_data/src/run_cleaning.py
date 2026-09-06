@@ -1,4 +1,4 @@
-﻿"""
+"""
 run_cleaning.py
 Orchestrates the full data cleaning and validation pipeline.
 Run from the project root:
@@ -30,13 +30,8 @@ from src.cleaning.clean_stations import clean_stations
 from src.cleaning.clean_trains import clean_trains
 from src.cleaning.clean_schedules import clean_schedules
 from src.cleaning.clean_delays import clean_delays
-
-# ─── paths ───────────────────────────────────────────────────────────────────
-RAW_DATAMEET = os.path.join(PROJECT_ROOT, "data", "raw", "railways")
-RAW_RAILPULL = os.path.join(PROJECT_ROOT, "data", "raw", "railpull", "data", "out")
-PROCESSED    = os.path.join(PROJECT_ROOT, "data", "processed")
-DECISION_LOG = os.path.join(PROCESSED, "decision_log.csv")
-
+from src.cleaning.clean_historical_delay import clean_historical_delay
+import src.config as config
 
 def main():
     log = DecisionLog()
@@ -46,8 +41,8 @@ def main():
     print("STEP 1 — Cleaning: stations.json")
     print("="*60)
     stations = clean_stations(
-        input_path=os.path.join(RAW_DATAMEET, "stations.json"),
-        output_path=os.path.join(PROCESSED, "stations_clean.json"),
+        input_path=os.path.join(config.DATAMEET_DIR, "stations.json"),
+        output_path=os.path.join(config.PROCESSED_DATA_DIR, "stations_clean.json"),
         log=log,
     )
 
@@ -63,8 +58,8 @@ def main():
     print("STEP 2 — Cleaning: trains.json")
     print("="*60)
     trains = clean_trains(
-        input_path=os.path.join(RAW_DATAMEET, "trains.json"),
-        output_path=os.path.join(PROCESSED, "trains_clean.json"),
+        input_path=os.path.join(config.DATAMEET_DIR, "trains.json"),
+        output_path=os.path.join(config.PROCESSED_DATA_DIR, "trains_clean.json"),
         valid_station_codes=valid_station_codes,
         log=log,
     )
@@ -78,8 +73,8 @@ def main():
     print("STEP 3 — Cleaning: schedules.json (this may take a minute …)")
     print("="*60)
     clean_schedules(
-        input_path=os.path.join(RAW_DATAMEET, "schedules.json"),
-        output_path=os.path.join(PROCESSED, "schedules_clean.json"),
+        input_path=os.path.join(config.DATAMEET_DIR, "schedules.json"),
+        output_path=os.path.join(config.PROCESSED_DATA_DIR, "schedules_clean.json"),
         valid_station_codes=valid_station_codes,
         log=log,
     )
@@ -88,22 +83,36 @@ def main():
     print("\n" + "="*60)
     print("STEP 4 — Cleaning: delays.json (Railpull)")
     print("="*60)
-    delays_path = os.path.join(RAW_RAILPULL, "delays.json")
+    delays_path = os.path.join(config.RAILPULL_DIR, "delays.json")
     if os.path.exists(delays_path):
         clean_delays(
             input_path=delays_path,
-            output_path=os.path.join(PROCESSED, "delays_clean.json"),
+            output_path=os.path.join(config.PROCESSED_DATA_DIR, "delays_clean.json"),
             valid_train_numbers=valid_train_numbers,
             log=log,
         )
     else:
         print("  delays.json not found — skipping.")
 
+    # ─── Step 5: Historical Delays (DA323) ────────────────────────────────────
+    print("\n" + "="*60)
+    print("STEP 5 — Cleaning: DA323 Historical Delays")
+    print("="*60)
+    historical_dir = os.path.join(config.DA323_DIR, "Dataset", "Train_Route")
+    if os.path.exists(historical_dir):
+        clean_historical_delay(
+            input_dir=historical_dir,
+            output_csv=os.path.join(config.PROCESSED_DATA_DIR, "public_historical_delay_clean.csv"),
+            log=log
+        )
+    else:
+        print(f"  {historical_dir} not found — skipping.")
+
     # ─── Save decision log ────────────────────────────────────────────────────
     print("\n" + "="*60)
     print("SAVING DECISION LOG")
     print("="*60)
-    log.save(DECISION_LOG)
+    log.save(config.DECISION_LOG_PATH)
 
     # ─── Summary ─────────────────────────────────────────────────────────────
     summary = log.summary()
@@ -112,7 +121,7 @@ def main():
     print("="*60)
     for decision, count in summary.items():
         print(f"  {decision:>12}: {count:>8,} log entries")
-    print(f"\n  Decision log: {DECISION_LOG}")
+    print(f"\n  Decision log: {config.DECISION_LOG_PATH}")
     print("  Processed files: data/processed/")
     print("\nDone. Raw files were not modified.")
 

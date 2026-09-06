@@ -22,9 +22,19 @@ To configure the API key for the project:
    ```
 **Important:** Never commit your `.env` file to version control. The client automatically reads the API key from this environment variable.
 
-## 3. Running the Client
+## 3. Current Live Data Status
 
-The integration module is located at `src/live_api/railradar_client.py`.
+| FEATURE | SOURCE | CLIENT IMPLEMENTED | DATA COLLECTED | AVAILABLE NOW |
+|---|---|---|---|---|
+| Current Delay | Railpull | N/A | YES | YES |
+| Current Speed | RailRadar | YES | NO | NO |
+| Current Position | RailRadar | YES | NO | NO |
+| Segment Progress | RailRadar | YES | NO | NO |
+| Update Time | RailRadar | YES | NO | NO |
+
+**Note:** The RailRadar API client is implemented (`src/live_api/railradar_client.py`), but we have NOT yet collected or stored any actual telemetry from it. It requires a valid API key and a running data collection job.
+
+## 4. Running the Client
 You can test the integration by running the provided test script:
 
 ```bash

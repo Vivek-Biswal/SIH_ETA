@@ -1,445 +1,2666 @@
-train_number,delay_min,cancelled,snapshot_ts
-31450,7,False,2026-09-06T18:30:40Z
-12377,35,False,2026-09-06T18:30:40Z
-13153,108,False,2026-09-06T18:30:40Z
-31844,15,False,2026-09-06T18:30:40Z
-31542,6,False,2026-09-06T18:30:40Z
-38455,15,False,2026-09-06T18:30:40Z
-38828,41,False,2026-09-06T18:30:40Z
-12839,181,False,2026-09-06T18:30:40Z
-11447,69,False,2026-09-06T18:30:40Z
-37290,18,False,2026-09-06T18:30:40Z
-22898,90,False,2026-09-06T18:30:40Z
-36860,10,False,2026-09-06T18:30:40Z
-12666,15,False,2026-09-06T18:30:40Z
-63502,16,False,2026-09-06T18:30:40Z
-12022,219,False,2026-09-06T18:30:40Z
-38830,48,False,2026-09-06T18:30:40Z
-22893,271,False,2026-09-06T18:30:40Z
-12221,288,False,2026-09-06T18:30:40Z
-22302,204,False,2026-09-06T18:30:40Z
-12840,168,False,2026-09-06T18:30:40Z
-53002,23,False,2026-09-06T18:30:40Z
-13024,32,False,2026-09-06T18:30:40Z
-13036,26,False,2026-09-06T18:30:40Z
-13030,10,False,2026-09-06T18:30:40Z
-12167,14,False,2026-09-06T18:30:40Z
-12115,8,False,2026-09-06T18:30:40Z
-96406,40,False,2026-09-06T18:30:40Z
-11062,6,False,2026-09-06T18:30:40Z
-96228,36,False,2026-09-06T18:30:40Z
-12145,169,False,2026-09-06T18:30:40Z
-96522,22,False,2026-09-06T18:30:40Z
-11058,30,False,2026-09-06T18:30:40Z
-12810,143,False,2026-09-06T18:30:40Z
-12141,274,False,2026-09-06T18:30:40Z
-11057,451,False,2026-09-06T18:30:40Z
-12811,249,False,2026-09-06T18:30:40Z
-22177,235,False,2026-09-06T18:30:40Z
-22538,437,False,2026-09-06T18:30:40Z
-18030,236,False,2026-09-06T18:30:40Z
-20822,495,False,2026-09-06T18:30:40Z
-40385,,True,2026-09-06T18:30:40Z
-40394,,True,2026-09-06T18:30:40Z
-40660,,True,2026-09-06T18:30:40Z
-40396,,True,2026-09-06T18:30:40Z
-40662,,True,2026-09-06T18:30:40Z
-12903,17,False,2026-09-06T18:30:40Z
-12955,6,False,2026-09-06T18:30:40Z
-12902,14,False,2026-09-06T18:30:40Z
-12962,7,False,2026-09-06T18:30:40Z
-09023,22,False,2026-09-06T18:30:40Z
-09423,95,False,2026-09-06T18:30:40Z
-12484,12,False,2026-09-06T18:30:40Z
-12228,18,False,2026-09-06T18:30:40Z
-05183,167,False,2026-09-06T18:30:40Z
-40381,,True,2026-09-06T18:30:40Z
-40383,,True,2026-09-06T18:30:40Z
-15630,305,False,2026-09-06T18:30:40Z
-12760,14,False,2026-09-06T18:30:40Z
-20819,47,False,2026-09-06T18:30:40Z
-22502,187,False,2026-09-06T18:30:40Z
-17015,40,False,2026-09-06T18:30:40Z
-12783,5,False,2026-09-06T18:30:40Z
-22504,19,False,2026-09-06T18:30:40Z
-12615,11,False,2026-09-06T18:30:40Z
-12851,30,False,2026-09-06T18:30:40Z
-12864,155,False,2026-09-06T18:30:40Z
-20625,11,False,2026-09-06T18:30:40Z
-08509,103,False,2026-09-06T18:30:40Z
-17244,19,False,2026-09-06T18:30:40Z
-05074,154,False,2026-09-06T18:30:40Z
-18189,9,False,2026-09-06T18:30:40Z
-19038,16,False,2026-09-06T18:30:40Z
-19625,9,False,2026-09-06T18:30:40Z
-09079,5,False,2026-09-06T18:30:40Z
-12906,212,False,2026-09-06T18:30:40Z
-12565,63,False,2026-09-06T18:30:40Z
-19167,28,False,2026-09-06T18:30:40Z
-12427,7,False,2026-09-06T18:30:40Z
-15658,110,False,2026-09-06T18:30:40Z
-15565,48,False,2026-09-06T18:30:40Z
-12555,74,False,2026-09-06T18:30:40Z
-12560,7,False,2026-09-06T18:30:40Z
-13237,18,False,2026-09-06T18:30:40Z
-02563,218,False,2026-09-06T18:30:40Z
-02569,256,False,2026-09-06T18:30:40Z
-12226,35,False,2026-09-06T18:30:40Z
-12571,,True,2026-09-06T18:30:40Z
-20103,99,False,2026-09-06T18:30:40Z
-20508,195,False,2026-09-06T18:30:40Z
-12183,45,False,2026-09-06T18:30:40Z
-12556,166,False,2026-09-06T18:30:40Z
-11055,94,False,2026-09-06T18:30:40Z
-11061,23,False,2026-09-06T18:30:40Z
-20424,18,False,2026-09-06T18:30:40Z
-22178,82,False,2026-09-06T18:30:40Z
-12716,30,False,2026-09-06T18:30:40Z
-11078,17,False,2026-09-06T18:30:40Z
-12159,30,False,2026-09-06T18:30:40Z
-22910,201,False,2026-09-06T18:30:40Z
-11071,27,False,2026-09-06T18:30:40Z
-12625,24,False,2026-09-06T18:30:40Z
-13202,28,False,2026-09-06T18:30:40Z
-12406,93,False,2026-09-06T18:30:40Z
-22359,114,False,2026-09-06T18:30:40Z
-01450,218,False,2026-09-06T18:30:40Z
-07076,369,False,2026-09-06T18:30:40Z
-12143,42,False,2026-09-06T18:30:40Z
-12173,38,False,2026-09-06T18:30:40Z
-61129,9,False,2026-09-06T18:30:40Z
-01449,71,False,2026-09-06T18:30:40Z
-12105,48,False,2026-09-06T18:30:40Z
-12130,246,False,2026-09-06T18:30:40Z
-13425,311,False,2026-09-06T18:30:40Z
-12137,45,False,2026-09-06T18:30:40Z
-12129,8,False,2026-09-06T18:30:40Z
-12152,317,False,2026-09-06T18:30:40Z
-01923,57,False,2026-09-06T18:30:40Z
-12322,54,False,2026-09-06T18:30:40Z
-20801,76,False,2026-09-06T18:30:40Z
-09152,41,False,2026-09-06T18:30:40Z
-09034,133,False,2026-09-06T18:30:40Z
-12302,7,False,2026-09-06T18:30:40Z
-20818,8,False,2026-09-06T18:30:40Z
-12310,6,False,2026-09-06T18:30:40Z
-13251,21,False,2026-09-06T18:30:40Z
-63295,152,False,2026-09-06T18:30:40Z
-11402,22,False,2026-09-06T18:30:40Z
-13152,64,False,2026-09-06T18:30:40Z
-13258,38,False,2026-09-06T18:30:40Z
-12888,37,False,2026-09-06T18:30:40Z
-12841,110,False,2026-09-06T18:30:40Z
-15645,707,False,2026-09-06T18:30:40Z
-07222,230,False,2026-09-06T18:30:40Z
-18477,150,False,2026-09-06T18:30:40Z
-12663,76,False,2026-09-06T18:30:40Z
-18018,,True,2026-09-06T18:30:40Z
-22889,44,False,2026-09-06T18:30:40Z
-12842,44,False,2026-09-06T18:30:40Z
-18409,13,False,2026-09-06T18:30:40Z
-18478,358,False,2026-09-06T18:30:40Z
-63526,6,False,2026-09-06T18:30:40Z
-12307,29,False,2026-09-06T18:30:40Z
-37857,5,False,2026-09-06T18:30:40Z
-08048,,True,2026-09-06T18:30:40Z
-13022,47,False,2026-09-06T18:30:40Z
-13029,9,False,2026-09-06T18:30:40Z
-15048,66,False,2026-09-06T18:30:40Z
-13148,123,False,2026-09-06T18:30:40Z
-12346,77,False,2026-09-06T18:30:40Z
-05932,132,False,2026-09-06T18:30:40Z
-15960,24,False,2026-09-06T18:30:40Z
-64409,10,False,2026-09-06T18:30:40Z
-64415,11,False,2026-09-06T18:30:40Z
-12001,24,False,2026-09-06T18:30:40Z
-22480,52,False,2026-09-06T18:30:40Z
-64051,31,False,2026-09-06T18:30:40Z
-64019,62,False,2026-09-06T18:30:40Z
-16524,113,False,2026-09-06T18:30:40Z
-43524,22,False,2026-09-06T18:30:40Z
-18413,177,False,2026-09-06T18:30:40Z
-22641,23,False,2026-09-06T18:30:40Z
-02023,80,False,2026-09-06T18:30:40Z
-12366,88,False,2026-09-06T18:30:40Z
-13248,131,False,2026-09-06T18:30:40Z
-15484,7,False,2026-09-06T18:30:40Z
-12361,35,False,2026-09-06T18:30:40Z
-13333,256,False,2026-09-06T18:30:40Z
-13330,,True,2026-09-06T18:30:40Z
-53231,123,False,2026-09-06T18:30:40Z
-13210,266,False,2026-09-06T18:30:40Z
-13048,246,False,2026-09-06T18:30:40Z
-63384,168,False,2026-09-06T18:30:40Z
-15483,151,False,2026-09-06T18:30:40Z
-15138,,True,2026-09-06T18:30:40Z
-55516,14,False,2026-09-06T18:30:40Z
-13005,38,False,2026-09-06T18:30:40Z
-13047,12,False,2026-09-06T18:30:40Z
-12504,,True,2026-09-06T18:30:40Z
-12837,6,False,2026-09-06T18:30:40Z
-12863,29,False,2026-09-06T18:30:40Z
-38727,32,False,2026-09-06T18:30:40Z
-38725,69,False,2026-09-06T18:30:40Z
-18022,50,False,2026-09-06T18:30:40Z
-18406,44,False,2026-09-06T18:30:40Z
-12101,71,False,2026-09-06T18:30:40Z
-12809,10,False,2026-09-06T18:30:40Z
-01150,291,False,2026-09-06T18:30:40Z
-12752,8,False,2026-09-06T18:30:40Z
-12405,13,False,2026-09-06T18:30:40Z
-22122,157,False,2026-09-06T18:30:40Z
-11841,16,False,2026-09-06T18:30:40Z
-22129,60,False,2026-09-06T18:30:40Z
-64702,48,False,2026-09-06T18:30:40Z
-12534,16,False,2026-09-06T18:30:40Z
-12627,105,False,2026-09-06T18:30:40Z
-22456,12,False,2026-09-06T18:30:40Z
-14118,19,False,2026-09-06T18:30:40Z
-19603,7,False,2026-09-06T18:30:40Z
-12505,208,False,2026-09-06T18:30:40Z
-15744,140,False,2026-09-06T18:30:40Z
-15707,71,False,2026-09-06T18:30:40Z
-15092,24,False,2026-09-06T18:30:40Z
-14217,10,False,2026-09-06T18:30:40Z
-12801,15,False,2026-09-06T18:30:40Z
-04013,110,False,2026-09-06T18:30:40Z
-14205,7,False,2026-09-06T18:30:40Z
-12391,126,False,2026-09-06T18:30:40Z
-04071,76,False,2026-09-06T18:30:40Z
-04138,77,False,2026-09-06T18:30:40Z
-15075,14,False,2026-09-06T18:30:40Z
-31541,15,False,2026-09-06T18:30:40Z
-31631,8,False,2026-09-06T18:30:40Z
-12951,20,False,2026-09-06T18:30:40Z
-12953,10,False,2026-09-06T18:30:40Z
-19309,10,False,2026-09-06T18:30:40Z
-20946,18,False,2026-09-06T18:30:40Z
-11464,23,False,2026-09-06T18:30:40Z
-22830,105,False,2026-09-06T18:30:40Z
-15726,18,False,2026-09-06T18:30:40Z
-12558,61,False,2026-09-06T18:30:40Z
-22412,62,False,2026-09-06T18:30:40Z
-04014,23,False,2026-09-06T18:30:40Z
-13257,,True,2026-09-06T18:30:40Z
-04445,12,False,2026-09-06T18:30:40Z
-14016,7,False,2026-09-06T18:30:40Z
-14206,14,False,2026-09-06T18:30:40Z
-15279,172,False,2026-09-06T18:30:40Z
-99829,29,False,2026-09-06T18:30:40Z
-11139,11,False,2026-09-06T18:30:40Z
-12701,16,False,2026-09-06T18:30:40Z
-99901,,True,2026-09-06T18:30:40Z
-40659,5,False,2026-09-06T18:30:40Z
-16179,6,False,2026-09-06T18:30:40Z
-14119,39,False,2026-09-06T18:30:40Z
-14691,10,False,2026-09-06T18:30:40Z
-13041,12,False,2026-09-06T18:30:40Z
-22424,232,False,2026-09-06T18:30:40Z
-15531,21,False,2026-09-06T18:30:40Z
-15127,31,False,2026-09-06T18:30:40Z
-15012,13,False,2026-09-06T18:30:40Z
-14674,145,False,2026-09-06T18:30:40Z
-04213,58,False,2026-09-06T18:30:40Z
-14241,30,False,2026-09-06T18:30:40Z
-20907,8,False,2026-09-06T18:30:40Z
-22663,11,False,2026-09-06T18:30:40Z
-19166,34,False,2026-09-06T18:30:40Z
-15634,54,False,2026-09-06T18:30:40Z
-12958,7,False,2026-09-06T18:30:40Z
-05045,5,False,2026-09-06T18:30:40Z
-14715,6,False,2026-09-06T18:30:40Z
-20482,92,False,2026-09-06T18:30:40Z
-12650,55,False,2026-09-06T18:30:40Z
-12807,5,False,2026-09-06T18:30:40Z
-16031,5,False,2026-09-06T18:30:40Z
-64524,263,False,2026-09-06T18:30:40Z
-64483,21,False,2026-09-06T18:30:40Z
-64481,125,False,2026-09-06T18:30:40Z
-12413,9,False,2026-09-06T18:30:40Z
-14661,126,False,2026-09-06T18:30:40Z
-18309,14,False,2026-09-06T18:30:40Z
-14610,10,False,2026-09-06T18:30:40Z
-14632,8,False,2026-09-06T18:30:40Z
-14628,90,False,2026-09-06T18:30:40Z
-15270,112,False,2026-09-06T18:30:40Z
-15079,14,False,2026-09-06T18:30:40Z
-55094,56,False,2026-09-06T18:30:40Z
-09189,184,False,2026-09-06T18:30:40Z
-14617,232,False,2026-09-06T18:30:40Z
-15131,47,False,2026-09-06T18:30:40Z
-22411,127,False,2026-09-06T18:30:40Z
-15909,111,False,2026-09-06T18:30:40Z
-12203,49,False,2026-09-06T18:30:40Z
-55055,220,False,2026-09-06T18:30:40Z
-15007,163,False,2026-09-06T18:30:40Z
-12566,50,False,2026-09-06T18:30:40Z
-15910,134,False,2026-09-06T18:30:40Z
-02570,86,False,2026-09-06T18:30:40Z
-15113,53,False,2026-09-06T18:30:40Z
-11123,58,False,2026-09-06T18:30:40Z
-63544,29,False,2026-09-06T18:30:40Z
-63527,25,False,2026-09-06T18:30:40Z
-13514,67,False,2026-09-06T18:30:40Z
-13287,98,False,2026-09-06T18:30:40Z
-13128,37,False,2026-09-06T18:30:40Z
-12352,34,False,2026-09-06T18:30:40Z
-13006,41,False,2026-09-06T18:30:40Z
-22164,41,False,2026-09-06T18:30:40Z
-12192,5,False,2026-09-06T18:30:40Z
-22646,22,False,2026-09-06T18:30:40Z
-18637,50,False,2026-09-06T18:30:40Z
-12657,13,False,2026-09-06T18:30:40Z
-13351,46,False,2026-09-06T18:30:40Z
-12602,20,False,2026-09-06T18:30:40Z
-12416,14,False,2026-09-06T18:30:40Z
-01944,13,False,2026-09-06T18:30:40Z
-51974,88,False,2026-09-06T18:30:40Z
-12722,15,False,2026-09-06T18:30:40Z
-64910,180,False,2026-09-06T18:30:40Z
-22181,12,False,2026-09-06T18:30:40Z
-12919,69,False,2026-09-06T18:30:40Z
-09309,83,False,2026-09-06T18:30:40Z
-67202,40,False,2026-09-06T18:30:40Z
-12704,10,False,2026-09-06T18:30:40Z
-67286,38,False,2026-09-06T18:30:40Z
-20809,156,False,2026-09-06T18:30:40Z
-12703,31,False,2026-09-06T18:30:40Z
-17016,7,False,2026-09-06T18:30:40Z
-14259,5,False,2026-09-06T18:30:40Z
-55132,378,False,2026-09-06T18:30:40Z
-15103,247,False,2026-09-06T18:30:40Z
-20503,13,False,2026-09-06T18:30:40Z
-54307,12,False,2026-09-06T18:30:40Z
-12705,86,False,2026-09-06T18:30:40Z
-47220,9,False,2026-09-06T18:30:40Z
-17612,49,False,2026-09-06T18:30:40Z
-20162,9,False,2026-09-06T18:30:40Z
-12106,19,False,2026-09-06T18:30:40Z
-12138,7,False,2026-09-06T18:30:40Z
-12336,43,False,2026-09-06T18:30:40Z
-11701,70,False,2026-09-06T18:30:40Z
-09045,291,False,2026-09-06T18:30:40Z
-11273,53,False,2026-09-06T18:30:40Z
-22184,9,False,2026-09-06T18:30:40Z
-19046,28,False,2026-09-06T18:30:40Z
-15017,42,False,2026-09-06T18:30:40Z
-09047,196,False,2026-09-06T18:30:40Z
-51708,60,False,2026-09-06T18:30:40Z
-16368,11,False,2026-09-06T18:30:40Z
-22311,122,False,2026-09-06T18:30:40Z
-11753,16,False,2026-09-06T18:30:40Z
-19013,179,False,2026-09-06T18:30:40Z
-12217,5,False,2026-09-06T18:30:40Z
-09031,155,False,2026-09-06T18:30:40Z
-12493,19,False,2026-09-06T18:30:40Z
-09119,76,False,2026-09-06T18:30:40Z
-22632,117,False,2026-09-06T18:30:40Z
-12478,6,False,2026-09-06T18:30:40Z
-22852,16,False,2026-09-06T18:30:40Z
-17479,40,False,2026-09-06T18:30:40Z
-18045,73,False,2026-09-06T18:30:40Z
-22855,41,False,2026-09-06T18:30:40Z
-42040,13,False,2026-09-06T18:30:40Z
-42042,17,False,2026-09-06T18:30:40Z
-12845,58,False,2026-09-06T18:30:40Z
-15206,24,False,2026-09-06T18:30:40Z
-61608,173,False,2026-09-06T18:30:40Z
-22564,61,False,2026-09-06T18:30:40Z
-15659,52,False,2026-09-06T18:30:40Z
-20838,29,False,2026-09-06T18:30:40Z
-22880,15,False,2026-09-06T18:30:40Z
-12844,10,False,2026-09-06T18:30:40Z
-20837,28,False,2026-09-06T18:30:40Z
-04150,438,False,2026-09-06T18:30:40Z
-12779,12,False,2026-09-06T18:30:40Z
-12197,83,False,2026-09-06T18:30:40Z
-09526,153,False,2026-09-06T18:30:40Z
-43253,10,False,2026-09-06T18:30:40Z
-14609,31,False,2026-09-06T18:30:40Z
-38321,7,False,2026-09-06T18:30:40Z
-38453,56,False,2026-09-06T18:30:40Z
-14242,16,False,2026-09-06T18:30:40Z
-54353,56,False,2026-09-06T18:30:40Z
-14208,10,False,2026-09-06T18:30:40Z
-12859,74,False,2026-09-06T18:30:40Z
-18574,89,False,2026-09-06T18:30:40Z
-12860,67,False,2026-09-06T18:30:40Z
-18109,424,False,2026-09-06T18:30:40Z
-22512,208,False,2026-09-06T18:30:40Z
-00951,106,False,2026-09-06T18:30:40Z
-18623,40,False,2026-09-06T18:30:40Z
-63255,272,False,2026-09-06T18:30:40Z
-15137,,True,2026-09-06T18:30:40Z
-11428,35,False,2026-09-06T18:30:40Z
-13329,,True,2026-09-06T18:30:40Z
-63231,131,False,2026-09-06T18:30:40Z
-11431,19,False,2026-09-06T18:30:40Z
-07091,28,False,2026-09-06T18:30:40Z
-63230,,True,2026-09-06T18:30:40Z
-13238,18,False,2026-09-06T18:30:40Z
-22877,200,False,2026-09-06T18:30:40Z
-16526,12,False,2026-09-06T18:30:40Z
-16525,45,False,2026-09-06T18:30:40Z
-06556,70,False,2026-09-06T18:30:40Z
-11021,17,False,2026-09-06T18:30:40Z
-63270,32,False,2026-09-06T18:30:40Z
-55520,206,False,2026-09-06T18:30:40Z
-13420,22,False,2026-09-06T18:30:40Z
-55565,96,False,2026-09-06T18:30:40Z
-75210,46,False,2026-09-06T18:30:40Z
-15655,22,False,2026-09-06T18:30:40Z
-13021,22,False,2026-09-06T18:30:40Z
-15528,239,False,2026-09-06T18:30:40Z
-55578,86,False,2026-09-06T18:30:40Z
-15203,27,False,2026-09-06T18:30:40Z
-75245,29,False,2026-09-06T18:30:40Z
-13105,47,False,2026-09-06T18:30:40Z
-15049,42,False,2026-09-06T18:30:40Z
-20506,9,False,2026-09-06T18:30:40Z
-55062,199,False,2026-09-06T18:30:40Z
-55034,123,False,2026-09-06T18:30:40Z
-15010,6,False,2026-09-06T18:30:40Z
-15066,453,False,2026-09-06T18:30:40Z
-20990,10,False,2026-09-06T18:30:40Z
-22208,7,False,2026-09-06T18:30:40Z
-16350,30,False,2026-09-06T18:30:40Z
-16604,20,False,2026-09-06T18:30:40Z
-15608,640,False,2026-09-06T18:30:40Z
-16320,11,False,2026-09-06T18:30:40Z
-63571,82,False,2026-09-06T18:30:40Z
-13121,25,False,2026-09-06T18:30:40Z
-13415,,True,2026-09-06T18:30:40Z
-15027,22,False,2026-09-06T18:30:40Z
-13031,11,False,2026-09-06T18:30:40Z
-63206,64,False,2026-09-06T18:30:40Z
-20832,38,False,2026-09-06T18:30:40Z
-11116,8,False,2026-09-06T18:30:40Z
-13185,33,False,2026-09-06T18:30:40Z
-55121,130,False,2026-09-06T18:30:40Z
-19306,21,False,2026-09-06T18:30:40Z
-15136,23,False,2026-09-06T18:30:40Z
-11059,199,False,2026-09-06T18:30:40Z
-20930,8,False,2026-09-06T18:30:40Z
-63202,139,False,2026-09-06T18:30:40Z
-12506,40,False,2026-09-06T18:30:40Z
-63218,80,False,2026-09-06T18:30:40Z
-13032,10,False,2026-09-06T18:30:40Z
-14164,19,False,2026-09-06T18:30:40Z
-02418,7,False,2026-09-06T18:30:40Z
-15733,17,False,2026-09-06T18:30:40Z
-14117,36,False,2026-09-06T18:30:40Z
-18043,146,False,2026-09-06T18:30:40Z
-68419,57,False,2026-09-06T18:30:40Z
-58532,46,False,2026-09-06T18:30:40Z
-13434,40,False,2026-09-06T18:30:40Z
-18248,22,False,2026-09-06T18:30:40Z
-18247,27,False,2026-09-06T18:30:40Z
-68804,132,False,2026-09-06T18:30:40Z
-12804,12,False,2026-09-06T18:30:40Z
-12389,11,False,2026-09-06T18:30:40Z
-12252,514,False,2026-09-06T18:30:40Z
-20605,6,False,2026-09-06T18:30:40Z
-67301,25,False,2026-09-06T18:30:40Z
-17482,59,False,2026-09-06T18:30:40Z
-53261,42,False,2026-09-06T18:30:40Z
+[
+  {
+    "train_number": "31450",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12377",
+    "delay_min": 35,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13153",
+    "delay_min": 108,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "31844",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "31542",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38455",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38828",
+    "delay_min": 41,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12839",
+    "delay_min": 181,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11447",
+    "delay_min": 69,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "37290",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22898",
+    "delay_min": 90,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "36860",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12666",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63502",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12022",
+    "delay_min": 219,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38830",
+    "delay_min": 48,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22893",
+    "delay_min": 271,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12221",
+    "delay_min": 288,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22302",
+    "delay_min": 204,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12840",
+    "delay_min": 168,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "53002",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13024",
+    "delay_min": 32,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13036",
+    "delay_min": 26,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13030",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12167",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12115",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "96406",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11062",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "96228",
+    "delay_min": 36,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12145",
+    "delay_min": 169,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "96522",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11058",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12810",
+    "delay_min": 143,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12141",
+    "delay_min": 274,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11057",
+    "delay_min": 451,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12811",
+    "delay_min": 249,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22177",
+    "delay_min": 235,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22538",
+    "delay_min": 437,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18030",
+    "delay_min": 236,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20822",
+    "delay_min": 495,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40385",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40394",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40660",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40396",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40662",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12903",
+    "delay_min": 17,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12955",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12902",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12962",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09023",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09423",
+    "delay_min": 95,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12484",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12228",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "05183",
+    "delay_min": 167,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40381",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40383",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15630",
+    "delay_min": 305,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12760",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20819",
+    "delay_min": 47,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22502",
+    "delay_min": 187,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17015",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12783",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22504",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12615",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12851",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12864",
+    "delay_min": 155,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20625",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "08509",
+    "delay_min": 103,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17244",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "05074",
+    "delay_min": 154,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18189",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19038",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19625",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09079",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12906",
+    "delay_min": 212,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12565",
+    "delay_min": 63,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19167",
+    "delay_min": 28,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12427",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15658",
+    "delay_min": 110,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15565",
+    "delay_min": 48,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12555",
+    "delay_min": 74,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12560",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13237",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "02563",
+    "delay_min": 218,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "02569",
+    "delay_min": 256,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12226",
+    "delay_min": 35,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12571",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20103",
+    "delay_min": 99,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20508",
+    "delay_min": 195,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12183",
+    "delay_min": 45,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12556",
+    "delay_min": 166,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11055",
+    "delay_min": 94,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11061",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20424",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22178",
+    "delay_min": 82,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12716",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11078",
+    "delay_min": 17,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12159",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22910",
+    "delay_min": 201,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11071",
+    "delay_min": 27,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12625",
+    "delay_min": 24,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13202",
+    "delay_min": 28,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12406",
+    "delay_min": 93,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22359",
+    "delay_min": 114,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "01450",
+    "delay_min": 218,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "07076",
+    "delay_min": 369,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12143",
+    "delay_min": 42,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12173",
+    "delay_min": 38,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "61129",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "01449",
+    "delay_min": 71,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12105",
+    "delay_min": 48,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12130",
+    "delay_min": 246,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13425",
+    "delay_min": 311,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12137",
+    "delay_min": 45,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12129",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12152",
+    "delay_min": 317,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "01923",
+    "delay_min": 57,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12322",
+    "delay_min": 54,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20801",
+    "delay_min": 76,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09152",
+    "delay_min": 41,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09034",
+    "delay_min": 133,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12302",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20818",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12310",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13251",
+    "delay_min": 21,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63295",
+    "delay_min": 152,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11402",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13152",
+    "delay_min": 64,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13258",
+    "delay_min": 38,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12888",
+    "delay_min": 37,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12841",
+    "delay_min": 110,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15645",
+    "delay_min": 707,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "07222",
+    "delay_min": 230,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18477",
+    "delay_min": 150,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12663",
+    "delay_min": 76,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18018",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22889",
+    "delay_min": 44,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12842",
+    "delay_min": 44,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18409",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18478",
+    "delay_min": 358,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63526",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12307",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "37857",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "08048",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13022",
+    "delay_min": 47,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13029",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15048",
+    "delay_min": 66,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13148",
+    "delay_min": 123,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12346",
+    "delay_min": 77,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "05932",
+    "delay_min": 132,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15960",
+    "delay_min": 24,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64409",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64415",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12001",
+    "delay_min": 24,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22480",
+    "delay_min": 52,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64051",
+    "delay_min": 31,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64019",
+    "delay_min": 62,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16524",
+    "delay_min": 113,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "43524",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18413",
+    "delay_min": 177,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22641",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "02023",
+    "delay_min": 80,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12366",
+    "delay_min": 88,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13248",
+    "delay_min": 131,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15484",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12361",
+    "delay_min": 35,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13333",
+    "delay_min": 256,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13330",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "53231",
+    "delay_min": 123,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13210",
+    "delay_min": 266,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13048",
+    "delay_min": 246,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63384",
+    "delay_min": 168,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15483",
+    "delay_min": 151,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15138",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55516",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13005",
+    "delay_min": 38,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13047",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12504",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12837",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12863",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38727",
+    "delay_min": 32,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38725",
+    "delay_min": 69,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18022",
+    "delay_min": 50,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18406",
+    "delay_min": 44,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12101",
+    "delay_min": 71,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12809",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "01150",
+    "delay_min": 291,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12752",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12405",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22122",
+    "delay_min": 157,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11841",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22129",
+    "delay_min": 60,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64702",
+    "delay_min": 48,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12534",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12627",
+    "delay_min": 105,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22456",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14118",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19603",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12505",
+    "delay_min": 208,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15744",
+    "delay_min": 140,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15707",
+    "delay_min": 71,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15092",
+    "delay_min": 24,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14217",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12801",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04013",
+    "delay_min": 110,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14205",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12391",
+    "delay_min": 126,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04071",
+    "delay_min": 76,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04138",
+    "delay_min": 77,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15075",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "31541",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "31631",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12951",
+    "delay_min": 20,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12953",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19309",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20946",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11464",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22830",
+    "delay_min": 105,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15726",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12558",
+    "delay_min": 61,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22412",
+    "delay_min": 62,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04014",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13257",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04445",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14016",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14206",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15279",
+    "delay_min": 172,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "99829",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11139",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12701",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "99901",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "40659",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16179",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14119",
+    "delay_min": 39,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14691",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13041",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22424",
+    "delay_min": 232,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15531",
+    "delay_min": 21,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15127",
+    "delay_min": 31,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15012",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14674",
+    "delay_min": 145,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04213",
+    "delay_min": 58,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14241",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20907",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22663",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19166",
+    "delay_min": 34,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15634",
+    "delay_min": 54,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12958",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "05045",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14715",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20482",
+    "delay_min": 92,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12650",
+    "delay_min": 55,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12807",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16031",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64524",
+    "delay_min": 263,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64483",
+    "delay_min": 21,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64481",
+    "delay_min": 125,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12413",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14661",
+    "delay_min": 126,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18309",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14610",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14632",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14628",
+    "delay_min": 90,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15270",
+    "delay_min": 112,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15079",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55094",
+    "delay_min": 56,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09189",
+    "delay_min": 184,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14617",
+    "delay_min": 232,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15131",
+    "delay_min": 47,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22411",
+    "delay_min": 127,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15909",
+    "delay_min": 111,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12203",
+    "delay_min": 49,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55055",
+    "delay_min": 220,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15007",
+    "delay_min": 163,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12566",
+    "delay_min": 50,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15910",
+    "delay_min": 134,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "02570",
+    "delay_min": 86,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15113",
+    "delay_min": 53,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11123",
+    "delay_min": 58,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63544",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63527",
+    "delay_min": 25,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13514",
+    "delay_min": 67,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13287",
+    "delay_min": 98,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13128",
+    "delay_min": 37,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12352",
+    "delay_min": 34,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13006",
+    "delay_min": 41,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22164",
+    "delay_min": 41,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12192",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22646",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18637",
+    "delay_min": 50,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12657",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13351",
+    "delay_min": 46,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12602",
+    "delay_min": 20,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12416",
+    "delay_min": 14,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "01944",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "51974",
+    "delay_min": 88,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12722",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "64910",
+    "delay_min": 180,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22181",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12919",
+    "delay_min": 69,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09309",
+    "delay_min": 83,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "67202",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12704",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "67286",
+    "delay_min": 38,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20809",
+    "delay_min": 156,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12703",
+    "delay_min": 31,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17016",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14259",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55132",
+    "delay_min": 378,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15103",
+    "delay_min": 247,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20503",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "54307",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12705",
+    "delay_min": 86,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "47220",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17612",
+    "delay_min": 49,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20162",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12106",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12138",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12336",
+    "delay_min": 43,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11701",
+    "delay_min": 70,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09045",
+    "delay_min": 291,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11273",
+    "delay_min": 53,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22184",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19046",
+    "delay_min": 28,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15017",
+    "delay_min": 42,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09047",
+    "delay_min": 196,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "51708",
+    "delay_min": 60,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16368",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22311",
+    "delay_min": 122,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11753",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19013",
+    "delay_min": 179,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12217",
+    "delay_min": 5,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09031",
+    "delay_min": 155,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12493",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09119",
+    "delay_min": 76,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22632",
+    "delay_min": 117,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12478",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22852",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17479",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18045",
+    "delay_min": 73,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22855",
+    "delay_min": 41,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "42040",
+    "delay_min": 13,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "42042",
+    "delay_min": 17,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12845",
+    "delay_min": 58,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15206",
+    "delay_min": 24,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "61608",
+    "delay_min": 173,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22564",
+    "delay_min": 61,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15659",
+    "delay_min": 52,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20838",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22880",
+    "delay_min": 15,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12844",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20837",
+    "delay_min": 28,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "04150",
+    "delay_min": 438,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12779",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12197",
+    "delay_min": 83,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "09526",
+    "delay_min": 153,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "43253",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14609",
+    "delay_min": 31,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38321",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "38453",
+    "delay_min": 56,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14242",
+    "delay_min": 16,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "54353",
+    "delay_min": 56,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14208",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12859",
+    "delay_min": 74,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18574",
+    "delay_min": 89,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12860",
+    "delay_min": 67,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18109",
+    "delay_min": 424,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22512",
+    "delay_min": 208,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "00951",
+    "delay_min": 106,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18623",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63255",
+    "delay_min": 272,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15137",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11428",
+    "delay_min": 35,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13329",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63231",
+    "delay_min": 131,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11431",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "07091",
+    "delay_min": 28,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63230",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13238",
+    "delay_min": 18,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22877",
+    "delay_min": 200,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16526",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16525",
+    "delay_min": 45,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "06556",
+    "delay_min": 70,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11021",
+    "delay_min": 17,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63270",
+    "delay_min": 32,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55520",
+    "delay_min": 206,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13420",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55565",
+    "delay_min": 96,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "75210",
+    "delay_min": 46,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15655",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13021",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15528",
+    "delay_min": 239,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55578",
+    "delay_min": 86,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15203",
+    "delay_min": 27,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "75245",
+    "delay_min": 29,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13105",
+    "delay_min": 47,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15049",
+    "delay_min": 42,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20506",
+    "delay_min": 9,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55062",
+    "delay_min": 199,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55034",
+    "delay_min": 123,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15010",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15066",
+    "delay_min": 453,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20990",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "22208",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16350",
+    "delay_min": 30,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16604",
+    "delay_min": 20,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15608",
+    "delay_min": 640,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "16320",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63571",
+    "delay_min": 82,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13121",
+    "delay_min": 25,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13415",
+    "delay_min": null,
+    "cancelled": true,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15027",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13031",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63206",
+    "delay_min": 64,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20832",
+    "delay_min": 38,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11116",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13185",
+    "delay_min": 33,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "55121",
+    "delay_min": 130,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "19306",
+    "delay_min": 21,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15136",
+    "delay_min": 23,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "11059",
+    "delay_min": 199,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20930",
+    "delay_min": 8,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63202",
+    "delay_min": 139,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12506",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "63218",
+    "delay_min": 80,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13032",
+    "delay_min": 10,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14164",
+    "delay_min": 19,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "02418",
+    "delay_min": 7,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "15733",
+    "delay_min": 17,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "14117",
+    "delay_min": 36,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18043",
+    "delay_min": 146,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "68419",
+    "delay_min": 57,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "58532",
+    "delay_min": 46,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "13434",
+    "delay_min": 40,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18248",
+    "delay_min": 22,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "18247",
+    "delay_min": 27,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "68804",
+    "delay_min": 132,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12804",
+    "delay_min": 12,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12389",
+    "delay_min": 11,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "12252",
+    "delay_min": 514,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "20605",
+    "delay_min": 6,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "67301",
+    "delay_min": 25,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "17482",
+    "delay_min": 59,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  },
+  {
+    "train_number": "53261",
+    "delay_min": 42,
+    "cancelled": false,
+    "snapshot_ts": "2026-09-06T18:30:40Z"
+  }
+]
