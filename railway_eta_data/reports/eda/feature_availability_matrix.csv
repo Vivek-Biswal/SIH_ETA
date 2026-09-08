@@ -1,0 +1,15 @@
+FEATURE,SOURCE,CATEGORY,AVAILABLE,DATA_TYPE,SAFE_FOR_FUTURE_MODEL,NOTES
+Train Type,trains_clean.json,STATIC,YES,Categorical,POTENTIALLY_SAFE,Broad categorisation.
+Scheduled Duration,trains_clean.json,STATIC,YES,Numeric,POTENTIALLY_SAFE,Based on static timetable.
+Route Distance,trains_clean.json,STATIC,YES,Numeric,POTENTIALLY_SAFE,Based on static timetable.
+Stop Count,journeys_scheduled.json,ROUTE,YES,Numeric,POTENTIALLY_SAFE,Inferred from schedules.
+Railway Zone,stations_clean.json,STATIC,YES,Categorical,POTENTIALLY_SAFE,
+State,stations_clean.json,STATIC,YES,Categorical,POTENTIALLY_SAFE,
+Scheduled Hour,schedules_clean.json,TIME,YES,Numeric,POTENTIALLY_SAFE,0-23 format.
+Journey Day,schedules_clean.json,TIME,YES,Numeric,POTENTIALLY_SAFE,Multi-day identifier.
+Average Distance Between Stops,Derived,ROUTE,YES,Numeric,POTENTIALLY_SAFE,Distance / Stop Count.
+Historical Average Delay,DA323,HISTORICAL_AGGREGATED,YES,Numeric,NOT_CURRENTLY_USABLE,Leakage risk if used directly as feature.
+Historical Delay Probability,DA323,HISTORICAL_AGGREGATED,YES,Numeric,NOT_CURRENTLY_USABLE,Leakage risk.
+Current Snapshot Delay,delays_clean.json,LIVE,YES,Numeric,REQUIRES_TIME_ALIGNMENT,Snapshot only. No time series.
+Current Speed,None,LIVE,NO,Unknown,UNKNOWN,Data does not exist.
+GPS Position,None,LIVE,NO,Unknown,UNKNOWN,Data does not exist.

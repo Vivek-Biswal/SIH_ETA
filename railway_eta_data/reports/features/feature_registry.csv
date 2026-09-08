@@ -1,0 +1,12 @@
+feature,category,source,availability,description,temporal_status,leakage_risk
+train_type,STATIC,trains_clean.json,STATIC_AVAILABLE,Broad category of the train,VALID,SAFE
+route_distance,STATIC,trains_clean.json,STATIC_AVAILABLE,Total scheduled distance,VALID,SAFE
+scheduled_duration_hours,STATIC,trains_clean.json,STATIC_AVAILABLE,Total scheduled time,VALID,SAFE
+destination_state,STATION_CONTEXT,stations_clean.json,STATIC_AVAILABLE,State of destination,VALID,SAFE
+destination_zone,STATION_CONTEXT,stations_clean.json,STATIC_AVAILABLE,Zone of destination,VALID,SAFE
+stop_count,ROUTE,journeys_scheduled.json,SCHEDULE_AVAILABLE,Number of stops,VALID,SAFE
+average_distance_between_stops,ROUTE,journeys_scheduled.json,SCHEDULE_AVAILABLE,Distance / Stop count,VALID,SAFE
+destination_historical_avg_delay,HISTORICAL_AGGREGATED,DA323,HISTORICAL_CONTEXT,Average delay for station,UNKNOWN_PROVENANCE,UNSAFE
+current_delay_minutes,LIVE,delays_clean.json,LIVE_AVAILABLE,Current known delay,REQUIRES_ALIGNMENT,CONDITIONALLY_SAFE
+actual_arrival_time,TARGET,None,FUTURE_REQUIRED,Ground truth arrival time,FUTURE_OR_INVALID,UNSAFE
+current_speed,LIVE,None,FUTURE_REQUIRED,Current train speed,FUTURE_OR_INVALID,UNSAFE

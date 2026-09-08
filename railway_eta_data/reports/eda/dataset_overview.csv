@@ -1,0 +1,7 @@
+dataset_name,classification,record_count,column_count,missing_values,duplicate_records,unique_trains,unique_stations,data_types
+trains,STATIC,5208,21,644,0,5208.0,,"third_ac: int64, arrival: str, from_station_code: str, name: str, zone: str, chair_car: int64, first_class: int64, duration_m: float64, sleeper: int64, from_station_name: str, number: str, departure: str, return_train: str, to_station_code: str, second_ac: int64, to_station_name: str, duration_h: float64, type: str, first_ac: int64, distance: float64, type_canonical: str"
+stations,STATIC,8990,8,14182,0,,8990.0,"code: str, name: str, state: str, zone: str, address: str, lon: float64, lat: float64, _status: str"
+schedules,STATIC,416636,8,22419,0,5208.0,8539.0,"arrival: str, day: float64, train_name: str, station_name: str, station_code: str, id: int64, train_number: str, departure: str"
+journeys_scheduled,STATIC,5208,2,0,0,5208.0,,"train_number: str, journey_route: object"
+da323_historical,HISTORICAL_AGGREGATED,1479,8,0,0,42.0,270.0,"train_number: int64, station_code: str, station_name: str, avg_delay_minutes: float64, percent_right_time: float64, percent_slight_delay: float64, percent_significant_delay: float64, percent_cancelled: float64"
+railpull_live,LIVE_SNAPSHOT,444,4,19,0,444.0,,"train_number: int64, delay_min: float64, cancelled: bool, snapshot_ts: str"

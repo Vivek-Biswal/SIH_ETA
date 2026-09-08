@@ -1,0 +1,14 @@
+feature,missing_count,missing_percentage,data_type,unique_values,leakage_status
+current_station,1000,100.0,object,0,UNKNOWN
+current_delay_minutes,1000,100.0,object,0,CONDITIONALLY_SAFE
+current_speed,1000,100.0,object,0,UNSAFE
+actual_arrival_time,1000,100.0,object,0,UNSAFE
+train_type,6,0.6,str,12,SAFE
+route_distance,6,0.6,float64,433,SAFE
+scheduled_duration_hours,6,0.6,float64,439,SAFE
+stop_count,0,0.0,int64,285,SAFE
+average_distance_between_stops,6,0.6,float64,513,SAFE
+destination_station,0,0.0,str,208,UNKNOWN
+destination_state,678,67.8,str,22,SAFE
+destination_zone,678,67.8,str,16,SAFE
+destination_historical_avg_delay,645,64.5,float64,52,UNSAFE

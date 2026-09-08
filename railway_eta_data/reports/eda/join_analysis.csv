@@ -1,0 +1,5 @@
+relationship,matched_records,total_source_records,match_percentage
+TRAINS <-> SCHEDULES (by train_number),5208,5208,100.0
+STATIONS <-> SCHEDULES (by station_code),8539,8539,100.0
+STATIONS <-> DA323 (by station_code),264,270,97.77777777777777
+TRAINS <-> LIVE_DELAYS (by train_number),215,444,48.42342342342342

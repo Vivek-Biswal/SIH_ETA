@@ -1,0 +1,2 @@
+dataset,observation_level,temporal_status,total_rows,unique_stations,avg_delay_mean,avg_delay_median,pct_right_time_mean,warning
+DA323 (public_historical_delay_clean.csv),HISTORICAL_AGGREGATED,TEMPORALLY_UNKNOWN,1479,270,122.66,95.0,25.2,The time window of DA323 aggregation is unknown. These statistics CANNOT be used as leakage-safe ML features.

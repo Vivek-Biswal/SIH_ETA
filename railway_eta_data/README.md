@@ -40,3 +40,16 @@ Please note the following constraints when working with this repository:
 3. **Live Data:** Railpull delays are snapshots. The RailRadar API integration is implemented (`src/live_api/railradar_client.py`), but live telemetry (like current speed or position) has not yet been collected.
 4. **Conclusion:** The current data does not support training a scientifically valid dynamic supervised ETA model at this stage. It is, however, fully ready for Exploratory Data Analysis (EDA) and network analysis.
 
+## GROUP A — JOURNEY RECONSTRUCTION
+
+The Journey Reconstruction module converts isolated, unordered schedule stops into sequential train routes.
+
+- **Input**: Processed railway data (`schedules_clean.json`, `trains_clean.json`)
+- **Output**: Reconstructed scheduled train journeys (`journeys_scheduled.json`)
+
+To run the reconstruction:
+```bash
+python src/run_journey_reconstruction.py
+```
+
+> **IMPORTANT LIMITATION**: This module outputs **Scheduled Journeys**. It does NOT represent historical actual train movement, as the underlying datasets lack actual historical arrival timestamps.

@@ -1,0 +1,12 @@
+field,category,source,available_now,temporal_status,valid_ml_training,description
+current_delay_minutes,OBSERVED_CURRENT,delays_clean.json,YES,SNAPSHOT_ONLY,NO,Single live snapshot delay
+snapshot_timestamp,OBSERVED_CURRENT,delays_clean.json,YES,SNAPSHOT_ONLY,NO,Timestamp of snapshot
+cancelled,OBSERVED_CURRENT,delays_clean.json,YES,SNAPSHOT_ONLY,NO,Cancellation flag
+historical_avg_delay,HISTORICAL_AGGREGATED,DA323,YES,TEMPORALLY_UNKNOWN,NO,Station-level avg delay (aggregated)
+percent_right_time,HISTORICAL_AGGREGATED,DA323,YES,TEMPORALLY_UNKNOWN,NO,Station punctuality rate
+percent_significant_delay,HISTORICAL_AGGREGATED,DA323,YES,TEMPORALLY_UNKNOWN,NO,Station significant delay rate
+route_distance,STATIC_CONTEXT,trains_clean.json,YES,VALID_ALWAYS,YES,Total scheduled route distance
+stop_count,STATIC_CONTEXT,journeys_scheduled,YES,VALID_ALWAYS,YES,Number of scheduled stops
+scheduled_duration_hours,STATIC_CONTEXT,trains_clean.json,YES,VALID_ALWAYS,YES,Scheduled journey duration
+actual_arrival_time,NOT_AVAILABLE,None,NO,NOT_AVAILABLE,N/A,Ground truth label — blocks all ML
+historical_trajectory,NOT_AVAILABLE,None,NO,NOT_AVAILABLE,N/A,Individual delay time-series — blocks recovery

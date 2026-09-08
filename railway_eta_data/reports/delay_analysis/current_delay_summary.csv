@@ -1,0 +1,2 @@
+snapshot_note,total_records,valid_delay_observations,missing_delay_count,missing_delay_pct,cancelled_count,cancelled_pct,min_delay,max_delay,mean_delay,median_delay,p25_delay,p75_delay,p90_delay,p99_delay,zero_delay_count,categories
+SINGLE_SNAPSHOT — not a historical time series,444,425,0,0.0,19,4.28,5.0,707.0,77.26,38.0,15.0,99.0,206.0,453.0,0,"{'low': 111, 'moderate': 160, 'high': 101, 'severe': 53}"

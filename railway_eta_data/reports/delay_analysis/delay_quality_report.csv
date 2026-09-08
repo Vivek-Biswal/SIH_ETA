@@ -1,0 +1,3 @@
+dataset,field,record_count,missing_count,missing_pct,data_level,temporal_status,valid_current,valid_ml
+delays_clean.json,delay_min,444,0,0.0,OBSERVED_CURRENT,SNAPSHOT_ONLY,YES,NO
+public_historical_delay_clean.csv (DA323),avg_delay_minutes,1479,0,0,HISTORICAL_AGGREGATED,TEMPORALLY_UNKNOWN,CONTEXT_ONLY,NO

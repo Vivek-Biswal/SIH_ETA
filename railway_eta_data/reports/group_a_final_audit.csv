@@ -1,0 +1,12 @@
+CHECK,STATUS,EVIDENCE,COMMENTS
+Raw data unchanged,PASS,2037 files found,Raw data directory is populated.
+Processed datasets exist,PASS,"delays_clean.json, trains_clean.json, journeys_scheduled.json, public_historical_delay_clean.csv",
+No ML model trained,PASS,No ML model artifacts found,
+No synthetic trajectories,PASS,Code inspection,Verified no generation scripts exist.
+No fake actual arrivals,PASS,Code inspection,Verified ETA contracts only predict.
+Baseline methods explicit,PASS,system/orchestrator.py,prediction_method explicitly returned.
+DA323 is HISTORICAL_AGGREGATED,PASS,delay_analysis/contract.py,explicitly tagged as TEMPORALLY_UNKNOWN
+DA323 does not silently modify ETA,PASS,test_system.py,test_no_unsafe_da323_use passes
+Live data availability is honest,PASS,state/builder.py,Explicit DataAvailability dataclass
+Missing live fields remain missing,PASS,test_system.py,test_no_fabricated_live_values passes
+Handoff documents exist,PASS,"eta_request_contract.md, eta_response_contract.md, backend_handoff.md, frontend_handoff.md, database_handoff.md",Documents are tracked in chunk task list.
