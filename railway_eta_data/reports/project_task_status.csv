@@ -1,0 +1,15 @@
+TEAM_MEMBER,MODULE,TASK,STATUS,COMPLETION_PERCENT,EVIDENCE,BLOCKER,NEXT_ACTION
+Kakul,Data,Raw Data Ingestion,COMPLETE,100,raw datasets exist,None,None
+Kakul,Data,Data Cleaning,COMPLETE,100,src/cleaning scripts & processed datasets,None,None
+Kakul,Data,Validation Pipeline,COMPLETE,100,src/validation scripts & data quality reports,None,None
+Kakul,Data,Decision Logging,COMPLETE,100,data/processed/decision_log.csv,None,None
+Vivek,Group A,Journey Reconstruction,COMPLETE,100,src/journey/ & journeys_scheduled.json,None,None
+Vivek,Group A,EDA,COMPLETE,100,src/eda/ & reports/eda/,None,None
+Vivek,Group A,ETA Baseline System,COMPLETE,100,src/eta/ & baseline logic handles multi-day safely,None,None
+Vivek,Group A,Feature Engineering,COMPLETE,100,src/features/ & LeakageChecker working,None,None
+Vivek,Group A,Delay-DNA Analysis,PARTIAL,80,src/delay_analysis/ works but recovery requires live history,Missing time-series history,Wait for backend tracking
+Vivek,Group A,System Integration,COMPLETE,100,src/system/orchestrator.py unifying states,None,None
+Varun,Backend,API & Database,NOT_STARTED,0,Missing API server & DB schema deployment,None,Build FastAPI/Django wrapper & DB schema
+Sneha,Frontend,UI/UX App,NOT_STARTED,0,Missing frontend implementation,Missing backend API,Build frontend connecting to mock/local orchestrator
+Ashwin,Intelligence,ML ETA Model,BLOCKED,0,No ML artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database
+Ashwin,Intelligence,Delay Propagation Model,BLOCKED,0,No ML artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database
