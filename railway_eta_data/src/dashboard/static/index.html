@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIH ETA — Local Inspection Dashboard</title>
+  <meta name="description" content="Local development data inspection dashboard for the SIH Indian Train ETA project. Read-only access to processed datasets and ETA prediction demo." />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🚆</div>
+        <h1>SIH <span>ETA</span> Inspection Dashboard</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="header-badge">Local Dev Only</span>
+        <a href="/docs" target="_blank" class="btn btn-ghost" style="font-size:12px;padding:5px 12px;">API Docs ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Status bar -->
+  <div class="status-bar" id="statusBar">
+    <span><span class="status-dot" id="statusDot"></span> &nbsp;Server: checking...</span>
+    <span id="statusDatasets">Datasets: —</span>
+    <span id="statusLoadedAt"></span>
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger Docs</a>
+    <a href="http://127.0.0.1:8000/redoc" target="_blank">ReDoc</a>
+  </div>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- System disclaimer -->
+    <div class="disclaimer-banner" id="disclaimerBanner">
+      <span class="disclaimer-icon">⚠️</span>
+      <div class="disclaimer-text" id="disclaimerText">
+        Loading disclaimer...
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" role="tab" onclick="switchTab('summary', this)" id="tab-summary">📊 Data Summary</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('stations', this)" id="tab-stations">📍 Stations</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('trains', this)" id="tab-trains">🚂 Trains</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('delays', this)" id="tab-delays">⏱️ Delays</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('eta', this)" id="tab-eta">🔮 ETA Demo</button>
+    </div>
+
+    <!-- ─── Tab: Data Summary ─────────────────────── -->
+    <div class="tab-panel active" id="panel-summary">
+      <div class="stats-grid" id="statsGrid">
+        <!-- Populated by JS -->
+        <div class="stat-card"><div class="stat-label">Loading...</div><div class="stat-value">—</div></div>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title">Dataset Status</span>
+      </div>
+      <p class="section-sub">All data loaded from <code>data/processed/</code>. No data is ever generated or modified by this dashboard.</p>
+
+      <div class="dataset-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>Source File</th>
+              <th>Records</th>
+              <th>Size (MB)</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="datasetTableBody">
+            <tr><td colspan="6" class="loading-overlay"><span class="loading-spinner"></span> Loading datasets...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Stations ─────────────────────────── -->
+    <div class="tab-panel" id="panel-stations">
+      <div class="section-header">
+        <span class="section-title">Station Explorer</span>
+        <span id="stationsTotal" style="font-size:12px;color:var(--text-muted);">— records</span>
+      </div>
+      <div class="controls-row">
+        <input type="text" class="search-input" id="stationsSearch" placeholder="Search by station code or name..." oninput="debounceSearch('stations')" />
+        <button class="btn btn-secondary" onclick="prevPage('stations')" id="stationsPrev" disabled>← Prev</button>
+        <button class="btn btn-secondary" onclick="nextPage('stations')" id="stationsNext" disabled>Next →</button>
+      </div>
+      <div class="data-table-wrapper">
+        <table>
+          <thead id="stationsHeader"><tr><th colspan="3">Loading...</th></tr></thead>
+          <tbody id="stationsBody">
+            <tr><td colspan="3" class="loading-overlay"><span class="loading-spinner"></span> Loading stations...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-row">
+        <span id="stationsPagination">—</span>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Trains ───────────────────────────── -->
+    <div class="tab-panel" id="panel-trains">
+      <div class="section-header">
+        <span class="section-title">Train Explorer</span>
+        <span id="trainsTotal" style="font-size:12px;color:var(--text-muted);">— records</span>
+      </div>
+      <div class="controls-row">
+        <input type="text" class="search-input" id="trainsSearch" placeholder="Search by train number or name..." oninput="debounceSearch('trains')" />
+        <button class="btn btn-secondary" onclick="prevPage('trains')" id="trainsPrev" disabled>← Prev</button>
+        <button class="btn btn-secondary" onclick="nextPage('trains')" id="trainsNext" disabled>Next →</button>
+      </div>
+      <div class="data-table-wrapper">
+        <table>
+          <thead id="trainsHeader"><tr><th colspan="3">Loading...</th></tr></thead>
+          <tbody id="trainsBody">
+            <tr><td colspan="3" class="loading-overlay"><span class="loading-spinner"></span> Loading trains...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-row">
+        <span id="trainsPagination">—</span>
+      </div>
+
+      <!-- Schedule drawer -->
+      <div id="scheduleDrawer" style="display:none;margin-top:24px;">
+        <div class="section-header">
+          <span class="section-title" id="scheduleTitle">Schedule for —</span>
+          <button class="btn btn-ghost" onclick="closeSchedule()" style="font-size:12px;">✕ Close</button>
+        </div>
+        <div class="data-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Station Code</th>
+                <th>Station Name</th>
+                <th>Arrival</th>
+                <th>Departure</th>
+                <th>Day</th>
+                <th>Distance (km)</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+              <tr><td colspan="7" class="loading-overlay"><span class="loading-spinner"></span> Loading schedule...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Delays ───────────────────────────── -->
+    <div class="tab-panel" id="panel-delays">
+      <div class="section-header">
+        <span class="section-title">Delay Records (delays_clean.json)</span>
+        <span id="delaysTotal" style="font-size:12px;color:var(--text-muted);">— records</span>
+      </div>
+      <p class="section-sub">Read-only view of cleaned delay observations. Source: <code>data/processed/delays_clean.json</code></p>
+      <div class="controls-row">
+        <button class="btn btn-secondary" onclick="prevPage('delays')" id="delaysPrev" disabled>← Prev</button>
+        <button class="btn btn-secondary" onclick="nextPage('delays')" id="delaysNext" disabled>Next →</button>
+      </div>
+      <div class="data-table-wrapper">
+        <table>
+          <thead id="delaysHeader"><tr><th colspan="3">Loading...</th></tr></thead>
+          <tbody id="delaysBody">
+            <tr><td colspan="3" class="loading-overlay"><span class="loading-spinner"></span> Loading delays...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-row">
+        <span id="delaysPagination">—</span>
+      </div>
+    </div>
+
+    <!-- ─── Tab: ETA Demo ─────────────────────────── -->
+    <div class="tab-panel" id="panel-eta">
+      <div class="eta-layout">
+
+        <!-- Form -->
+        <div class="eta-form-card">
+          <div class="form-title">🔮 ETA Prediction Demo</div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">
+            Runs the deterministic ETA baseline using the pre-loaded schedule data and 
+            optionally an injected delay. <strong style="color:var(--accent-yellow);">Not an ML model.</strong>
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="etaTrainNumber">Train Number</label>
+            <input type="text" id="etaTrainNumber" class="form-input" placeholder="e.g. 12001" />
+            <div class="preset-buttons">
+              <span style="font-size:11px;color:var(--text-muted);align-self:center;">Quick:</span>
+              <button class="preset-btn" onclick="setPreset('12001', 'NDLS')">12001 → NDLS</button>
+              <button class="preset-btn" onclick="setPreset('12951', 'MMCT')">12951 → MMCT</button>
+              <button class="preset-btn" onclick="setPreset('12301', 'HWH')">12301 → HWH</button>
+              <button class="preset-btn" onclick="setPreset('99999', 'NDLS')">99999 (invalid)</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="etaDestination">Destination Station Code</label>
+            <input type="text" id="etaDestination" class="form-input" placeholder="e.g. NDLS" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="etaDelay">Current Delay (minutes) — optional</label>
+            <input type="number" id="etaDelay" class="form-input" placeholder="Leave blank for SCHEDULE_BASELINE" min="0" max="9999" step="1" />
+            <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">
+              With delay → <span style="color:var(--accent-purple);">DELAY_ADJUSTED_BASELINE</span> |
+              Without → <span style="color:var(--accent-blue);">SCHEDULE_BASELINE</span>
+            </div>
+          </div>
+
+          <button class="submit-btn" id="etaSubmitBtn" onclick="submitETA()">
+            Predict ETA →
+          </button>
+        </div>
+
+        <!-- Result -->
+        <div class="eta-result-card" id="etaResultCard">
+          <div class="result-placeholder">
+            <span class="big-icon">🚆</span>
+            <span>Fill in the form and click <strong>Predict ETA</strong> to see results.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    SIH Indian Train ETA Project — Local Development Inspection Dashboard &nbsp;|&nbsp;
+    Read-only &nbsp;|&nbsp; Not a production system &nbsp;|&nbsp;
+    <a href="http://127.0.0.1:8000/docs" target="_blank" style="color:var(--accent-blue);text-decoration:none;">API Docs</a>
+  </footer>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
