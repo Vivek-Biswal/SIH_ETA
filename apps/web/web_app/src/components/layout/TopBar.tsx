@@ -24,12 +24,16 @@ export const TopBar: React.FC = () => {
 
       {/* Right Telemetry Controls */}
       <div className="flex items-center gap-3 md:gap-4">
-        <div className="hidden sm:block">
-          <StatusBadge type="LIVE" label="FEED ACTIVE" pulse />
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="px-2 py-0.5 text-[10px] font-mono font-medium rounded border border-amber-500/30 bg-amber-500/10 text-amber-400">
+            V1 PROTOTYPE
+          </span>
+          <StatusBadge type="INFO" label="SIMULATED FEED" pulse />
         </div>
         <div className="sm:hidden">
-          <StatusBadge type="LIVE" label="LIVE" pulse />
+          <StatusBadge type="INFO" label="PROTOTYPE" pulse />
         </div>
+
 
         <div className="hidden sm:block h-4 w-px bg-white/10" />
 
