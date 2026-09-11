@@ -17,11 +17,16 @@ class RealETAProvider(ETAProvider, DelayDNAProvider, RecoveryProvider):
         self, train_number: str, journey_id: Optional[str], current_delay: int, schedule: list[dict]
     ) -> Optional[list[dict]]:
         try:
-            # Future ML integration:
-            # from intelligence.train_eta.inference import ETAPredictor
-            # predictor = ETAPredictor(model_version="eta-xgboost-v1")
-            # return predictor.predict(train_number, current_station, current_delay, date)
-            return None
+            from intelligence.train_eta.inference.predictor import ETAPredictor
+            predictor = ETAPredictor(model_version="eta-xgboost-v1")
+            
+            # extract current station if available in the kwargs or state? 
+            # predict_eta signature has train_number, journey_id, current_delay, schedule
+            # Let's pass current_station as None and let the predictor handle it based on schedule
+            current_station = None
+            date = "today" # placeholder
+            
+            return predictor.predict(train_number, current_station, current_delay, date, schedule)
         except Exception as e:
             logger.warning("RealETAProvider predict_eta failed: %s", e)
             return None

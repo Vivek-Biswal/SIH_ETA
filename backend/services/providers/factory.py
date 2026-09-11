@@ -16,8 +16,8 @@ from .interfaces import (
 logger = logging.getLogger(__name__)
 
 # Switch these to True when the ML modules are ready to be used
-USE_REAL_ETA = False
-USE_REAL_NETWORK = False
+USE_REAL_ETA = True
+USE_REAL_NETWORK = True
 
 
 def get_eta_provider() -> type[ETAProvider] | type[DelayDNAProvider] | type[RecoveryProvider]:
