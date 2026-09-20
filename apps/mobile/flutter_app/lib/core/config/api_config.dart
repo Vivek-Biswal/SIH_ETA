@@ -2,7 +2,7 @@ class ApiConfig {
   // Base host URL (e.g. 'https://sih-eta-api.onrender.com' or 'http://10.0.2.2:8000')
   static const String rootUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'http://10.0.2.2:8000',
   );
 
   // Unversioned compatibility API endpoints (/api)
