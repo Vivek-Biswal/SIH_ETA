@@ -22,14 +22,14 @@ export function DataTable<T>({
   emptyMessage = 'No records available',
 }: DataTableProps<T>) {
   return (
-    <div className="w-full overflow-x-auto border border-white/10 rounded-sm bg-[#18181B]">
+    <div className="w-full overflow-x-auto border border-[var(--color-border-subtle)] rounded-lg bg-[var(--color-surface-card)] shadow-sm">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="border-b border-white/10 bg-[#18181B]">
+          <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-hover)]">
             {columns.map((col, idx) => (
               <th
                 key={idx}
-                className={`py-3 px-4 text-[11px] font-semibold tracking-wider text-[#A1A1AA] uppercase font-mono ${
+                className={`py-3.5 px-4 text-xs font-semibold tracking-wide text-[var(--color-text-muted)] ${
                   col.align === 'right'
                     ? 'text-right'
                     : col.align === 'center'
@@ -42,12 +42,12 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/10 text-sm">
+        <tbody className="divide-y divide-[var(--color-border-subtle)] text-sm">
           {data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="py-8 text-center text-[#A1A1AA] font-mono text-xs"
+                className="py-12 text-center text-[var(--color-text-muted)] text-sm"
               >
                 {emptyMessage}
               </td>
@@ -59,14 +59,19 @@ export function DataTable<T>({
                 onClick={() => onRowClick && onRowClick(row)}
                 className={`transition-colors ${
                   onRowClick
-                    ? 'cursor-pointer hover:bg-white/[0.04]'
-                    : 'hover:bg-white/[0.02]'
+                    ? 'cursor-pointer hover:bg-[var(--color-surface-hover)]'
+                    : 'hover:bg-[var(--color-surface-hover)]'
                 }`}
               >
+                <td
+                  colSpan={columns.length}
+                  className="p-0 border-none"
+                  style={{ display: 'none' }}
+                ></td>
                 {columns.map((col, colIdx) => (
                   <td
                     key={colIdx}
-                    className={`py-3 px-4 font-mono ${
+                    className={`py-4 px-4 text-sm font-medium text-[var(--color-text-primary)] ${
                       col.align === 'right'
                         ? 'text-right'
                         : col.align === 'center'

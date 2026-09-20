@@ -18,31 +18,31 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   const getValueColor = () => {
     switch (status) {
       case 'SUCCESS':
-        return 'text-[#22C55E]';
+        return 'text-[var(--color-live-green)]';
       case 'WARNING':
-        return 'text-[#F59E0B]';
+        return 'text-[var(--color-warning-amber)]';
       case 'CRITICAL':
-        return 'text-[#EF4444]';
+        return 'text-[var(--color-critical-red)]';
       default:
-        return 'text-white';
+        return 'text-[var(--color-text-primary)]';
     }
   };
 
   return (
-    <div className="bg-[#18181B] border border-white/10 rounded-sm p-4 flex flex-col justify-between">
-      <div className="flex items-center justify-between text-[#A1A1AA] text-xs font-semibold uppercase tracking-wider mb-2">
+    <div className="bg-[var(--color-surface-card)] border border-[var(--color-border-subtle)] rounded-lg shadow-sm p-5 flex flex-col justify-between">
+      <div className="flex items-center justify-between text-[var(--color-text-muted)] text-sm font-medium mb-3">
         <span>{title}</span>
         {tag && (
-          <span className="text-[10px] font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-[#A1A1AA]">
+          <span className="text-[10px] font-medium bg-[var(--color-surface-hover)] border border-[var(--color-border-subtle)] px-2 py-0.5 rounded text-[var(--color-text-muted)]">
             {tag}
           </span>
         )}
       </div>
-      <div className={`text-2xl font-bold font-mono tracking-tight ${getValueColor()}`}>
+      <div className={`text-3xl font-bold font-sans tracking-tight ${getValueColor()}`}>
         {value}
       </div>
       {subtitle && (
-        <div className="text-xs text-[#A1A1AA] mt-1.5 font-sans flex items-center gap-1">
+        <div className="text-sm text-[var(--color-text-muted)] mt-2 font-sans flex items-center gap-1">
           {subtitle}
         </div>
       )}

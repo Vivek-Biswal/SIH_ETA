@@ -20,27 +20,27 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       case 'LIVE':
       case 'ON_TIME':
         return {
-          bg: 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]',
-          dot: 'bg-[#22C55E]',
-          defaultText: 'ON TIME',
+          bg: 'bg-green-100 border-green-200 text-green-700',
+          dot: 'bg-green-500',
+          defaultText: 'On Time',
         };
       case 'WARNING':
         return {
-          bg: 'bg-[#F59E0B]/15 border-[#F59E0B]/30 text-[#F59E0B]',
-          dot: 'bg-[#F59E0B]',
-          defaultText: 'DELAYED',
+          bg: 'bg-amber-100 border-amber-200 text-amber-700',
+          dot: 'bg-amber-500',
+          defaultText: 'Delayed',
         };
       case 'CRITICAL':
         return {
-          bg: 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#EF4444]',
-          dot: 'bg-[#EF4444]',
-          defaultText: 'CRITICAL',
+          bg: 'bg-red-100 border-red-200 text-red-700',
+          dot: 'bg-red-500',
+          defaultText: 'Cancelled',
         };
       case 'INFO':
         return {
-          bg: 'bg-[#3B82F6]/15 border-[#3B82F6]/30 text-[#3B82F6]',
-          dot: 'bg-[#3B82F6]',
-          defaultText: 'INFO',
+          bg: 'bg-blue-100 border-blue-200 text-blue-700',
+          dot: 'bg-blue-500',
+          defaultText: 'Info',
         };
     }
   };
@@ -49,7 +49,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-semibold tracking-wider uppercase font-mono ${config.bg} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-medium tracking-wide ${config.bg} ${className}`}
     >
       {(pulse || type === 'LIVE') && (
         <span className="relative flex h-1.5 w-1.5">
