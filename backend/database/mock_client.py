@@ -28,6 +28,9 @@ MOCK_TRAINS = [
     {"train_number": "12302", "train_name": "New Delhi Rajdhani Express", "from_station": "NDLS", "to_station": "HWH", "departure_time": "17:15", "arrival_time": "10:05", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Rajdhani"},
     {"train_number": "12952", "train_name": "New Delhi Rajdhani Express", "from_station": "NDLS", "to_station": "BCT", "departure_time": "16:25", "arrival_time": "08:15", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Rajdhani"},
     {"train_number": "12002", "train_name": "Bhopal Shatabdi Express", "from_station": "NDLS", "to_station": "BPL", "departure_time": "06:00", "arrival_time": "13:50", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Shatabdi"},
+    {"train_number": "12259", "train_name": "Sealdah Duronto Express", "from_station": "SDAH", "to_station": "NDLS", "departure_time": "18:30", "arrival_time": "11:25", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Duronto"},
+    {"train_number": "22221", "train_name": "CSMT Rajdhani Express", "from_station": "CSMT", "to_station": "NZM", "departure_time": "16:00", "arrival_time": "09:55", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Rajdhani"},
+    {"train_number": "12004", "train_name": "Lucknow Swarna Shatabdi", "from_station": "NDLS", "to_station": "LKO", "departure_time": "06:10", "arrival_time": "12:50", "days_of_run": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "train_type": "Shatabdi"},
 ]
 
 MOCK_SCHEDULES = {

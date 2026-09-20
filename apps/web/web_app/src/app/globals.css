@@ -1,37 +1,32 @@
 @import "tailwindcss";
 
-:root {
-  --color-canvas-black: #09090B;
-  --color-surface-zinc: #18181B;
-  --color-surface-zinc-light: #27272A;
-  --color-whisper-border: rgba(255, 255, 255, 0.1);
-  --color-pure-white: #FFFFFF;
-  --color-muted-steel: #A1A1AA;
-  --color-live-green: #22C55E;
-  --color-warning-amber: #F59E0B;
-  --color-critical-red: #EF4444;
-  --color-brand-blue: #3B82F6;
-}
-
 @theme {
-  --color-canvas-black: #09090B;
-  --color-surface-zinc: #18181B;
-  --color-surface-zinc-light: #27272A;
-  --color-whisper-border: rgba(255, 255, 255, 0.1);
-  --color-pure-white: #FFFFFF;
-  --color-muted-steel: #A1A1AA;
+  --color-canvas-bg: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-surface-hover: #F1F5F9;
+  --color-border-subtle: #E2E8F0;
+  
+  --color-text-primary: #0F172A;
+  --color-text-muted: #64748B;
+  
+  --color-sidebar-bg: #141B2D;
+  --color-sidebar-text: #FFFFFF;
+  --color-sidebar-muted: #94A3B8;
+  --color-sidebar-hover: rgba(255, 255, 255, 0.1);
+  --color-sidebar-active: #2563EB;
+  
   --color-live-green: #22C55E;
   --color-warning-amber: #F59E0B;
   --color-critical-red: #EF4444;
-  --color-brand-blue: #3B82F6;
+  --color-brand-blue: #2563EB;
   
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-sans: var(--font-geist), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
-  background-color: var(--color-canvas-black);
-  color: var(--color-pure-white);
+  background-color: var(--color-canvas-bg);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
@@ -43,18 +38,18 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom scrollbar matching dark cockpit theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-canvas-black);
+  background: var(--color-canvas-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-zinc-light);
+  background: var(--color-border-subtle);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted-steel);
+  background: var(--color-text-muted);
 }
