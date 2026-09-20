@@ -1,87 +1,91 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../config/api_config.dart';
 import '../models/train_models.dart';
 import '../network/api_client.dart';
-import '../config/api_config.dart';
+
+class JourneyResult {
+  final ApiResult<TrainStatus> status;
+  final ApiResult<ETAModel> eta;
+  final DateTime fetchedAt;
+  JourneyResult(this.status, this.eta, this.fetchedAt);
+}
 
 abstract class TrainRepository {
-  Future<ApiResult<List<TrainSummary>>> getRecentTrains();
-  Future<ApiResult<ETAModel>> getTrainETA(String trainNumber);
-  Future<ApiResult<DelayDnaModel>> getDelayDna(String trainNumber);
-  Future<ApiResult<RecoveryModel>> getRecovery(String trainNumber);
-  Future<ApiResult<PropagationModel>> getPropagation(String trainNumber);
+  Future<ApiResult<List<Station>>> searchStations(String query);
+  Future<ApiResult<TrainSearchPage>> searchTrains(
+    String from,
+    String to, {
+    int page = 1,
+  });
+  Future<JourneyResult> getJourney(String trainNumber);
 }
 
 class ApiTrainRepository implements TrainRepository {
   final ApiClient _client;
-
-  ApiTrainRepository({ApiClient? client}) : _client = client ?? ApiClient();
-
-  @override
-  Future<ApiResult<List<TrainSummary>>> getRecentTrains() {
-    return _client.get(
-      '${ApiConfig.v1BaseUrl}/trains/search?from_station=NDLS&to_station=BCT',
-      (json) {
-        if (json is Map<String, dynamic> && json.containsKey('trains')) {
-          return (json['trains'] as List).map((e) => TrainSummary.fromJson(e)).toList();
-        }
-        return (json as List).map((e) => TrainSummary.fromJson(e)).toList();
-      }
-    );
-  }
+  final String baseUrl;
+  ApiTrainRepository({ApiClient? client, String? baseUrl})
+    : _client = client ?? ApiClient(),
+      baseUrl = (baseUrl ?? ApiConfig.v1BaseUrl).replaceFirst(
+        RegExp(r'/+$'),
+        '',
+      );
+  void close() => _client.close();
+  String _url(String path, [Map<String, String>? query]) =>
+      Uri.parse('$baseUrl/$path').replace(queryParameters: query).toString();
 
   @override
-  Future<ApiResult<ETAModel>> getTrainETA(String trainNumber) {
-    return _client.get(
-      '${ApiConfig.baseUrl}/trains/$trainNumber/eta',
-      (json) => ETAModel.fromJson(json),
-    );
-  }
+  Future<ApiResult<List<Station>>> searchStations(String query) => _client.get(
+    _url('stations/search', {'q': query.trim()}),
+    (json) => jsonList(jsonObject(json)['results'], Station.fromJson),
+  );
 
   @override
-  Future<ApiResult<DelayDnaModel>> getDelayDna(String trainNumber) {
-    return _client.get(
-      '${ApiConfig.baseUrl}/trains/$trainNumber/delay-dna',
-      (json) => DelayDnaModel.fromJson(json),
-    );
-  }
+  Future<ApiResult<TrainSearchPage>> searchTrains(
+    String from,
+    String to, {
+    int page = 1,
+  }) => _client.get(
+    _url('trains/search', {
+      'from_station': from.trim().toUpperCase(),
+      'to_station': to.trim().toUpperCase(),
+      'page': '$page',
+      'limit': '20',
+    }),
+    (json) => TrainSearchPage.fromJson(jsonObject(json)),
+  );
 
   @override
-  Future<ApiResult<RecoveryModel>> getRecovery(String trainNumber) {
-    return _client.get(
-      '${ApiConfig.baseUrl}/trains/$trainNumber/recovery',
-      (json) => RecoveryModel.fromJson(json),
+  Future<JourneyResult> getJourney(String trainNumber) async {
+    final id = Uri.encodeComponent(trainNumber.trim());
+    final status = await _client.get(
+      _url('trains/$id/status'),
+      (json) => TrainStatus.fromJson(jsonObject(json)),
     );
-  }
-
-  @override
-  Future<ApiResult<PropagationModel>> getPropagation(String trainNumber) {
-    return _client.get(
-      '${ApiConfig.baseUrl}/trains/$trainNumber/propagation',
-      (json) => PropagationModel.fromJson(json),
+    final date = status.data?.date;
+    var eta = await _client.get(
+      _url('trains/$id/eta', date == null ? null : {'date': date}),
+      (json) => ETAModel.fromJson(jsonObject(json)),
     );
+    if (eta.data != null &&
+        ((status.data != null && eta.data!.date != date) ||
+            eta.data!.trainNumber != trainNumber.trim())) {
+      eta = ApiResult.error(
+        'Prediction belongs to a different journey. Please refresh.',
+      );
+    }
+    if (status.data != null && status.data!.trainNumber != trainNumber.trim()) {
+      return JourneyResult(
+        ApiResult.error('Unexpected train in server response.'),
+        eta,
+        DateTime.now(),
+      );
+    }
+    return JourneyResult(status, eta, DateTime.now());
   }
 }
 
 final trainRepositoryProvider = Provider<TrainRepository>((ref) {
-  return ApiTrainRepository();
-});
-
-final recentTrainsProvider = FutureProvider<ApiResult<List<TrainSummary>>>((ref) {
-  return ref.watch(trainRepositoryProvider).getRecentTrains();
-});
-
-final trainEtaProvider = FutureProvider.family<ApiResult<ETAModel>, String>((ref, trainNo) {
-  return ref.watch(trainRepositoryProvider).getTrainETA(trainNo);
-});
-
-final delayDnaProvider = FutureProvider.family<ApiResult<DelayDnaModel>, String>((ref, trainNo) {
-  return ref.watch(trainRepositoryProvider).getDelayDna(trainNo);
-});
-
-final recoveryProvider = FutureProvider.family<ApiResult<RecoveryModel>, String>((ref, trainNo) {
-  return ref.watch(trainRepositoryProvider).getRecovery(trainNo);
-});
-
-final propagationProvider = FutureProvider.family<ApiResult<PropagationModel>, String>((ref, trainNo) {
-  return ref.watch(trainRepositoryProvider).getPropagation(trainNo);
+  final repository = ApiTrainRepository();
+  ref.onDispose(repository.close);
+  return repository;
 });

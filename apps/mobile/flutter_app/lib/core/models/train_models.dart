@@ -1,226 +1,212 @@
-enum ApiDataState { live, mock, cached, unavailable, error }
+enum ApiDataState { unknown, live, mock, cached, unavailable, error }
 
-ApiDataState _parseDataState(String? state) {
-  switch (state?.toLowerCase()) {
-    case 'mock':
-      return ApiDataState.mock;
-    case 'cached':
-      return ApiDataState.cached;
-    case 'unavailable':
-      return ApiDataState.unavailable;
-    case 'error':
-      return ApiDataState.error;
-    case 'live':
-    default:
-      return ApiDataState.live;
+ApiDataState parseDataState(Object? value) => switch (value) {
+  'live' => ApiDataState.live,
+  'mock' || 'demo' => ApiDataState.mock,
+  'cached' => ApiDataState.cached,
+  'unavailable' => ApiDataState.unavailable,
+  'error' => ApiDataState.error,
+  _ => ApiDataState.unknown,
+};
+
+Map<String, dynamic> jsonObject(dynamic value) {
+  if (value is! Map<String, dynamic>) {
+    throw const FormatException('Expected an object');
   }
+  return value;
 }
+
+String requiredText(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is! String || value.trim().isEmpty) {
+    throw FormatException('Missing or invalid $key');
+  }
+  return value;
+}
+
+List<T> jsonList<T>(dynamic value, T Function(Map<String, dynamic>) parse) {
+  if (value is! List) throw const FormatException('Expected a list');
+  return value.map((item) => parse(jsonObject(item))).toList();
+}
+
+String sourceLabel(String? source) => switch (source) {
+  'demo' => 'Demo data',
+  'database' => 'Database records',
+  _ => 'Source unverified',
+};
 
 class Station {
   final String code;
   final String name;
-
   const Station({required this.code, required this.name});
+  factory Station.fromJson(Map<String, dynamic> json) => Station(
+    code: requiredText(json, 'code'),
+    name: json['name'] as String? ?? '',
+  );
+  String get label => name.isEmpty ? code : '$name ($code)';
+}
 
-  factory Station.fromJson(Map<String, dynamic> json) {
-    return Station(
-      code: json['code'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
+Station? stationFrom(dynamic value) =>
+    value == null ? null : Station.fromJson(jsonObject(value));
 
-  Map<String, dynamic> toJson() => {
-        'code': code,
-        'name': name,
-      };
+class TrainSummary {
+  final String trainNumber;
+  final String trainName;
+  final Station? origin;
+  final Station? destination;
+  final String? departureTime;
+  final String? arrivalTime;
+  const TrainSummary({
+    required this.trainNumber,
+    required this.trainName,
+    this.origin,
+    this.destination,
+    this.departureTime,
+    this.arrivalTime,
+  });
+  factory TrainSummary.fromJson(Map<String, dynamic> json) => TrainSummary(
+    trainNumber: requiredText(json, 'train_number'),
+    trainName: requiredText(json, 'train_name'),
+    origin: stationFrom(json['from_station']),
+    destination: stationFrom(json['to_station']),
+    departureTime: json['departure_time'] as String?,
+    arrivalTime: json['arrival_time'] as String?,
+  );
+}
+
+class TrainSearchPage {
+  final int total;
+  final int page;
+  final int limit;
+  final String? source;
+  final List<TrainSummary> trains;
+  TrainSearchPage.fromJson(Map<String, dynamic> json)
+    : total = (json['total'] as num).toInt(),
+      page = (json['page'] as num).toInt(),
+      limit = (json['limit'] as num).toInt(),
+      source = json['data_source'] as String?,
+      trains = jsonList(json['trains'], TrainSummary.fromJson);
+  bool get hasNext => page * limit < total;
+}
+
+class RouteStop {
+  final Station? station;
+  final String? scheduledArrival;
+  final String? scheduledDeparture;
+  final String? actualArrival;
+  final String? actualDeparture;
+  final int? delayMinutes;
+  final bool hasDeparted;
+  final String? platform;
+  RouteStop.fromJson(Map<String, dynamic> json)
+    : station = stationFrom(json['station']),
+      scheduledArrival = json['scheduled_arrival'] as String?,
+      scheduledDeparture = json['scheduled_departure'] as String?,
+      actualArrival = json['actual_arrival'] as String?,
+      actualDeparture = json['actual_departure'] as String?,
+      delayMinutes = (json['delay_minutes'] as num?)?.toInt(),
+      hasDeparted = json['has_departed'] as bool? ?? false,
+      platform = json['platform'] as String?;
+}
+
+class TrainStatus {
+  final String trainNumber;
+  final String trainName;
+  final String? date;
+  final String? source;
+  final Station? currentStation;
+  final String? observedAt;
+  final bool hasObservation;
+  final int? delay;
+  final String status;
+  final List<RouteStop> route;
+  TrainStatus.fromJson(Map<String, dynamic> json)
+    : trainNumber = requiredText(json, 'train_number'),
+      trainName = requiredText(json, 'train_name'),
+      date = json['date'] as String?,
+      source = json['data_source'] as String?,
+      currentStation = stationFrom(json['current_station']),
+      observedAt = json['last_known_location'] == null
+          ? null
+          : jsonObject(json['last_known_location'])['updated_at'] as String?,
+      hasObservation = json['last_known_location'] != null,
+      delay = json['last_known_location'] == null
+          ? null
+          : (jsonObject(json['last_known_location'])['delay_minutes'] as num?)
+                ?.toInt(),
+      status = json['status'] as String? ?? 'unknown',
+      route = jsonList(json['route'], RouteStop.fromJson);
 }
 
 class StationPrediction {
-  final Station station;
-  final String scheduledArrival;
-  final String predictedArrival;
-  final int predictedDelayMinutes;
-  final double? confidence;
-  final String platform;
-
-  const StationPrediction({
-    required this.station,
-    required this.scheduledArrival,
-    required this.predictedArrival,
-    required this.predictedDelayMinutes,
-    this.confidence,
-    required this.platform,
-  });
-
-  factory StationPrediction.fromJson(Map<String, dynamic> json) {
-    return StationPrediction(
-      station: json['station'] != null
-          ? Station.fromJson(json['station'])
-          : const Station(code: '', name: ''),
-      scheduledArrival: json['scheduled_arrival'] ?? '',
-      predictedArrival: json['predicted_arrival'] ?? '',
-      predictedDelayMinutes: json['predicted_delay_minutes'] ?? 0,
-      confidence: json['prediction_confidence']?.toDouble(),
-      platform: json['platform'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'station': station.toJson(),
-        'scheduled_arrival': scheduledArrival,
-        'predicted_arrival': predictedArrival,
-        'predicted_delay_minutes': predictedDelayMinutes,
-        'prediction_confidence': confidence,
-        'platform': platform,
-      };
+  final Station? station;
+  final String? scheduledArrival;
+  final String? predictedArrival;
+  final int? predictedDelayMinutes;
+  StationPrediction.fromJson(Map<String, dynamic> json)
+    : station = stationFrom(json['station']),
+      scheduledArrival = json['scheduled_arrival'] as String?,
+      predictedArrival = json['predicted_arrival'] as String?,
+      predictedDelayMinutes = (json['predicted_delay_minutes'] as num?)
+          ?.toInt();
 }
 
 class DelayFactor {
   final String factor;
   final int contributionMinutes;
   final String description;
-
-  const DelayFactor({
-    required this.factor,
-    required this.contributionMinutes,
-    required this.description,
-  });
-
-  factory DelayFactor.fromJson(Map<String, dynamic> json) {
-    return DelayFactor(
-      factor: json['factor'] ?? '',
-      contributionMinutes: json['contribution_minutes'] ?? 0,
-      description: json['description'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'factor': factor,
-        'contribution_minutes': contributionMinutes,
-        'description': description,
-      };
+  DelayFactor.fromJson(Map<String, dynamic> json)
+    : factor = json['factor'] as String? ?? '',
+      contributionMinutes =
+          (json['contribution_minutes'] as num?)?.toInt() ?? 0,
+      description = json['description'] as String? ?? '';
 }
 
 class ETAModel {
   final String trainNumber;
   final String trainName;
-  final String modelVersion;
-  final int overallDelayMinutes;
-  final double? confidenceScore;
+  final String? date;
+  final String? generatedAt;
+  final String? source;
+  final String method;
+  final String? modelVersion;
   final List<StationPrediction> remainingStations;
   final List<DelayFactor> delayFactors;
+  ETAModel.fromJson(Map<String, dynamic> json)
+    : trainNumber = requiredText(json, 'train_number'),
+      trainName = requiredText(json, 'train_name'),
+      date = json['date'] as String?,
+      generatedAt = json['prediction_generated_at'] as String?,
+      source = json['data_source'] as String?,
+      method = json['prediction_method'] as String? ?? 'unknown',
+      modelVersion = json['model_version'] as String?,
+      remainingStations = jsonList(
+        json['remaining_stations'],
+        StationPrediction.fromJson,
+      ),
+      delayFactors = jsonList(
+        json['delay_factors'] ?? [],
+        DelayFactor.fromJson,
+      );
 
-  const ETAModel({
-    required this.trainNumber,
-    required this.trainName,
-    this.modelVersion = 'eta-xgboost-v1.2',
-    required this.overallDelayMinutes,
-    this.confidenceScore,
-    required this.remainingStations,
-    required this.delayFactors,
-  });
-
-  factory ETAModel.fromJson(Map<String, dynamic> json) {
-    return ETAModel(
-      trainNumber: json['train_number'] ?? '',
-      trainName: json['train_name'] ?? '',
-      modelVersion: json['model_version'] ?? '',
-      overallDelayMinutes: json['overall_delay_minutes'] ?? 0,
-      confidenceScore: json['confidence_score']?.toDouble(),
-      remainingStations: (json['remaining_stations'] as List?)
-              ?.map((e) => StationPrediction.fromJson(e))
-              .toList() ??
-          [],
-      delayFactors: (json['delay_factors'] as List?)
-              ?.map((e) => DelayFactor.fromJson(e))
-              .toList() ??
-          [],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'train_number': trainNumber,
-        'train_name': trainName,
-        'model_version': modelVersion,
-        'overall_delay_minutes': overallDelayMinutes,
-        'confidence_score': confidenceScore,
-        'remaining_stations': remainingStations.map((e) => e.toJson()).toList(),
-        'delay_factors': delayFactors.map((e) => e.toJson()).toList(),
-      };
+  bool get hasPredictions => method == 'stored' || method == 'inference';
+  String get methodLabel => switch (method) {
+    'schedule_only' => 'Schedule only · adjusted ETA unavailable',
+    'stored' => 'Stored prediction',
+    'inference' => 'Arrival estimate',
+    _ => 'Prediction method unverified',
+  };
 }
 
-class TrainSummary {
-  final String trainNumber;
-  final String trainName;
-  final String origin;
-  final String destination;
-  final String nextStation;
-  final int delayMinutes;
-  final String predictedArrival;
-  final bool isLive;
-
-  const TrainSummary({
-    required this.trainNumber,
-    required this.trainName,
-    required this.origin,
-    required this.destination,
-    required this.nextStation,
-    required this.delayMinutes,
-    required this.predictedArrival,
-    this.isLive = true,
-  });
-
-  factory TrainSummary.fromJson(Map<String, dynamic> json) {
-    // Handling nested station objects or flat structures based on backend payload
-    String nextStn = json['next_station'] is Map 
-        ? json['next_station']['name'] 
-        : (json['next_station'] ?? '');
-        
-    return TrainSummary(
-      trainNumber: json['train_number'] ?? '',
-      trainName: json['train_name'] ?? '',
-      origin: json['origin'] ?? '',
-      destination: json['destination'] ?? '',
-      nextStation: nextStn,
-      delayMinutes: json['delay_minutes'] ?? 0,
-      predictedArrival: json['predicted_next_arrival'] ?? '',
-      isLive: json['is_live'] ?? true,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'train_number': trainNumber,
-        'train_name': trainName,
-        'origin': origin,
-        'destination': destination,
-        'next_station': nextStation,
-        'delay_minutes': delayMinutes,
-        'predicted_next_arrival': predictedArrival,
-        'is_live': isLive,
-      };
-}
-
+// Retained contracts for existing optional intelligence integrations.
 class DelayDnaModel {
   final String trainId;
   final List<DelayFactor> contributors;
   final ApiDataState dataState;
-
-  const DelayDnaModel({
-    required this.trainId,
-    required this.contributors,
-    this.dataState = ApiDataState.live,
-  });
-
-  factory DelayDnaModel.fromJson(Map<String, dynamic> json) {
-    return DelayDnaModel(
-      trainId: json['train_id'] ?? '',
-      contributors: (json['contributors'] as List?)
-              ?.map((e) => DelayFactor.fromJson(e))
-              .toList() ??
-          [],
-      dataState: _parseDataState(json['data_state']),
-    );
-  }
+  DelayDnaModel.fromJson(Map<String, dynamic> json)
+    : trainId = json['train_id'] as String? ?? '',
+      contributors = jsonList(json['contributors'] ?? [], DelayFactor.fromJson),
+      dataState = parseDataState(json['data_state']);
 }
 
 class RecoveryModel {
@@ -229,24 +215,13 @@ class RecoveryModel {
   final int expectedRemainingDelay;
   final double? confidence;
   final ApiDataState dataState;
-
-  const RecoveryModel({
-    required this.currentDelay,
-    required this.expectedRecovery,
-    required this.expectedRemainingDelay,
-    this.confidence,
-    this.dataState = ApiDataState.live,
-  });
-
-  factory RecoveryModel.fromJson(Map<String, dynamic> json) {
-    return RecoveryModel(
-      currentDelay: json['current_delay'] ?? 0,
-      expectedRecovery: json['expected_recovery'] ?? 0,
-      expectedRemainingDelay: json['expected_remaining_delay'] ?? 0,
-      confidence: json['confidence']?.toDouble(),
-      dataState: _parseDataState(json['data_state']),
-    );
-  }
+  RecoveryModel.fromJson(Map<String, dynamic> json)
+    : currentDelay = (json['current_delay'] as num?)?.toInt() ?? 0,
+      expectedRecovery = (json['expected_recovery'] as num?)?.toInt() ?? 0,
+      expectedRemainingDelay =
+          (json['expected_remaining_delay'] as num?)?.toInt() ?? 0,
+      confidence = (json['confidence'] as num?)?.toDouble(),
+      dataState = parseDataState(json['data_state']);
 }
 
 class PropagationModel {
@@ -258,28 +233,13 @@ class PropagationModel {
   final String risk;
   final double? confidence;
   final ApiDataState dataState;
-
-  const PropagationModel({
-    required this.sourceTrain,
-    required this.affectedTrain,
-    required this.affectedStation,
-    required this.predictedDelay,
-    required this.timeWindow,
-    required this.risk,
-    this.confidence,
-    this.dataState = ApiDataState.live,
-  });
-
-  factory PropagationModel.fromJson(Map<String, dynamic> json) {
-    return PropagationModel(
-      sourceTrain: json['source_train'] ?? '',
-      affectedTrain: json['affected_train'] ?? '',
-      affectedStation: json['affected_station'] ?? '',
-      predictedDelay: json['predicted_delay'] ?? 0,
-      timeWindow: json['time_window'] ?? '',
-      risk: json['risk'] ?? '',
-      confidence: json['confidence']?.toDouble(),
-      dataState: _parseDataState(json['data_state']),
-    );
-  }
+  PropagationModel.fromJson(Map<String, dynamic> json)
+    : sourceTrain = json['source_train'] as String? ?? '',
+      affectedTrain = json['affected_train'] as String? ?? '',
+      affectedStation = json['affected_station'] as String? ?? '',
+      predictedDelay = (json['predicted_delay'] as num?)?.toInt() ?? 0,
+      timeWindow = json['time_window'] as String? ?? '',
+      risk = json['risk'] as String? ?? 'unknown',
+      confidence = (json['confidence'] as num?)?.toDouble(),
+      dataState = parseDataState(json['data_state']);
 }

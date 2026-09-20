@@ -9,25 +9,34 @@ void main() {
   runApp(const ProviderScope(child: SihEtaMobileApp()));
 }
 
-final _router = GoRouter(
-  initialLocation: '/',
+final _router = createAppRouter();
+
+GoRouter createAppRouter({String initialLocation = '/'}) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
     GoRoute(
       path: '/trains/:id',
       builder: (context, state) {
-        final id = state.pathParameters['id'] ?? '12301';
+        final id = state.pathParameters['id'] ?? '';
         return TrainDetailsScreen(trainNumber: id);
       },
     ),
   ],
+  errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(title: const Text('Page unavailable')),
+    body: Center(
+      child: FilledButton(
+        onPressed: () => context.go('/'),
+        child: const Text('Go to train search'),
+      ),
+    ),
+  ),
 );
 
 class SihEtaMobileApp extends StatelessWidget {
-  const SihEtaMobileApp({super.key});
+  final GoRouter? router;
+  const SihEtaMobileApp({super.key, this.router});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +44,7 @@ class SihEtaMobileApp extends StatelessWidget {
       title: 'SIH ETA Train Intelligence',
       theme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: router ?? _router,
     );
   }
 }

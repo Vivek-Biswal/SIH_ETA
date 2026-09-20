@@ -54,6 +54,7 @@ class TrainService:
         ]
 
         return TrainSearchResponse(
+            data_source=getattr(self._repo, "data_source", "unknown"),
             total=total,
             page=page,
             limit=limit,
@@ -88,6 +89,7 @@ class TrainService:
         route = self._build_route(train_number, journey)
 
         return TrainStatusResponse(
+            data_source=getattr(self._repo, "data_source", "unknown"),
             train_number=train["train_number"],
             train_name=train["train_name"],
             date=journey["start_date"] if journey else None,

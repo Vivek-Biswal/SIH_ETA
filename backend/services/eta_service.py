@@ -65,15 +65,18 @@ class ETAService:
             station_etas = self._parse_ml_predictions(ml_predictions)
             model_version = "ml-live"
             prediction_generated_at = None
+            prediction_method = "inference"
         else:
             # Fall back to stored predictions or schedule baseline
-            station_etas, model_version, prediction_generated_at = (
+            station_etas, model_version, prediction_generated_at, prediction_method = (
                 self._get_stored_or_baseline(journey, current_delay, schedule)
             )
 
         delay_factors = self._build_delay_factors(journey, current_delay)
 
         return ETAResponse(
+            data_source=getattr(self._train_repo, "data_source", "unknown"),
+            prediction_method=prediction_method,
             train_number=train["train_number"],
             train_name=train["train_name"],
             date=journey["start_date"] if journey else None,
@@ -116,11 +119,11 @@ class ETAService:
         journey: Optional[dict],
         current_delay: int,
         schedule: list[dict],
-    ) -> tuple[list[StationETA], str, Optional[str]]:
+    ) -> tuple[list[StationETA], str, Optional[str], str]:
         """
         Try stored predictions from DB; fall back to schedule baseline.
 
-        Returns (station_etas, model_version, prediction_generated_at).
+        Returns station ETAs, version, generated timestamp and actual method.
         """
         model_version = "baseline-v0"
         prediction_generated_at = None
@@ -128,11 +131,10 @@ class ETAService:
         if journey:
             raw_preds = self._eta_repo.get_predictions(journey["id"])
             if raw_preds:
-                return self._deduplicate_predictions(
-                    raw_preds, model_version
-                )
+                return (*self._deduplicate_predictions(raw_preds, model_version), "stored")
 
-        # Final fallback: schedule + uniform delay
+        # Legacy schedule-only output. Expose its method so clients do not
+        # mistake the unchanged scheduled time for a delay-adjusted prediction.
         station_etas = [
             StationETA(
                 station=stop.get("station"),
@@ -143,7 +145,7 @@ class ETAService:
             )
             for stop in schedule
         ]
-        return station_etas, model_version, None
+        return station_etas, model_version, None, "schedule_only"
 
     @staticmethod
     def _deduplicate_predictions(

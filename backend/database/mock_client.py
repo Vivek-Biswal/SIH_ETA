@@ -137,7 +137,7 @@ class MockQuery:
 
     def is_(self, field, value):
         if value == "null":
-            self._filters.append(("is_null", field))
+            self._filters.append(("is_null", field, None))
         return self
 
     def order(self, field, desc=False):
@@ -193,9 +193,12 @@ class MockTable:
 
 class MockSupabaseClient:
     def __init__(self):
+        # Match the joined station references returned by the real train query.
+        station_refs = {s["code"]: {"code": s["code"], "name": s["name"]} for s in MOCK_STATIONS}
         self._tables = {
             "stations": MOCK_STATIONS,
-            "trains": MOCK_TRAINS,
+            "trains": [dict(t, from_station_ref=station_refs.get(t["from_station"]),
+                            to_station_ref=station_refs.get(t["to_station"])) for t in MOCK_TRAINS],
             "schedules": _flatten_schedules(),
             "train_journeys": MOCK_JOURNEYS,
             "train_states": _flatten_train_states(),

@@ -16,6 +16,12 @@ class TrainRepository:
     def __init__(self):
         self._db = get_supabase_client()
 
+    @property
+    def data_source(self) -> str:
+        """Storage provenance, deliberately not a claim of live observations."""
+        from database.mock_client import MockSupabaseClient
+        return "demo" if isinstance(self._db, MockSupabaseClient) else "database"
+
     # ── Train search ─────────────────────────────────────────────────────
 
     def search_trains(

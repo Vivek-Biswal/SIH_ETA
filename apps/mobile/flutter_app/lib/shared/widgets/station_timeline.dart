@@ -1,183 +1,103 @@
 import 'package:flutter/material.dart';
+import '../../core/models/journey_view.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_typography.dart';
-
-class StationStop {
-  final String stationCode;
-  final String stationName;
-  final String scheduledTime;
-  final String? predictedTime;
-  final int? delayMinutes;
-  final bool isDeparted;
-  final bool isCurrent;
-  final String platform;
-
-  const StationStop({
-    required this.stationCode,
-    required this.stationName,
-    required this.scheduledTime,
-    this.predictedTime,
-    this.delayMinutes,
-    this.isDeparted = false,
-    this.isCurrent = false,
-    required this.platform,
-  });
-}
+import 'passenger_components.dart';
 
 class StationTimeline extends StatelessWidget {
-  final List<StationStop> stops;
+  final List<JourneyStop> stops;
+  const StationTimeline({super.key, required this.stops});
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < stops.length; i++)
+        _StopTile(entry: stops[i], last: i == stops.length - 1),
+    ],
+  );
+}
 
-  const StationTimeline({
-    super.key,
-    required this.stops,
-  });
-
+class _StopTile extends StatelessWidget {
+  final JourneyStop entry;
+  final bool last;
+  const _StopTile({required this.entry, required this.last});
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: stops.length,
-      itemBuilder: (context, index) {
-        final stop = stops[index];
-        final isLast = index == stops.length - 1;
-
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left track & node
-              SizedBox(
-                width: 32,
-                child: Column(
-                  children: [
-                    _buildNode(stop),
-                    if (!isLast)
-                      Expanded(
-                        child: Container(
-                          width: 2,
-                          color: stop.isDeparted
-                              ? AppColors.whisperBorder
-                              : ((stop.delayMinutes ?? 0) >= 15
-                                  ? AppColors.criticalRed
-                                  : ((stop.delayMinutes ?? 0) > 0
-                                      ? AppColors.warningAmber
-                                      : AppColors.whisperBorder)),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Right content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                stop.stationCode,
-                                style: AppTypography.dataMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: stop.isCurrent
-                                      ? AppColors.pureWhite
-                                      : (stop.isDeparted
-                                          ? AppColors.mutedSteel
-                                          : AppColors.pureWhite),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                stop.stationName,
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: stop.isCurrent
-                                      ? AppColors.pureWhite
-                                      : AppColors.mutedSteel,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'PF ${stop.platform}',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.mutedSteel,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            stop.predictedTime ?? stop.scheduledTime,
-                            style: AppTypography.dataMedium.copyWith(
-                              color: (stop.delayMinutes ?? 0) > 0
-                                  ? ((stop.delayMinutes ?? 0) >= 15
-                                      ? AppColors.criticalRed
-                                      : AppColors.warningAmber)
-                                  : AppColors.pureWhite,
-                            ),
-                          ),
-                          if ((stop.delayMinutes ?? 0) > 0)
-                            Text(
-                              stop.scheduledTime,
-                              style: AppTypography.dataSmall.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                color: AppColors.mutedSteel,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
+    final stop = entry.stop;
+    final current = entry.stage == StopStage.current;
+    final stage = switch (entry.stage) {
+      StopStage.passed => 'Passed',
+      StopStage.current => 'Last known station',
+      StopStage.upcoming => 'Upcoming',
+      StopStage.unknown => 'Progress unknown',
+    };
+    return Container(
+      padding: const EdgeInsets.only(bottom: 18, top: 14),
+      decoration: BoxDecoration(
+        border: last
+            ? null
+            : const Border(bottom: BorderSide(color: AppColors.whisperBorder)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4, right: 14),
+            child: Icon(
+              current
+                  ? Icons.radio_button_checked
+                  : entry.stage == StopStage.passed
+                  ? Icons.check_circle_outline
+                  : Icons.circle_outlined,
+              size: 18,
+              color: current ? AppColors.liveGreen : AppColors.mutedSteel,
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stop.station?.label ?? 'Station unavailable',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 5),
+                Text(
+                  stage,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: current ? AppColors.liveGreen : AppColors.mutedSteel,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      'Scheduled ${displayTime(stop.scheduledArrival ?? stop.scheduledDeparture)}',
+                    ),
+                    if (stop.actualArrival != null)
+                      Text('Arrived ${displayTime(stop.actualArrival)}'),
+                    if (stop.actualDeparture != null)
+                      Text('Departed ${displayTime(stop.actualDeparture)}'),
+                    if (entry.prediction?.predictedArrival != null &&
+                        entry.stage != StopStage.passed &&
+                        stop.actualArrival == null)
+                      Text(
+                        'ETA ${displayTime(entry.prediction!.predictedArrival)}',
+                        style: const TextStyle(color: AppColors.brandBlue),
+                      ),
+                    if (stop.platform != null && stop.platform!.isNotEmpty)
+                      Text('Platform ${stop.platform}'),
+                  ],
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
-  }
-
-  Widget _buildNode(StationStop stop) {
-    if (stop.isCurrent) {
-      return Container(
-        width: 14,
-        height: 14,
-        decoration: BoxDecoration(
-          color: AppColors.liveGreen,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.pureWhite, width: 2),
-        ),
-      );
-    } else if (stop.isDeparted) {
-      return Container(
-        width: 10,
-        height: 10,
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        decoration: BoxDecoration(
-          color: AppColors.mutedSteel.withValues(alpha: 0.4),
-          shape: BoxShape.circle,
-        ),
-      );
-    } else {
-      return Container(
-        width: 10,
-        height: 10,
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.mutedSteel, width: 2),
-        ),
-      );
-    }
   }
 }

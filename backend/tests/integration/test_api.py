@@ -14,6 +14,17 @@ from models.schemas.trains import (
     TrainStatusResponse,
     ETAResponse,
 )
+from services.providers.mock_network_provider import MockNetworkProvider
+from services.adapters.network_adapter import NetworkIntelligenceAdapter
+
+
+@pytest.fixture
+def mock_network_provider(monkeypatch):
+    """These compatibility tests exercise mock scenario contracts explicitly."""
+    provider = MockNetworkProvider()
+    monkeypatch.setattr(NetworkIntelligenceAdapter, "get_bottlenecks", lambda self: provider.get_bottlenecks())
+    monkeypatch.setattr(NetworkIntelligenceAdapter, "run_what_if", lambda self, data: provider.run_what_if(data))
+    monkeypatch.setattr(NetworkIntelligenceAdapter, "run_simulation", lambda self, data: provider.run_simulation(data))
 
 
 @pytest.fixture
@@ -90,7 +101,7 @@ async def test_propagation_endpoint(client):
 
 
 @pytest.mark.asyncio
-async def test_bottlenecks_endpoint(client):
+async def test_bottlenecks_endpoint(client, mock_network_provider):
     """GET /api/network/bottlenecks should return a list."""
     response = await client.get("/api/network/bottlenecks")
     assert response.status_code == 200
@@ -103,7 +114,7 @@ async def test_bottlenecks_endpoint(client):
 
 
 @pytest.mark.asyncio
-async def test_what_if_endpoint(client):
+async def test_what_if_endpoint(client, mock_network_provider):
     """POST /api/what-if should accept a scenario and return results."""
     payload = {"scenario_type": "speed_restriction", "parameters": {"speed": 30}}
     response = await client.post("/api/what-if", json=payload)
@@ -117,7 +128,7 @@ async def test_what_if_endpoint(client):
 
 
 @pytest.mark.asyncio
-async def test_simulation_endpoint(client):
+async def test_simulation_endpoint(client, mock_network_provider):
     """POST /api/simulation should accept and return a scenario."""
     payload = {"scenario_id": "sim_test", "parameters": {"trains": 10}}
     response = await client.post("/api/simulation", json=payload)

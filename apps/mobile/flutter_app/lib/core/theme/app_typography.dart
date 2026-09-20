@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'app_colors.dart';
 
 class AppTypography {
   AppTypography._();
 
   // Headings & UI (Fallback to clean sans if geist not packaged)
-  static TextStyle headlineLarge = GoogleFonts.interTight(
+  static TextStyle headlineLarge = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 28,
     fontWeight: FontWeight.w600,
     color: AppColors.pureWhite,
     letterSpacing: -0.5,
   );
 
-  static TextStyle headlineMedium = GoogleFonts.interTight(
+  static TextStyle headlineMedium = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.pureWhite,
     letterSpacing: -0.3,
   );
 
-  static TextStyle headlineSmall = GoogleFonts.interTight(
+  static TextStyle headlineSmall = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppColors.pureWhite,
     letterSpacing: -0.2,
   );
 
-  static TextStyle bodyLarge = GoogleFonts.interTight(
+  static TextStyle bodyLarge = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 15,
     fontWeight: FontWeight.w400,
     color: AppColors.pureWhite,
   );
 
-  static TextStyle bodyMedium = GoogleFonts.interTight(
+  static TextStyle bodyMedium = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 13,
     fontWeight: FontWeight.w400,
     color: AppColors.mutedSteel,
   );
 
-  static TextStyle labelSmall = GoogleFonts.interTight(
+  static TextStyle labelSmall = const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 11,
     fontWeight: FontWeight.w600,
     color: AppColors.mutedSteel,
@@ -47,26 +53,30 @@ class AppTypography {
   );
 
   // Tabular / Monospace (JetBrains Mono)
-  static TextStyle dataHero = GoogleFonts.jetBrainsMono(
+  static TextStyle dataHero = const TextStyle(
+    fontFamily: 'monospace',
     fontSize: 36,
     fontWeight: FontWeight.w700,
     color: AppColors.pureWhite,
     letterSpacing: -1.0,
   );
 
-  static TextStyle dataLarge = GoogleFonts.jetBrainsMono(
+  static TextStyle dataLarge = const TextStyle(
+    fontFamily: 'monospace',
     fontSize: 22,
     fontWeight: FontWeight.w600,
     color: AppColors.pureWhite,
   );
 
-  static TextStyle dataMedium = GoogleFonts.jetBrainsMono(
+  static TextStyle dataMedium = const TextStyle(
+    fontFamily: 'monospace',
     fontSize: 15,
     fontWeight: FontWeight.w500,
     color: AppColors.pureWhite,
   );
 
-  static TextStyle dataSmall = GoogleFonts.jetBrainsMono(
+  static TextStyle dataSmall = const TextStyle(
+    fontFamily: 'monospace',
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.mutedSteel,

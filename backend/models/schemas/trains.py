@@ -4,7 +4,7 @@ Pydantic schemas for Train-related API requests and responses.
 Matches the OpenAPI contract in shared/api_contracts/api-contract.yaml.
 """
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -51,6 +51,7 @@ class TrainSearchResponse(BaseModel):
     page: int
     limit: int
     trains: list[TrainSummary]
+    data_source: Literal["demo", "database", "unknown"] = "unknown"
 
 
 # ── Train Status Response ────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ class TrainStatusResponse(BaseModel):
     overall_delay_minutes: int = 0
     status: str = "not_started"
     route: list[StationRunningStatus] = []
+    data_source: Literal["demo", "database", "unknown"] = "unknown"
 
 
 # ── ETA Response ─────────────────────────────────────────────────────────────
@@ -123,3 +125,5 @@ class ETAResponse(BaseModel):
     confidence_score: float = 0.5
     remaining_stations: list[StationETA] = []
     delay_factors: list[DelayFactor] = []
+    data_source: Literal["demo", "database", "unknown"] = "unknown"
+    prediction_method: Literal["schedule_only", "stored", "inference", "unknown"] = "unknown"
