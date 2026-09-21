@@ -16,6 +16,7 @@ abstract class TrainRepository {
     String from,
     String to, {
     int page = 1,
+    DateTime? date,
   });
   Future<JourneyResult> getJourney(String trainNumber, {String? date});
 }
@@ -47,12 +48,14 @@ class ApiTrainRepository implements TrainRepository {
     String from,
     String to, {
     int page = 1,
+    DateTime? date,
   }) => _client.get(
     _url('trains/search', {
       'from_station': from.trim().toUpperCase(),
       'to_station': to.trim().toUpperCase(),
       'page': '$page',
       'limit': '20',
+      if (date != null) 'date': formatSearchDate(date),
     }),
     (json) => TrainSearchPage.fromJson(jsonObject(json)),
   );
@@ -98,6 +101,11 @@ class ApiTrainRepository implements TrainRepository {
     return JourneyResult(status, eta, DateTime.now());
   }
 }
+
+String formatSearchDate(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
 
 final trainRepositoryProvider = Provider<TrainRepository>((ref) {
   final repository = ApiTrainRepository();

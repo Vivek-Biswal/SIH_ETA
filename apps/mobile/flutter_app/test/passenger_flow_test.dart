@@ -36,7 +36,12 @@ class TestRepository implements TrainRepository {
   Future<ApiResult<List<Station>>> searchStations(String query) async =>
       ApiResult.success([Station.fromJson(station(query.toUpperCase()))]);
   @override
-  Future<ApiResult<TrainSearchPage>> searchTrains(String from, String to, {int page = 1}) async {
+  Future<ApiResult<TrainSearchPage>> searchTrains(
+    String from,
+    String to, {
+    int page = 1,
+    DateTime? date,
+  }) async {
     searchedFrom = from; searchedTo = to;
     return ApiResult.success(TrainSearchPage.fromJson(searchJson(empty: emptySearch)));
   }

@@ -34,6 +34,40 @@ void main() {
     expect(paths[1].queryParameters['from_station'], 'AAA');
   });
 
+  test('train search sends a selected date in YYYY-MM-DD format', () async {
+    late Uri requestedUri;
+    final client = ApiClient(client: MockClient((request) async {
+      requestedUri = request.url;
+      return http.Response(jsonEncode(searchJson()), 200);
+    }));
+    final repo = ApiTrainRepository(
+      client: client,
+      baseUrl: 'https://example.test/api/v1',
+    );
+    addTearDown(repo.close);
+
+    await repo.searchTrains('aaa', 'ccc', date: DateTime(2026, 1, 9));
+
+    expect(requestedUri.queryParameters['date'], '2026-01-09');
+  });
+
+  test('train search omits date when none is selected', () async {
+    late Uri requestedUri;
+    final client = ApiClient(client: MockClient((request) async {
+      requestedUri = request.url;
+      return http.Response(jsonEncode(searchJson()), 200);
+    }));
+    final repo = ApiTrainRepository(
+      client: client,
+      baseUrl: 'https://example.test/api/v1',
+    );
+    addTearDown(repo.close);
+
+    await repo.searchTrains('aaa', 'ccc');
+
+    expect(requestedUri.queryParameters.containsKey('date'), isFalse);
+  });
+
   test('route order, observed progress and unique predictions are merged', () {
     final status = TrainStatus.fromJson(statusJson());
     final entries = journeyStops(status, ETAModel.fromJson(etaJson(method: 'stored')));

@@ -96,7 +96,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     try {
       final result = await ref
           .read(trainRepositoryProvider)
-          .searchTrains(_from!.code, _to!.code, page: page);
+          .searchTrains(
+            _from!.code,
+            _to!.code,
+            page: page,
+            date: _travelDate,
+          );
       if (!mounted || request != _request) return;
       setState(() {
         _busy = false;
