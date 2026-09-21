@@ -19,7 +19,7 @@ class TestRepository implements TrainRepository {
   String? searchedTo;
   Completer<JourneyResult>? pending;
   @override
-  Future<JourneyResult> getJourney(String trainNumber) async {
+  Future<JourneyResult> getJourney(String trainNumber, {String? date}) async {
     calls++;
     lastNumber = trainNumber;
     if (pending != null) return pending!.future;
@@ -79,13 +79,14 @@ void main() {
     await revealTap(tester, find.byKey(const Key('find-train')));
     expect(repo.lastNumber, '12301');
     expect(find.text('Test Express'), findsOneWidget);
-    expect(find.text('Demo data'), findsOneWidget);
+    expect(find.text('Database records'), findsOneWidget);
     expect(find.text('ML PREDICTION'), findsNothing);
     expect(find.text('20:47'), findsNothing);
-    await tester.ensureVisible(find.text('Scheduled arrival'));
+    await tester.ensureVisible(find.text('Scheduled: 10:00'));
     await tester.pumpAndSettle();
-    expect(find.text('Scheduled arrival'), findsOneWidget);
-    expect(find.text('Schedule only · adjusted ETA unavailable'), findsOneWidget);
+    expect(find.text('Scheduled: 10:00'), findsOneWidget);
+    expect(find.text('Arrival difference unavailable'), findsOneWidget);
+    expect(find.text('Why this ETA?'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

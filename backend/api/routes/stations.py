@@ -6,6 +6,8 @@ No Supabase imports, no business logic, no SQL.
 """
 
 from fastapi import APIRouter, Query
+from starlette.concurrency import run_in_threadpool
+from services import railradar_passenger
 
 from api.controllers.station_controller import StationController
 
@@ -21,6 +23,8 @@ async def search_stations(
     ),
 ):
     """Search stations by name or code."""
+    if railradar_passenger.configured():
+        return await run_in_threadpool(railradar_passenger.lookup_stations, q)
     return await _controller.search_stations(q)
 
 

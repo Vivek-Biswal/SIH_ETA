@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/models/journey_view.dart';
 import '../../core/theme/app_colors.dart';
 import 'passenger_components.dart';
@@ -30,17 +31,21 @@ class _StopTile extends StatelessWidget {
       StopStage.unknown => 'Progress unknown',
     };
     return Container(
-      padding: const EdgeInsets.only(bottom: 18, top: 14),
+      padding: EdgeInsets.only(bottom: 18, top: 14),
       decoration: BoxDecoration(
         border: last
             ? null
-            : const Border(bottom: BorderSide(color: AppColors.whisperBorder)),
+            : Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 4, right: 14),
+            padding: EdgeInsets.only(top: 4, right: 14),
             child: Icon(
               current
                   ? Icons.radio_button_checked
@@ -48,7 +53,9 @@ class _StopTile extends StatelessWidget {
                   ? Icons.check_circle_outline
                   : Icons.circle_outlined,
               size: 18,
-              color: current ? AppColors.liveGreen : AppColors.mutedSteel,
+              color: current
+                  ? AppColors.liveGreen
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           Expanded(
@@ -57,20 +64,49 @@ class _StopTile extends StatelessWidget {
               children: [
                 Text(
                   stop.station?.label ?? 'Station unavailable',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
-                const SizedBox(height: 5),
+                SizedBox(height: 5),
                 Text(
                   stage,
                   style: TextStyle(
                     fontSize: 12,
-                    color: current ? AppColors.liveGreen : AppColors.mutedSteel,
+                    color: current
+                        ? AppColors.liveGreen
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 10),
+                if (stop.station != null)
+                  TextButton.icon(
+                    icon: const Icon(Icons.directions_outlined, size: 18),
+                    label: const Text('Directions'),
+                    onPressed: () async {
+                      final url = Uri.https('www.google.com', '/maps/dir/', {
+                        'api': '1',
+                        'destination':
+                            '${stop.station!.name} railway station ${stop.station!.code} India',
+                      });
+                      try {
+                        if (!await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        )) {
+                          throw StateError('unavailable');
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Could not open maps on this device.',
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                SizedBox(height: 10),
                 Wrap(
                   spacing: 16,
                   runSpacing: 8,
@@ -87,7 +123,7 @@ class _StopTile extends StatelessWidget {
                         stop.actualArrival == null)
                       Text(
                         'ETA ${displayTime(entry.prediction!.predictedArrival)}',
-                        style: const TextStyle(color: AppColors.brandBlue),
+                        style: TextStyle(color: AppColors.brandBlue),
                       ),
                     if (stop.platform != null && stop.platform!.isNotEmpty)
                       Text('Platform ${stop.platform}'),

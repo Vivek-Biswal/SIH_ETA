@@ -8,8 +8,10 @@ No Supabase imports, no business logic, no SQL.
 from typing import Optional
 
 from fastapi import APIRouter, Query
+from starlette.concurrency import run_in_threadpool
 
 from api.controllers.train_controller import TrainController
+from services import railradar_passenger
 
 router = APIRouter(prefix="/api/v1/trains", tags=["trains"])
 
@@ -32,6 +34,8 @@ async def search_trains(
     limit: int = Query(20, ge=1, le=100),
 ):
     """Search trains running between two stations."""
+    if railradar_passenger.configured():
+        return await run_in_threadpool(railradar_passenger.between, from_station, to_station, date, page, limit)
     return await _controller.search_trains(
         from_station, to_station, date, page, limit
     )
@@ -45,6 +49,8 @@ async def get_train_status(
     ),
 ):
     """Get the live running status of a train."""
+    if railradar_passenger.configured():
+        return railradar_passenger.status_response(await run_in_threadpool(railradar_passenger.fetch_live, train_number, date))
     return await _controller.get_train_status(train_number, date)
 
 
@@ -56,4 +62,6 @@ async def get_train_eta(
     ),
 ):
     """Get ML-predicted ETA for remaining stations on the train's route."""
+    if railradar_passenger.configured():
+        return railradar_passenger.eta_response(await run_in_threadpool(railradar_passenger.fetch_live, train_number, date))
     return await _controller.get_train_eta(train_number, date)

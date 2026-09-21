@@ -200,15 +200,6 @@ class ETAService:
                     )
                 )
 
-        if not factors:
-            factors.append(
-                DelayFactor(
-                    factor="historical_delay",
-                    contribution_minutes=current_delay,
-                    description="Based on current running delay (ML model not yet active)",
-                )
-            )
-
         return factors
 
     def get_delay_dna(self, train_id: str) -> dict:

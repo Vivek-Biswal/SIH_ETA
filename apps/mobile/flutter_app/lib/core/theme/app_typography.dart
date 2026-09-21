@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-
 class AppTypography {
   AppTypography._();
 
@@ -10,7 +8,6 @@ class AppTypography {
     fontFamily: 'Roboto',
     fontSize: 28,
     fontWeight: FontWeight.w600,
-    color: AppColors.pureWhite,
     letterSpacing: -0.5,
   );
 
@@ -18,7 +15,6 @@ class AppTypography {
     fontFamily: 'Roboto',
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: AppColors.pureWhite,
     letterSpacing: -0.3,
   );
 
@@ -26,7 +22,6 @@ class AppTypography {
     fontFamily: 'Roboto',
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppColors.pureWhite,
     letterSpacing: -0.2,
   );
 
@@ -34,21 +29,18 @@ class AppTypography {
     fontFamily: 'Roboto',
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    color: AppColors.pureWhite,
   );
 
   static TextStyle bodyMedium = const TextStyle(
     fontFamily: 'Roboto',
     fontSize: 13,
     fontWeight: FontWeight.w400,
-    color: AppColors.mutedSteel,
   );
 
   static TextStyle labelSmall = const TextStyle(
     fontFamily: 'Roboto',
     fontSize: 11,
     fontWeight: FontWeight.w600,
-    color: AppColors.mutedSteel,
     letterSpacing: 0.5,
   );
 
@@ -57,7 +49,6 @@ class AppTypography {
     fontFamily: 'monospace',
     fontSize: 36,
     fontWeight: FontWeight.w700,
-    color: AppColors.pureWhite,
     letterSpacing: -1.0,
   );
 
@@ -65,20 +56,17 @@ class AppTypography {
     fontFamily: 'monospace',
     fontSize: 22,
     fontWeight: FontWeight.w600,
-    color: AppColors.pureWhite,
   );
 
   static TextStyle dataMedium = const TextStyle(
     fontFamily: 'monospace',
     fontSize: 15,
     fontWeight: FontWeight.w500,
-    color: AppColors.pureWhite,
   );
 
   static TextStyle dataSmall = const TextStyle(
     fontFamily: 'monospace',
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    color: AppColors.mutedSteel,
   );
 }

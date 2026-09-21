@@ -100,6 +100,12 @@ class ApiClient {
         final source = decoded is Map
             ? decoded['data_source'] ?? decoded['data_state']
             : null;
+        if (source == 'demo' || source == 'mock') {
+          return ApiResult.error(
+            'Live data unavailable. The connected service returned demonstration records, which are not shown.',
+            status: ApiResultStatus.unavailable,
+          );
+        }
         return ApiResult.success(
           parse(decoded),
           dataState: parseDataState(source),

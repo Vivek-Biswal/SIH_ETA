@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import '../../core/services/preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/train_models.dart';
@@ -7,6 +10,7 @@ import '../../core/network/api_client.dart';
 import '../../core/services/train_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/eta_display.dart';
+import '../../shared/widgets/station_reminder.dart';
 import '../../shared/widgets/station_timeline.dart';
 import '../../shared/widgets/passenger_components.dart';
 
@@ -27,6 +31,8 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   bool _loading = true;
   bool _busy = false;
   int _request = 0;
+  String? _journeyDate;
+  int? _arrivalIndex;
 
   @override
   void initState() {
@@ -77,7 +83,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     try {
       final result = await ref
           .read(trainRepositoryProvider)
-          .getJourney(widget.trainNumber);
+          .getJourney(widget.trainNumber, date: _journeyDate);
       if (!mounted || request != _request) return;
       setState(() {
         final freshStatus = result.status.data;
@@ -87,6 +93,9 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
         if (freshEta != null && _status?.date != freshEta.date) _status = null;
         if (result.status.status == ApiResultStatus.notFound) _status = null;
         if (result.eta.status == ApiResultStatus.notFound) _eta = null;
+        if (freshStatus != null) {
+          ref.read(historyProvider.notifier).add(widget.trainNumber);
+        }
         _status = freshStatus ?? _status;
         _eta = freshEta ?? _eta;
         _statusError = result.status.isSuccess
@@ -116,7 +125,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   bool get _observationOld {
     final observed = DateTime.tryParse(_status?.observedAt ?? '');
     return observed != null &&
-        DateTime.now().difference(observed) > const Duration(minutes: 5);
+        DateTime.now().difference(observed) > Duration(minutes: 5);
   }
 
   @override
@@ -124,55 +133,123 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     final status = _status;
     final eta = _eta;
     final stops = status == null ? <JourneyStop>[] : journeyStops(status, eta);
-    final destination = stops.isEmpty ? null : stops.last;
+    final destination = stops.isEmpty
+        ? null
+        : stops[_arrivalIndex != null && _arrivalIndex! < stops.length
+              ? _arrivalIndex!
+              : stops.length - 1];
     final progressKnown = stops.any((s) => s.stage != StopStage.unknown);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Back to search',
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
         ),
         title: Text(
           'Train ${widget.trainNumber}',
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 18),
+          style: TextStyle(fontFamily: 'monospace', fontSize: 18),
         ),
         actions: [
           IconButton(
-            key: const Key('refresh-journey'),
+            tooltip: 'Journey start date',
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: _busy
+                ? null
+                : () async {
+                    final today = DateTime.now();
+                    final chosen = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          DateTime.tryParse(_journeyDate ?? '') ?? today,
+                      firstDate: today.subtract(const Duration(days: 365)),
+                      lastDate: today.add(const Duration(days: 120)),
+                      helpText: 'Date the train starts its journey',
+                    );
+                    if (chosen == null || !mounted) return;
+                    setState(() {
+                      _journeyDate = chosen.toIso8601String().split('T').first;
+                      _status = null;
+                      _eta = null;
+                      _loading = true;
+                    });
+                    _refresh();
+                  },
+          ),
+          IconButton(
+            tooltip: 'Share journey',
+            icon: const Icon(Icons.share_outlined),
+            onPressed: status == null
+                ? null
+                : () async {
+                    final summary =
+                        '${status.trainNumber} · ${status.trainName}\nJourney: ${status.date ?? "Unavailable"}\n${delayLabel(status.delay)}\nLast observation: ${displayTime(status.observedAt)}\nSource: ${sourceLabel(status.source)}';
+                    try {
+                      if (!kIsWeb &&
+                          defaultTargetPlatform == TargetPlatform.android) {
+                        await const MethodChannel(
+                          'sih_eta/travel',
+                        ).invokeMethod('share', {'text': summary});
+                      } else {
+                        await Clipboard.setData(ClipboardData(text: summary));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Journey summary copied. Paste it to share.',
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Sharing is unavailable on this device.',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+          ),
+          IconButton(
+            key: Key('refresh-journey'),
             tooltip: 'Refresh train',
             onPressed: _busy ? null : _refresh,
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh),
           ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _refresh,
               child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                physics: AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 32),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 640),
+                    constraints: BoxConstraints(maxWidth: 640),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (_busy)
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(bottom: 16),
                             child: LinearProgressIndicator(),
                           ),
                         if (status != null || eta != null) ...[
                           Text(
                             status?.trainName ?? eta!.trainName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -187,36 +264,42 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                               if (status != null && status.hasObservation)
                                 DataTag(status.status.replaceAll('_', ' ')),
                               if (_observationOld)
-                                const DataTag('Observation over 5 minutes old'),
+                                DataTag('Observation over 5 minutes old'),
                             ],
                           ),
                           if (eta != null &&
                               status != null &&
                               eta.source != status.source)
                             Padding(
-                              padding: const EdgeInsets.only(top: 8),
+                              padding: EdgeInsets.only(top: 8),
                               child: DataTag('ETA: ${sourceLabel(eta.source)}'),
                             ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Text(
                             'Last fetched: ${_fetchedAt == null ? 'Unavailable' : displayTime(_fetchedAt!.toUtc().toIso8601String())}',
-                            style: const TextStyle(
-                              color: AppColors.mutedSteel,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             'Last observation: ${displayTime(status?.observedAt)}',
-                            style: const TextStyle(
-                              color: AppColors.mutedSteel,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
                           if (eta?.generatedAt != null)
                             Text(
                               'Prediction generated: ${displayTime(eta!.generatedAt)}',
-                              style: const TextStyle(
-                                color: AppColors.mutedSteel,
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontSize: 12,
                               ),
                             ),
@@ -234,7 +317,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             onRetry: _busy ? null : _refresh,
                           ),
                         if (status != null) ...[
-                          const SectionTitle('Journey status'),
+                          SectionTitle('Journey status'),
                           PassengerCard(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,20 +325,22 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                                 Text(
                                   status.currentStation?.label ??
                                       'Current station unavailable',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(delayLabel(status.delay)),
                                 if (!status.hasObservation)
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsets.only(top: 8),
                                     child: Text(
                                       'No running observation is available for this journey.',
                                       style: TextStyle(
-                                        color: AppColors.mutedSteel,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -264,7 +349,32 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                           ),
                         ],
                         if (destination != null) ...[
-                          const SectionTitle('Arrival information'),
+                          SectionTitle('Arrival information'),
+                          DropdownButtonFormField<int>(
+                            value:
+                                _arrivalIndex != null &&
+                                    _arrivalIndex! < stops.length
+                                ? _arrivalIndex!
+                                : stops.length - 1,
+                            decoration: const InputDecoration(
+                              labelText: 'Arrival station',
+                            ),
+                            isExpanded: true,
+                            items: [
+                              for (var i = 0; i < stops.length; i++)
+                                DropdownMenuItem(
+                                  value: i,
+                                  child: Text(
+                                    stops[i].stop.station?.label ??
+                                        'Station unavailable',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
+                            onChanged: (value) =>
+                                setState(() => _arrivalIndex = value),
+                          ),
+                          const SizedBox(height: 12),
                           EtaDisplay(
                             destination:
                                 destination.stop.station?.label ??
@@ -274,19 +384,26 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                                 destination.prediction?.predictedArrival,
                             actualTime: destination.stop.actualArrival,
                             delayMinutes: status?.delay,
+                            predictedDelayMinutes:
+                                destination.prediction?.predictedDelayMinutes,
+                            evidence: eta,
                             method:
                                 eta?.methodLabel ?? 'Prediction unavailable',
                           ),
                         ],
                         if (status != null) ...[
-                          const SectionTitle('Stations on your route'),
+                          StationReminderButton(
+                            trainNumber: widget.trainNumber,
+                            stops: stops,
+                          ),
+                          SectionTitle('Stations on your route'),
                           if (!progressKnown && stops.isNotEmpty)
-                            const MessagePanel(
+                            MessagePanel(
                               message:
                                   'Current progress is unavailable. Stations are shown in scheduled route order.',
                             ),
                           if (stops.isEmpty)
-                            const MessagePanel(
+                            MessagePanel(
                               message:
                                   'No route has been supplied for this train.',
                             )
@@ -294,15 +411,15 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             PassengerCard(child: StationTimeline(stops: stops)),
                         ],
                         if (status == null && eta != null) ...[
-                          const SectionTitle('Station arrival information'),
-                          const MessagePanel(
+                          SectionTitle('Station arrival information'),
+                          MessagePanel(
                             message:
                                 'Route order and current progress are unavailable because status could not be loaded.',
                           ),
                           DataTag(eta.methodLabel),
                           for (final prediction in eta.remainingStations)
                             Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: EdgeInsets.only(top: 10),
                               child: PassengerCard(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +428,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                                       prediction.station?.label ??
                                           'Station unavailable',
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
                                       'Scheduled: ${displayTime(prediction.scheduledArrival)}',
                                     ),
@@ -325,29 +442,31 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             ),
                         ],
                         if (eta != null && eta.delayFactors.isNotEmpty) ...[
-                          const SectionTitle('Reported delay factors'),
+                          SectionTitle('Reported delay factors'),
                           for (final factor in eta.delayFactors)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
+                              padding: EdgeInsets.only(bottom: 10),
                               child: PassengerCard(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       factor.factor.replaceAll('_', ' '),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
                                       factor.description,
-                                      style: const TextStyle(
-                                        color: AppColors.mutedSteel,
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                         height: 1.4,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
                                       '${factor.contributionMinutes > 0 ? '+' : ''}${factor.contributionMinutes} min',
                                       style: TextStyle(
@@ -361,11 +480,13 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                               ),
                             ),
                         ],
-                        const SizedBox(height: 20),
-                        const Text(
+                        SizedBox(height: 20),
+                        Text(
                           'Timings reflect the latest available records. Refresh to check for updates.',
                           style: TextStyle(
-                            color: AppColors.mutedSteel,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                             height: 1.5,
                           ),

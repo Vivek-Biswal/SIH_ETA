@@ -4,7 +4,7 @@ Pydantic schemas for Station-related API responses.
 Matches the OpenAPI contract in shared/api_contracts/api-contract.yaml.
 """
 
-from typing import Optional
+from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -28,3 +28,4 @@ class StationSearchResponse(BaseModel):
     """List of stations matching a search query."""
 
     results: list[StationRef] = []
+    data_source: Literal["demo", "database", "unknown"] = "unknown"

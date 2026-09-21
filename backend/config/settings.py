@@ -26,6 +26,8 @@ class Settings(BaseSettings):
         description="Supabase service_role key — bypasses RLS. NEVER expose to clients.",
     )
 
+    RAILRADAR_API_KEY: str = Field(default="", repr=False)
+
     # ── Application ───────────────────────────────────────────────────────────
     APP_ENV: str = Field(default="development")
     APP_HOST: str = Field(default="0.0.0.0")

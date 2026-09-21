@@ -17,7 +17,7 @@ void main() {
       final path = request.url.path;
       return http.Response(jsonEncode(path.endsWith('/status') ? statusJson() :
         path.endsWith('/eta') ? etaJson(method: 'stored') :
-        path.endsWith('/stations/search') ? {'results': [station('AAA')]} : searchJson()), 200);
+        path.endsWith('/stations/search') ? {'data_source': 'database', 'results': [station('AAA')]} : searchJson()), 200);
     }));
     final repo = ApiTrainRepository(client: client, baseUrl: 'http://localhost/api/v1/');
     addTearDown(repo.close);

@@ -32,7 +32,7 @@ class StationService:
                 seen.add(row["code"])
                 results.append(StationRef(code=row["code"], name=row["name"]))
 
-        return StationSearchResponse(results=results)
+        return StationSearchResponse(results=results, data_source=getattr(self._repo, "data_source", "unknown"))
 
     def get_station(self, station_code: str) -> Optional[StationDetail]:
         """

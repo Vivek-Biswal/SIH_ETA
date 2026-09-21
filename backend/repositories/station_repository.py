@@ -13,6 +13,11 @@ class StationRepository:
     def __init__(self):
         self._db = get_supabase_client()
 
+    @property
+    def data_source(self) -> str:
+        from database.mock_client import MockSupabaseClient
+        return "demo" if isinstance(self._db, MockSupabaseClient) else "database"
+
     def search_by_code_prefix(self, query: str, limit: int = 20) -> list[dict]:
         """Search stations whose code starts with *query* (case-insensitive)."""
         response = (

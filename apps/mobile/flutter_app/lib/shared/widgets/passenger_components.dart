@@ -13,7 +13,7 @@ String displayTime(String? value) {
   // remain as supplied; no guessed journey date is attached to HH:mm.
   final zoned = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(value);
   final local = zoned
-      ? date.toUtc().add(const Duration(hours: 5, minutes: 30))
+      ? date.toUtc().add(Duration(hours: 5, minutes: 30))
       : date;
   return '${DateFormat('d MMM, HH:mm').format(local)}${zoned ? ' IST' : ''}';
 }
@@ -32,10 +32,10 @@ class PassengerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(18),
+    padding: EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: AppColors.surfaceZinc,
-      border: Border.all(color: AppColors.whisperBorder),
+      color: Theme.of(context).colorScheme.surface,
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(16),
     ),
     child: child,
@@ -54,7 +54,7 @@ class MessagePanel extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: EdgeInsets.symmetric(vertical: 8),
     child: PassengerCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,19 +63,17 @@ class MessagePanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, color: AppColors.warningAmber, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(message, style: const TextStyle(height: 1.5)),
-              ),
+              SizedBox(width: 10),
+              Expanded(child: Text(message, style: TextStyle(height: 1.5))),
             ],
           ),
           if (onRetry != null)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: EdgeInsets.only(top: 8),
               child: TextButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                icon: Icon(Icons.refresh),
+                label: Text('Retry'),
               ),
             ),
         ],
@@ -89,15 +87,18 @@ class DataTag extends StatelessWidget {
   const DataTag(this.label, {super.key});
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: AppColors.canvasBlack,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: AppColors.whisperBorder),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Text(
       label,
-      style: const TextStyle(color: AppColors.mutedSteel, fontSize: 12),
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontSize: 12,
+      ),
     ),
   );
 }
@@ -107,10 +108,10 @@ class SectionTitle extends StatelessWidget {
   const SectionTitle(this.title, {super.key});
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 24, bottom: 12),
+    padding: EdgeInsets.only(top: 24, bottom: 12),
     child: Text(
       title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
     ),
   );
 }

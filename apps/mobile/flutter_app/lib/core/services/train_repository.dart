@@ -17,7 +17,7 @@ abstract class TrainRepository {
     String to, {
     int page = 1,
   });
-  Future<JourneyResult> getJourney(String trainNumber);
+  Future<JourneyResult> getJourney(String trainNumber, {String? date});
 }
 
 class ApiTrainRepository implements TrainRepository {
@@ -36,7 +36,10 @@ class ApiTrainRepository implements TrainRepository {
   @override
   Future<ApiResult<List<Station>>> searchStations(String query) => _client.get(
     _url('stations/search', {'q': query.trim()}),
-    (json) => jsonList(jsonObject(json)['results'], Station.fromJson),
+    (json) {
+      if (jsonObject(json)['data_source'] != 'database') throw const FormatException('Station source unverified');
+      return jsonList(jsonObject(json)['results'], Station.fromJson);
+    },
   );
 
   @override
@@ -55,19 +58,31 @@ class ApiTrainRepository implements TrainRepository {
   );
 
   @override
-  Future<JourneyResult> getJourney(String trainNumber) async {
+  Future<JourneyResult> getJourney(String trainNumber, {String? date}) async {
     final id = Uri.encodeComponent(trainNumber.trim());
-    final status = await _client.get(
-      _url('trains/$id/status'),
+    var status = await _client.get(
+      _url('trains/$id/status', date == null ? null : {'date': date}),
       (json) => TrainStatus.fromJson(jsonObject(json)),
     );
-    final date = status.data?.date;
+    if (date != null &&
+        status.data?.date != null &&
+        status.data!.date != date) {
+      status = ApiResult.error(
+        'No status was returned for the selected journey date.',
+      );
+    }
+    final journeyDate = date ?? status.data?.date;
     var eta = await _client.get(
-      _url('trains/$id/eta', date == null ? null : {'date': date}),
+      _url(
+        'trains/$id/eta',
+        journeyDate == null ? null : {'date': journeyDate},
+      ),
       (json) => ETAModel.fromJson(jsonObject(json)),
     );
     if (eta.data != null &&
-        ((status.data != null && eta.data!.date != date) ||
+        ((journeyDate != null &&
+                eta.data!.date != null &&
+                eta.data!.date != journeyDate) ||
             eta.data!.trainNumber != trainNumber.trim())) {
       eta = ApiResult.error(
         'Prediction belongs to a different journey. Please refresh.',

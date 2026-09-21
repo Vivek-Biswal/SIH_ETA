@@ -32,6 +32,8 @@ List<T> jsonList<T>(dynamic value, T Function(Map<String, dynamic>) parse) {
 String sourceLabel(String? source) => switch (source) {
   'demo' => 'Demo data',
   'database' => 'Database records',
+  'live' => 'Live provider observation',
+  'cached' => 'Last available provider record',
   _ => 'Source unverified',
 };
 
@@ -56,6 +58,7 @@ class TrainSummary {
   final Station? destination;
   final String? departureTime;
   final String? arrivalTime;
+  final List<String>? daysOfRun;
   const TrainSummary({
     required this.trainNumber,
     required this.trainName,
@@ -63,6 +66,7 @@ class TrainSummary {
     this.destination,
     this.departureTime,
     this.arrivalTime,
+    this.daysOfRun,
   });
   factory TrainSummary.fromJson(Map<String, dynamic> json) => TrainSummary(
     trainNumber: requiredText(json, 'train_number'),
@@ -71,6 +75,7 @@ class TrainSummary {
     destination: stationFrom(json['to_station']),
     departureTime: json['departure_time'] as String?,
     arrivalTime: json['arrival_time'] as String?,
+    daysOfRun: (json['days_of_run'] as List?)?.cast<String>(),
   );
 }
 
@@ -189,9 +194,11 @@ class ETAModel {
         DelayFactor.fromJson,
       );
 
-  bool get hasPredictions => method == 'stored' || method == 'inference';
+  bool get hasPredictions =>
+      method == 'stored' || method == 'inference' || method == 'delay_adjusted';
   String get methodLabel => switch (method) {
     'schedule_only' => 'Schedule only · adjusted ETA unavailable',
+    'delay_adjusted' => 'Observed-delay estimate',
     'stored' => 'Stored prediction',
     'inference' => 'Arrival estimate',
     _ => 'Prediction method unverified',

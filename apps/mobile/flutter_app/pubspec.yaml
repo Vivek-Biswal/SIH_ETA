@@ -39,6 +39,8 @@ dependencies:
   go_router: ^17.0.0
   http: ^1.6.0
   intl: ^0.20.2
+  shared_preferences: 2.5.3
+  url_launcher: 6.3.1
 
 dev_dependencies:
   integration_test:
