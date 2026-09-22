@@ -24,67 +24,139 @@ class StationTimeline extends StatefulWidget {
 }
 
 class _StationTimelineState extends State<StationTimeline> {
-  bool _showAll = false;
+  final Set<int> _expandedGaps = {};
+
+  @override
+  void didUpdateWidget(StationTimeline oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new route must not inherit expansion state from unrelated sections.
+    final before = oldWidget.stops
+        .map((s) => '${s.stop.station?.code}:${isPassingEntry(s)}')
+        .join('|');
+    final after = widget.stops
+        .map((s) => '${s.stop.station?.code}:${isPassingEntry(s)}')
+        .join('|');
+    if (before != after) _expandedGaps.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final stops = [
-      for (var i = 0; i < widget.stops.length; i++)
-        if (_showAll ||
-            i == 0 ||
-            i == widget.stops.length - 1 ||
-            widget.stops[i].stage == StopStage.current ||
-            !isPassingEntry(widget.stops[i]))
-          widget.stops[i],
+    final stops = widget.stops;
+    final anchors = <int>[
+      for (var i = 0; i < stops.length; i++)
+        if (i == 0 || i == stops.length - 1 || !isPassingEntry(stops[i])) i,
     ];
-    final hidden = widget.stops.length - stops.length;
-    final current = stops.indexWhere((s) => s.stage == StopStage.current);
-    final height = 190.0 * MediaQuery.textScalerOf(context).scale(1);
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final height = 190.0 * scale;
+    final gapHeight = 64.0 * scale;
+    final rows = <Widget>[];
+    double offset = 0;
+    double? markerTop;
+    String? markerCode;
+
+    void addStation(int i, {VoidCallback? onGapTap}) {
+      if (stops[i].stage == StopStage.current) {
+        markerTop = offset + 14;
+        markerCode = stops[i].stop.station?.code;
+      }
+      rows.add(
+        SizedBox(
+          height: height,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: onGapTap,
+            child: _StopTile(entry: stops[i], last: i == stops.length - 1),
+          ),
+        ),
+      );
+      offset += height;
+    }
+
+    for (var a = 0; a < anchors.length; a++) {
+      final start = anchors[a];
+      final end = a + 1 < anchors.length ? anchors[a + 1] : start;
+      final count = end - start - 1;
+      void toggle() => setState(() {
+        if (!_expandedGaps.remove(start)) _expandedGaps.add(start);
+      });
+      addStation(start, onGapTap: count > 0 ? toggle : null);
+      if (count <= 0) continue;
+      final expanded = _expandedGaps.contains(start);
+      final from = stops[start].stop.station?.name ?? 'station';
+      final to = stops[end].stop.station?.name ?? 'next station';
+      rows.add(
+        SizedBox(
+          height: gapHeight,
+          child: Semantics(
+            button: true,
+            label:
+                '${expanded ? "Hide" : "Show"} $count intermediate stations between $from and $to',
+            child: InkWell(
+              key: ValueKey('station-gap-$start-$end'),
+              onTap: toggle,
+              borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  const SizedBox(width: 54),
+                  SizedBox(
+                    width: 30,
+                    height: gapHeight,
+                    child: CustomPaint(
+                      painter: _RailPainter(
+                        Theme.of(context).colorScheme.outlineVariant,
+                        dot: false,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${expanded ? "Hide" : "Show"} $count intermediate stations',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    expanded ? Icons.expand_less : Icons.expand_more,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      offset += gapHeight;
+      for (var i = start + 1; i < end; i++) {
+        if (expanded || stops[i].stage == StopStage.current) addStation(i);
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (hidden > 0 || _showAll)
-          TextButton.icon(
-            key: const Key('toggle-intermediate'),
-            onPressed: () => setState(() => _showAll = !_showAll),
-            icon: Icon(_showAll ? Icons.unfold_less : Icons.unfold_more),
-            label: Text(
-              _showAll
-                  ? 'Hide intermediate stations'
-                  : 'Show $hidden intermediate stations',
-            ),
-          ),
         Stack(
           children: [
-            Column(
-              children: [
-                for (var i = 0; i < stops.length; i++)
-                  SizedBox(
-                    height: height,
-                    child: _StopTile(
-                      entry: stops[i],
-                      last: i == stops.length - 1,
-                    ),
-                  ),
-              ],
-            ),
-            if (current >= 0)
+            Column(children: rows),
+            if (markerTop != null)
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeInOut,
                 left: 54,
-                top: current * height + 14,
-                child: Tooltip(
-                  message: 'Last reported station',
-                  child: CircleAvatar(
-                    key: ValueKey(
-                      'train-marker-${stops[current].stop.station?.code}',
-                    ),
-                    radius: 15,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Icon(
-                      Icons.train_rounded,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onPrimary,
+                top: markerTop,
+                child: IgnorePointer(
+                  child: Tooltip(
+                    message: 'Last reported station',
+                    child: CircleAvatar(
+                      key: ValueKey('train-marker-$markerCode'),
+                      radius: 15,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: Icon(
+                        Icons.train_rounded,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -92,7 +164,7 @@ class _StationTimelineState extends State<StationTimeline> {
           ],
         ),
         Text(
-          'The marker follows reported station updates. Intermediate entries have equal scheduled arrival and departure times.',
+          'Tap a gap to show its intermediate stations. The train marks the last reported station.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -257,7 +329,8 @@ class _StopTile extends StatelessWidget {
 
 class _RailPainter extends CustomPainter {
   final Color color;
-  _RailPainter(this.color);
+  final bool dot;
+  _RailPainter(this.color, {this.dot = true});
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -268,9 +341,12 @@ class _RailPainter extends CustomPainter {
     for (double y = 0; y < size.height; y += 12) {
       canvas.drawLine(Offset(5, y), Offset(25, y), paint);
     }
-    canvas.drawCircle(const Offset(15, 15), 4, Paint()..color = Colors.blue);
+    if (dot) {
+      canvas.drawCircle(const Offset(15, 15), 4, Paint()..color = Colors.blue);
+    }
   }
 
   @override
-  bool shouldRepaint(_RailPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_RailPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.dot != dot;
 }

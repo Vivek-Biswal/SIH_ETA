@@ -8,7 +8,6 @@ import '../../core/models/train_models.dart';
 import '../../core/services/preferences.dart';
 import '../explore/explore_screen.dart';
 import '../../core/services/train_repository.dart';
-import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/passenger_components.dart';
 
 final _stationSuggestions = StateProvider<List<Station>>(
@@ -27,237 +26,267 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _number = TextEditingController();
   final _form = GlobalKey<FormState>();
-  Station? _from;
-  Station? _to;
-  Station? _trackedStation;
-  TrainSearchPage? _results;
-  String? _error;
-  bool _busy = false;
-  bool _submitted = false;
-  int _request = 0;
-  String _sort = "departure";
+  Station? _from, _to, _trackedStation;
   DateTime? _travelDate;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
+  String? _error;
 
   @override
   void dispose() {
-    _request++;
-    WidgetsBinding.instance.removeObserver(this);
     _number.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _submitted) {
-      _search(page: _results?.page ?? 1);
-    }
-  }
-
-  void _openTrain() {
-    if (_form.currentState!.validate()) {
-      ref.read(historyProvider.notifier).add(_number.text.trim());
-      context.push(
-        Uri(
-          path: '/trains/${_number.text.trim()}',
-          queryParameters: _trackedStation == null
-              ? null
-              : {'station': _trackedStation!.code},
-        ).toString(),
-      );
-    }
-  }
+  Future<Station?> _choose(String title) => showDialog<Station>(
+    context: context,
+    builder: (_) => _StationPicker(title: title),
+  );
 
   Future<void> _pick(bool origin) async {
-    final station = await showDialog<Station>(
-      context: context,
-      builder: (_) => _StationPicker(
-        title: origin ? 'Origin station' : 'Destination station',
-      ),
+    final station = await _choose(
+      origin ? 'Origin station' : 'Destination station',
     );
     if (!mounted || station == null) return;
     setState(() {
-      _request++;
       if (origin) {
         _from = station;
       } else {
         _to = station;
       }
-      _results = null;
       _error = null;
-      _submitted = false;
     });
   }
 
-  Future<void> _search({int page = 1}) async {
-    if (_busy || _from == null || _to == null) return;
+  void _search() {
+    if (_from == null || _to == null) return;
     if (_from!.code == _to!.code) {
       setState(
         () => _error = 'Choose different origin and destination stations.',
       );
       return;
     }
-    final request = ++_request;
-    setState(() {
-      _busy = true;
-      _submitted = true;
-      _error = null;
-    });
-    try {
-      final result = await ref
-          .read(trainRepositoryProvider)
-          .searchTrains(_from!.code, _to!.code, page: page, date: _travelDate);
-      if (!mounted || request != _request) return;
-      setState(() {
-        _busy = false;
-        if (result.isSuccess) {
-          _results = result.data;
-        } else {
-          _error = result.errorMessage ?? 'Unable to load trains.';
-        }
-      });
-    } catch (_) {
-      if (mounted && request == _request) {
-        setState(() {
-          _busy = false;
-          _error = 'Unable to load trains. Please retry.';
-        });
-      }
-    }
+    FocusScope.of(context).unfocus();
+    context.push(
+      Uri(
+        path: '/search',
+        queryParameters: {
+          'from': _from!.code,
+          'to': _to!.code,
+          'fromName': _from!.name,
+          'toName': _to!.name,
+          if (_travelDate != null) 'date': formatSearchDate(_travelDate!),
+        },
+      ).toString(),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Row(
-        children: [
-          Icon(Icons.train_rounded, color: AppColors.brandBlue),
-          SizedBox(width: 10),
-          Expanded(child: Text('SIH ETA')),
-        ],
+  void _openTrain() {
+    if (!_form.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
+    ref.read(historyProvider.notifier).add(_number.text.trim());
+    context.push(
+      Uri(
+        path: '/trains/${_number.text.trim()}',
+        queryParameters: _trackedStation == null
+            ? null
+            : {'station': _trackedStation!.code},
+      ).toString(),
+    );
+  }
+
+  Widget _stationField({
+    required String keyName,
+    required String label,
+    required Station? station,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) => ListTile(
+    key: Key(keyName),
+    onTap: onTap,
+    contentPadding: EdgeInsets.zero,
+    leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+    title: Text(label, style: Theme.of(context).textTheme.labelMedium),
+    subtitle: Text(
+      station?.label ?? 'City or station · e.g., Delhi',
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: station == null ? FontWeight.normal : FontWeight.w600,
       ),
     ),
-    bottomNavigationBar: const AppNavigation(selected: 0),
-    body: RefreshIndicator(
-      onRefresh: () => _search(page: _results?.page ?? 1),
-      child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(20, 12, 20, 32),
+    trailing: const Icon(Icons.chevron_right, size: 20),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Icon(Icons.train_rounded, color: colors.primary),
+            const SizedBox(width: 10),
+            const Text('SIH ETA'),
+          ],
+        ),
+      ),
+      bottomNavigationBar: const AppNavigation(selected: 0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 640),
+            constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'YOUR JOURNEY, CLEARER',
-                  style: TextStyle(
-                    color: AppColors.brandBlue,
-                    fontSize: 11,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
+                const Text(
                   'Find your train',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'Check the latest available status, station timings and arrival information.',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
+                  'Plan a journey. Follow your train.',
+                  style: TextStyle(color: colors.onSurfaceVariant),
                 ),
-                SizedBox(height: 24),
-                SectionTitle('Find a route'),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    'Find trains starting and ending at your selected stations.',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 22),
                 PassengerCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      OutlinedButton.icon(
-                        key: Key('origin-picker'),
-                        onPressed: _busy ? null : () => _pick(true),
-                        icon: Icon(Icons.trip_origin),
-                        label: Text(
-                          _from?.label ?? 'Choose origin station',
-                          textAlign: TextAlign.center,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.alt_route,
+                            size: 20,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Find a route',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: 'Swap stations',
-                          icon: const Icon(Icons.swap_vert),
-                          onPressed: _busy
-                              ? null
-                              : () => setState(() {
-                                  final previous = _from;
-                                  _from = _to;
-                                  _to = previous;
-                                  _results = null;
-                                  _submitted = false;
-                                  _error = null;
-                                }),
-                        ),
+                      const SizedBox(height: 10),
+                      _stationField(
+                        keyName: 'origin-picker',
+                        label: 'From',
+                        station: _from,
+                        icon: Icons.trip_origin,
+                        onTap: () => _pick(true),
                       ),
-                      OutlinedButton.icon(
-                        key: Key('destination-picker'),
-                        onPressed: _busy ? null : () => _pick(false),
-                        icon: Icon(Icons.location_on_outlined),
-                        label: Text(
-                          _to?.label ?? 'Choose destination station',
-                          textAlign: TextAlign.center,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Divider(color: colors.outlineVariant),
+                          ),
+                          IconButton(
+                            tooltip: 'Swap stations',
+                            icon: const Icon(Icons.swap_vert),
+                            onPressed: () => setState(() {
+                              final previous = _from;
+                              _from = _to;
+                              _to = previous;
+                              _error = null;
+                            }),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 14),
+                      _stationField(
+                        keyName: 'destination-picker',
+                        label: 'To',
+                        station: _to,
+                        icon: Icons.location_on_outlined,
+                        onTap: () => _pick(false),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          TextButton.icon(
+                            key: const Key('travel-date'),
+                            icon: const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              _travelDate == null
+                                  ? 'Choose travel date'
+                                  : formatSearchDate(_travelDate!),
+                            ),
+                            onPressed: () async {
+                              final now = DateTime.now();
+                              final today = DateTime(
+                                now.year,
+                                now.month,
+                                now.day,
+                              );
+                              final selected = await showDatePicker(
+                                context: context,
+                                initialDate:
+                                    _travelDate != null &&
+                                        !_travelDate!.isBefore(today)
+                                    ? _travelDate
+                                    : today,
+                                firstDate: today,
+                                lastDate: today.add(const Duration(days: 120)),
+                              );
+                              if (mounted && selected != null) {
+                                setState(() => _travelDate = selected);
+                              }
+                            },
+                          ),
+                          if (_travelDate != null)
+                            IconButton(
+                              tooltip: 'Clear travel date',
+                              icon: const Icon(Icons.close, size: 18),
+                              onPressed: () =>
+                                  setState(() => _travelDate = null),
+                            ),
+                        ],
+                      ),
+                      if (_error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            _error!,
+                            style: TextStyle(color: colors.error),
+                          ),
+                        ),
                       FilledButton.icon(
-                        key: Key('search-trains'),
-                        onPressed: _busy || _from == null || _to == null
+                        key: const Key('search-trains'),
+                        onPressed: _from == null || _to == null
                             ? null
-                            : () => _search(),
-                        icon: Icon(Icons.search),
-                        label: Text(_busy ? 'Searching…' : 'Search trains'),
+                            : _search,
+                        icon: const Icon(Icons.search),
+                        label: const Text('Search trains'),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
                 PassengerCard(
                   child: Form(
                     key: _form,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
+                        const Text(
                           'Have a train number?',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(height: 14),
+                        const SizedBox(height: 14),
                         TextFormField(
-                          key: Key('train-number'),
+                          key: const Key('train-number'),
                           controller: _number,
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.search,
@@ -265,10 +294,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(5),
                           ],
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: '5-digit train number',
-                            hintText: 'Enter train number',
-                            prefixIcon: Icon(Icons.search),
+                            hintText: 'e.g., 12423',
+                            prefixIcon: Icon(Icons.train_outlined),
                           ),
                           validator: (value) =>
                               RegExp(r'^\d{5}$').hasMatch(value?.trim() ?? '')
@@ -276,31 +305,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               : 'Enter a valid 5-digit train number.',
                           onFieldSubmitted: (_) => _openTrain(),
                         ),
-                        SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            key: Key('find-train'),
-                            onPressed: _openTrain,
-                            icon: Icon(Icons.arrow_forward),
-                            label: Text('View train status'),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
+                        const SizedBox(height: 10),
+                        TextButton.icon(
                           key: const Key('track-station-picker'),
-                          icon: const Icon(Icons.location_on_outlined),
+                          icon: const Icon(
+                            Icons.location_on_outlined,
+                            size: 18,
+                          ),
                           label: Text(
                             _trackedStation?.label ??
-                                'Station to track (optional) · e.g., Delhi',
+                                'Station to track · e.g., Delhi (optional)',
                           ),
                           onPressed: () async {
-                            final station = await showDialog<Station>(
-                              context: context,
-                              builder: (_) => const _StationPicker(
-                                title: 'Station to track',
-                              ),
-                            );
+                            final station = await _choose('Station to track');
                             if (mounted && station != null) {
                               setState(() => _trackedStation = station);
                             }
@@ -312,11 +329,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 setState(() => _trackedStation = null),
                             child: const Text('Clear station'),
                           ),
+                        const SizedBox(height: 6),
+                        FilledButton.tonalIcon(
+                          key: const Key('find-train'),
+                          onPressed: _openTrain,
+                          icon: const Icon(Icons.arrow_forward),
+                          label: const Text('View train status'),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -334,219 +358,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ],
                 ),
                 if (ref.watch(historyProvider).isNotEmpty) ...[
-                  const SectionTitle('Recently opened'),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Recently opened',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     children: [
                       for (final n in ref.watch(historyProvider))
                         ActionChip(
-                          label: Text(n),
                           avatar: const Icon(Icons.history, size: 16),
+                          label: Text(n),
                           onPressed: () => context.push('/trains/$n'),
-                        ),
-                    ],
-                  ),
-                ],
-                if (_busy)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: LinearProgressIndicator(),
-                  ),
-                if (_error != null)
-                  MessagePanel(
-                    message:
-                        '${_error!}${_results == null ? '' : ' Showing previous results; they may be out of date.'}',
-                    onRetry: _busy
-                        ? null
-                        : () => _search(page: _results?.page ?? 1),
-                  ),
-                if (_results != null) ...[
-                  SectionTitle('Train services'),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      DataTag(sourceLabel(_results!.source)),
-                      DataTag(
-                        '${_results!.total} results · page ${_results!.page}',
-                      ),
-                      DataTag('Scheduled services'),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  if (_results!.trains.isEmpty)
-                    MessagePanel(
-                      message:
-                          'No trains match these endpoints. Try another origin or destination.',
-                      icon: Icons.search_off,
-                    ),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text(
-                      _travelDate == null
-                          ? 'All running days'
-                          : 'Starts ${_travelDate!.toIso8601String().split('T').first}',
-                    ),
-                    onPressed: () async {
-                      final today = DateTime.now();
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: _travelDate ?? today,
-                        firstDate: today,
-                        lastDate: today.add(const Duration(days: 120)),
-                        helpText: 'Filter by scheduled origin running day',
-                      );
-                      if (date != null && mounted) {
-                        setState(() => _travelDate = date);
-                      }
-                    },
-                  ),
-                  if (_travelDate != null)
-                    TextButton(
-                      onPressed: () => setState(() => _travelDate = null),
-                      child: const Text('Clear running-day filter'),
-                    ),
-                  if (_travelDate != null)
-                    const Text(
-                      'Based on published running days, not a confirmation of operation. Services with unknown running days remain visible.',
-                    ),
-                  DropdownButton<String>(
-                    value: _sort,
-                    isExpanded: true,
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'departure',
-                        child: Text('Sort this page: departure time'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'arrival',
-                        child: Text('Sort this page: arrival time'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'name',
-                        child: Text('Sort this page: train name'),
-                      ),
-                    ],
-                    onChanged: (value) => setState(() => _sort = value!),
-                  ),
-                  for (final train
-                      in ([
-                        ..._results!.trains.where(
-                          (t) =>
-                              _travelDate == null ||
-                              t.daysOfRun == null ||
-                              t.daysOfRun!.isEmpty ||
-                              t.daysOfRun!.any(
-                                (day) =>
-                                    day.toLowerCase() == "daily" ||
-                                    day.toLowerCase().startsWith(
-                                      [
-                                        "mon",
-                                        "tue",
-                                        "wed",
-                                        "thu",
-                                        "fri",
-                                        "sat",
-                                        "sun",
-                                      ][_travelDate!.weekday - 1],
-                                    ),
-                              ),
-                        ),
-                      ]..sort(
-                        (a, b) =>
-                            (_sort == 'name'
-                                    ? a.trainName
-                                    : _sort == 'arrival'
-                                    ? a.arrivalTime ?? 'ZZ'
-                                    : a.departureTime ?? 'ZZ')
-                                .compareTo(
-                                  _sort == 'name'
-                                      ? b.trainName
-                                      : _sort == 'arrival'
-                                      ? b.arrivalTime ?? 'ZZ'
-                                      : b.departureTime ?? 'ZZ',
-                                ),
-                      )))
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () =>
-                            context.push('/trains/${train.trainNumber}'),
-                        child: PassengerCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                train.trainNumber,
-                                style: TextStyle(
-                                  color: AppColors.brandBlue,
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                train.daysOfRun?.join(' · ') ??
-                                    'Running days unavailable',
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                              Text(
-                                train.trainName,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${train.origin?.label ?? 'Origin unavailable'} → ${train.destination?.label ?? 'Destination unavailable'}',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  height: 1.4,
-                                ),
-                              ),
-                              SizedBox(height: 12),
-                              Wrap(
-                                spacing: 16,
-                                runSpacing: 8,
-                                children: [
-                                  Text(
-                                    'Departs ${displayTime(train.departureTime)}',
-                                  ),
-                                  Text(
-                                    'Arrives ${displayTime(train.arrivalTime)}',
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Text(
-                                'View status & arrival information →',
-                                style: TextStyle(color: AppColors.brandBlue),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  Wrap(
-                    spacing: 12,
-                    children: [
-                      if (_results!.page > 1)
-                        OutlinedButton(
-                          onPressed: _busy
-                              ? null
-                              : () => _search(page: _results!.page - 1),
-                          child: Text('Previous page'),
-                        ),
-                      if (_results!.hasNext)
-                        OutlinedButton(
-                          onPressed: _busy
-                              ? null
-                              : () => _search(page: _results!.page + 1),
-                          child: Text('Next page'),
                         ),
                     ],
                   ),
@@ -556,8 +381,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _StationPicker extends ConsumerStatefulWidget {

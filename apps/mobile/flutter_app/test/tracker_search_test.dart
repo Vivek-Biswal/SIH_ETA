@@ -44,7 +44,7 @@ void main() {
   });
 
   testWidgets(
-    'intermediate stations expand and collapse; marker follows updates',
+    'only the tapped gap expands and the current marker stays visible',
     (tester) async {
       Future<void> render(String current) => tester.pumpWidget(
         MaterialApp(
@@ -52,17 +52,19 @@ void main() {
             body: SingleChildScrollView(
               child: StationTimeline(
                 stops: [
-                  entry('A', d: '10:05'),
-                  entry('B'),
                   entry(
-                    'C',
-                    stage: current == 'C'
+                    'A',
+                    d: '10:05',
+                    stage: current == 'A'
                         ? StopStage.current
                         : StopStage.passed,
                   ),
+                  entry('B'),
+                  entry('C', d: '10:05'),
+                  entry('D'),
                   entry(
-                    'D',
-                    stage: current == 'D'
+                    'E',
+                    stage: current == 'E'
                         ? StopStage.current
                         : StopStage.upcoming,
                   ),
@@ -72,19 +74,26 @@ void main() {
           ),
         ),
       );
-      await render('C');
+      await render('A');
       expect(find.text('B'), findsNothing);
-      expect(find.byKey(const ValueKey('train-marker-C')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('toggle-intermediate')));
+      expect(find.text('D'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('station-gap-0-2')));
       await tester.pumpAndSettle();
       expect(find.text('B'), findsNWidgets(2));
-      await tester.tap(find.byKey(const Key('toggle-intermediate')));
+      expect(find.text('D'), findsNothing);
+      await tester.ensureVisible(find.byKey(const ValueKey('station-gap-2-4')));
+      await tester.tap(find.byKey(const ValueKey('station-gap-2-4')));
+      await tester.pumpAndSettle();
+      expect(find.text('D'), findsNWidgets(2));
+      await tester.ensureVisible(find.byKey(const ValueKey('station-gap-0-2')));
+      await tester.tap(find.byKey(const ValueKey('station-gap-0-2')));
       await tester.pumpAndSettle();
       expect(find.text('B'), findsNothing);
-      await render('D');
+      expect(find.text('D'), findsNWidgets(2));
+      await render('E');
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('train-marker-D')), findsOneWidget);
-      expect(find.byKey(const ValueKey('train-marker-C')), findsNothing);
+      expect(find.byKey(const ValueKey('train-marker-E')), findsOneWidget);
+      expect(find.byKey(const ValueKey('train-marker-A')), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

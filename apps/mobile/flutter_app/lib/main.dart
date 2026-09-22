@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'features/explore/explore_screen.dart';
 import 'features/explore/directory_screen.dart';
 import 'features/home/home_screen.dart';
+import 'features/home/train_search_results_screen.dart';
 import 'features/train_details/train_details_screen.dart';
 
 Future<void> main() async {
@@ -42,6 +43,19 @@ GoRouter createAppRouter({String initialLocation = '/'}) => GoRouter(
       builder: (context, state) => const NetworkSpace(),
     ),
     GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) {
+        final query = state.uri.queryParameters;
+        return TrainSearchResultsScreen(
+          from: query['from'] ?? '',
+          to: query['to'] ?? '',
+          fromName: query['fromName'] ?? '',
+          toName: query['toName'] ?? '',
+          date: DateTime.tryParse(query['date'] ?? ''),
+        );
+      },
+    ),
     GoRoute(
       path: '/trains/:id',
       builder: (context, state) {
