@@ -127,7 +127,7 @@ void main() {
     expect(find.text('Test Express'), findsOneWidget);
     expect(find.textContaining('ETA service unavailable'), findsOneWidget);
     expect(find.text('Stations on your route'), findsOneWidget);
-    expect(find.text('Last known station'), findsOneWidget);
+    expect(find.text('Last reported station'), findsOneWidget);
   });
 
   testWidgets('station picker uses selected endpoints and displays empty results', (tester) async {

@@ -32,10 +32,11 @@ List<JourneyStop> journeyStops(TrainStatus status, ETAModel? eta) {
                 codes[status.route[i].station?.code] == 1
             ? uniquePrediction(eta, status.route[i].station?.code)
             : null,
-        status.route[i].hasDeparted || (currentIndex >= 0 && i < currentIndex)
-            ? StopStage.passed
-            : i == currentIndex
+        i == currentIndex
             ? StopStage.current
+            : status.route[i].hasDeparted ||
+                  (currentIndex >= 0 && i < currentIndex)
+            ? StopStage.passed
             : hasProgress &&
                   i >
                       (currentIndex > lastDeparted

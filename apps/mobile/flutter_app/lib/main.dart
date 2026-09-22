@@ -46,7 +46,10 @@ GoRouter createAppRouter({String initialLocation = '/'}) => GoRouter(
       path: '/trains/:id',
       builder: (context, state) {
         final id = state.pathParameters['id'] ?? '';
-        return TrainDetailsScreen(trainNumber: id);
+        return TrainDetailsScreen(
+          trainNumber: id,
+          stationCode: state.uri.queryParameters['station'],
+        );
       },
     ),
   ],

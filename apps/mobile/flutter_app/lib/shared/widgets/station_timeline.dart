@@ -1,97 +1,225 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/models/journey_view.dart';
-import '../../core/theme/app_colors.dart';
 import 'passenger_components.dart';
 
-class StationTimeline extends StatelessWidget {
+bool isPassingEntry(JourneyStop entry) {
+  final a = entry.stop.scheduledArrival;
+  final d = entry.stop.scheduledDeparture;
+  if (a == null || d == null) return false;
+  final arrival = DateTime.tryParse(a);
+  final departure = DateTime.tryParse(d);
+  if (arrival != null && departure != null) return arrival == departure;
+  final time = RegExp(r'^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$');
+  return time.hasMatch(a) &&
+      time.hasMatch(d) &&
+      (a.length == 5 ? '$a:00' : a) == (d.length == 5 ? '$d:00' : d);
+}
+
+class StationTimeline extends StatefulWidget {
   final List<JourneyStop> stops;
   const StationTimeline({super.key, required this.stops});
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      for (var i = 0; i < stops.length; i++)
-        _StopTile(entry: stops[i], last: i == stops.length - 1),
-    ],
-  );
+  State<StationTimeline> createState() => _StationTimelineState();
+}
+
+class _StationTimelineState extends State<StationTimeline> {
+  bool _showAll = false;
+  @override
+  Widget build(BuildContext context) {
+    final stops = [
+      for (var i = 0; i < widget.stops.length; i++)
+        if (_showAll ||
+            i == 0 ||
+            i == widget.stops.length - 1 ||
+            widget.stops[i].stage == StopStage.current ||
+            !isPassingEntry(widget.stops[i]))
+          widget.stops[i],
+    ];
+    final hidden = widget.stops.length - stops.length;
+    final current = stops.indexWhere((s) => s.stage == StopStage.current);
+    final height = 190.0 * MediaQuery.textScalerOf(context).scale(1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (hidden > 0 || _showAll)
+          TextButton.icon(
+            key: const Key('toggle-intermediate'),
+            onPressed: () => setState(() => _showAll = !_showAll),
+            icon: Icon(_showAll ? Icons.unfold_less : Icons.unfold_more),
+            label: Text(
+              _showAll
+                  ? 'Hide intermediate stations'
+                  : 'Show $hidden intermediate stations',
+            ),
+          ),
+        Stack(
+          children: [
+            Column(
+              children: [
+                for (var i = 0; i < stops.length; i++)
+                  SizedBox(
+                    height: height,
+                    child: _StopTile(
+                      entry: stops[i],
+                      last: i == stops.length - 1,
+                    ),
+                  ),
+              ],
+            ),
+            if (current >= 0)
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+                left: 54,
+                top: current * height + 14,
+                child: Tooltip(
+                  message: 'Last reported station',
+                  child: CircleAvatar(
+                    key: ValueKey(
+                      'train-marker-${stops[current].stop.station?.code}',
+                    ),
+                    radius: 15,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: Icon(
+                      Icons.train_rounded,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        Text(
+          'The marker follows reported station updates. Intermediate entries have equal scheduled arrival and departure times.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
 }
 
 class _StopTile extends StatelessWidget {
   final JourneyStop entry;
   final bool last;
   const _StopTile({required this.entry, required this.last});
+
+  Widget _time(
+    BuildContext context,
+    String label,
+    String? scheduled,
+    String? actual, {
+    bool predicted = false,
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
+      Text(
+        scheduled == null ? '—' : displayTime(scheduled),
+        style: const TextStyle(fontSize: 11),
+      ),
+      if (actual != null) ...[
+        const SizedBox(height: 6),
+        Text(
+          predicted ? 'ETA' : 'Actual',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        Text(
+          displayTime(actual),
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ],
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final stop = entry.stop;
+    final colors = Theme.of(context).colorScheme;
     final current = entry.stage == StopStage.current;
-    final stage = switch (entry.stage) {
-      StopStage.passed => 'Passed',
-      StopStage.current => 'Last known station',
-      StopStage.upcoming => 'Upcoming',
-      StopStage.unknown => 'Progress unknown',
-    };
-    return Container(
-      padding: EdgeInsets.only(bottom: 18, top: 14),
-      decoration: BoxDecoration(
-        border: last
-            ? null
-            : Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 4, right: 14),
-            child: Icon(
-              current
-                  ? Icons.radio_button_checked
-                  : entry.stage == StopStage.passed
-                  ? Icons.check_circle_outline
-                  : Icons.circle_outlined,
-              size: 18,
-              color: current
-                  ? AppColors.liveGreen
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+    final predicted =
+        stop.actualArrival == null && entry.stage != StopStage.passed
+        ? entry.prediction?.predictedArrival
+        : null;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: 54,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, right: 4),
+            child: _time(
+              context,
+              'Arrival',
+              stop.scheduledArrival,
+              stop.actualArrival ?? predicted,
+              predicted: predicted != null,
             ),
           ),
-          Expanded(
+        ),
+        SizedBox(
+          width: 30,
+          child: CustomPaint(painter: _RailPainter(colors.outlineVariant)),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, right: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  stop.station?.label ?? 'Station unavailable',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  stage,
+                  stop.station?.name ?? 'Station unavailable',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12,
-                    color: current
-                        ? AppColors.liveGreen
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: current ? colors.primary : colors.onSurface,
                   ),
                 ),
+                const SizedBox(height: 5),
+                Text(
+                  [
+                    stop.station?.code,
+                    if (stop.platform?.isNotEmpty == true)
+                      'PF ${stop.platform}',
+                  ].whereType<String>().join(' · '),
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                if (current)
+                  Text(
+                    stop.hasDeparted
+                        ? 'Last reported departure'
+                        : 'Last reported station',
+                    style: TextStyle(fontSize: 10, color: colors.primary),
+                  ),
                 if (stop.station != null)
-                  TextButton.icon(
+                  IconButton(
+                    tooltip: 'Directions to ${stop.station!.name}',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.directions_outlined, size: 18),
-                    label: const Text('Directions'),
                     onPressed: () async {
                       final url = Uri.https('www.google.com', '/maps/dir/', {
                         'api': '1',
                         'destination':
-                            '${stop.station!.name} railway station ${stop.station!.code} India',
+                            '${stop.station!.label} railway station India',
                       });
                       try {
                         if (!await launchUrl(
                           url,
                           mode: LaunchMode.externalApplication,
                         )) {
-                          throw StateError('unavailable');
+                          throw StateError('Unavailable');
                         }
                       } catch (_) {
                         if (context.mounted) {
@@ -106,34 +234,43 @@ class _StopTile extends StatelessWidget {
                       }
                     },
                   ),
-                SizedBox(height: 10),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 8,
-                  children: [
-                    Text(
-                      'Scheduled ${displayTime(stop.scheduledArrival ?? stop.scheduledDeparture)}',
-                    ),
-                    if (stop.actualArrival != null)
-                      Text('Arrived ${displayTime(stop.actualArrival)}'),
-                    if (stop.actualDeparture != null)
-                      Text('Departed ${displayTime(stop.actualDeparture)}'),
-                    if (entry.prediction?.predictedArrival != null &&
-                        entry.stage != StopStage.passed &&
-                        stop.actualArrival == null)
-                      Text(
-                        'ETA ${displayTime(entry.prediction!.predictedArrival)}',
-                        style: TextStyle(color: AppColors.brandBlue),
-                      ),
-                    if (stop.platform != null && stop.platform!.isNotEmpty)
-                      Text('Platform ${stop.platform}'),
-                  ],
-                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        SizedBox(
+          width: 54,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: _time(
+              context,
+              'Departs',
+              stop.scheduledDeparture,
+              stop.actualDeparture,
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
+
+class _RailPainter extends CustomPainter {
+  final Color color;
+  _RailPainter(this.color);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2;
+    canvas.drawLine(const Offset(9, 0), Offset(9, size.height), paint);
+    canvas.drawLine(const Offset(21, 0), Offset(21, size.height), paint);
+    for (double y = 0; y < size.height; y += 12) {
+      canvas.drawLine(Offset(5, y), Offset(25, y), paint);
+    }
+    canvas.drawCircle(const Offset(15, 15), 4, Paint()..color = Colors.blue);
+  }
+
+  @override
+  bool shouldRepaint(_RailPainter oldDelegate) => oldDelegate.color != color;
 }

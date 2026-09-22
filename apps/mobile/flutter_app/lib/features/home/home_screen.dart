@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart' show StateProvider;
 import 'package:go_router/go_router.dart';
 import '../../core/models/train_models.dart';
 import '../../core/services/preferences.dart';
@@ -9,6 +10,16 @@ import '../explore/explore_screen.dart';
 import '../../core/services/train_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/passenger_components.dart';
+
+final _stationSuggestions = StateProvider<List<Station>>(
+  (ref) => const [
+    Station(code: 'NDLS', name: 'New Delhi'),
+    Station(code: 'CSMT', name: 'Chhatrapati Shivaji Maharaj Terminus'),
+    Station(code: 'HWH', name: 'Howrah Junction'),
+    Station(code: 'MAS', name: 'MGR Chennai Central'),
+  ],
+);
+final _stationSearchCache = Provider((ref) => <String, List<Station>>{});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   final _form = GlobalKey<FormState>();
   Station? _from;
   Station? _to;
+  Station? _trackedStation;
   TrainSearchPage? _results;
   String? _error;
   bool _busy = false;
@@ -54,7 +66,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _openTrain() {
     if (_form.currentState!.validate()) {
       ref.read(historyProvider.notifier).add(_number.text.trim());
-      context.push('/trains/${_number.text.trim()}');
+      context.push(
+        Uri(
+          path: '/trains/${_number.text.trim()}',
+          queryParameters: _trackedStation == null
+              ? null
+              : {'station': _trackedStation!.code},
+        ).toString(),
+      );
     }
   }
 
@@ -96,12 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     try {
       final result = await ref
           .read(trainRepositoryProvider)
-          .searchTrains(
-            _from!.code,
-            _to!.code,
-            page: page,
-            date: _travelDate,
-          );
+          .searchTrains(_from!.code, _to!.code, page: page, date: _travelDate);
       if (!mounted || request != _request) return;
       setState(() {
         _busy = false;
@@ -166,85 +180,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                 ),
                 SizedBox(height: 24),
-                PassengerCard(
-                  child: Form(
-                    key: _form,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Have a train number?',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 14),
-                        TextFormField(
-                          key: Key('train-number'),
-                          controller: _number,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.search,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(5),
-                          ],
-                          decoration: InputDecoration(
-                            labelText: '5-digit train number',
-                            hintText: 'Enter train number',
-                            prefixIcon: Icon(Icons.search),
-                          ),
-                          validator: (value) =>
-                              RegExp(r'^\d{5}$').hasMatch(value?.trim() ?? '')
-                              ? null
-                              : 'Enter a valid 5-digit train number.',
-                          onFieldSubmitted: (_) => _openTrain(),
-                        ),
-                        SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            key: Key('find-train'),
-                            onPressed: _openTrain,
-                            icon: Icon(Icons.arrow_forward),
-                            label: Text('View train status'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      avatar: const Icon(Icons.manage_search, size: 18),
-                      label: const Text('Search train name'),
-                      onPressed: () => context.push('/directory'),
-                    ),
-                    ActionChip(
-                      avatar: const Icon(Icons.departure_board, size: 18),
-                      label: const Text('Station board'),
-                      onPressed: () => context.push('/board'),
-                    ),
-                  ],
-                ),
-                if (ref.watch(historyProvider).isNotEmpty) ...[
-                  const SectionTitle('Recently opened'),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final n in ref.watch(historyProvider))
-                        ActionChip(
-                          label: Text(n),
-                          avatar: const Icon(Icons.history, size: 16),
-                          onPressed: () => context.push('/trains/$n'),
-                        ),
-                    ],
-                  ),
-                ],
                 SectionTitle('Find a route'),
                 Padding(
                   padding: EdgeInsets.only(bottom: 12),
@@ -307,6 +242,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                   ),
                 ),
+                PassengerCard(
+                  child: Form(
+                    key: _form,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Have a train number?',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 14),
+                        TextFormField(
+                          key: Key('train-number'),
+                          controller: _number,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.search,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(5),
+                          ],
+                          decoration: InputDecoration(
+                            labelText: '5-digit train number',
+                            hintText: 'Enter train number',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                          validator: (value) =>
+                              RegExp(r'^\d{5}$').hasMatch(value?.trim() ?? '')
+                              ? null
+                              : 'Enter a valid 5-digit train number.',
+                          onFieldSubmitted: (_) => _openTrain(),
+                        ),
+                        SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            key: Key('find-train'),
+                            onPressed: _openTrain,
+                            icon: Icon(Icons.arrow_forward),
+                            label: Text('View train status'),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          key: const Key('track-station-picker'),
+                          icon: const Icon(Icons.location_on_outlined),
+                          label: Text(
+                            _trackedStation?.label ??
+                                'Station to track (optional) · e.g., Delhi',
+                          ),
+                          onPressed: () async {
+                            final station = await showDialog<Station>(
+                              context: context,
+                              builder: (_) => const _StationPicker(
+                                title: 'Station to track',
+                              ),
+                            );
+                            if (mounted && station != null) {
+                              setState(() => _trackedStation = station);
+                            }
+                          },
+                        ),
+                        if (_trackedStation != null)
+                          TextButton(
+                            onPressed: () =>
+                                setState(() => _trackedStation = null),
+                            child: const Text('Clear station'),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.manage_search, size: 18),
+                      label: const Text('Search train name'),
+                      onPressed: () => context.push('/directory'),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.departure_board, size: 18),
+                      label: const Text('Station board'),
+                      onPressed: () => context.push('/board'),
+                    ),
+                  ],
+                ),
+                if (ref.watch(historyProvider).isNotEmpty) ...[
+                  const SectionTitle('Recently opened'),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final n in ref.watch(historyProvider))
+                        ActionChip(
+                          label: Text(n),
+                          avatar: const Icon(Icons.history, size: 16),
+                          onPressed: () => context.push('/trains/$n'),
+                        ),
+                    ],
+                  ),
+                ],
                 if (_busy)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
@@ -536,18 +576,33 @@ class _StationPickerState extends ConsumerState<_StationPicker> {
   bool _searched = false;
   int _request = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _stations = ref.read(_stationSuggestions);
+  }
+
   void _changed(String value) {
     _query = value.trim();
     _debounce?.cancel();
     _request++;
     setState(() {
-      _stations = [];
+      _stations = _query.isEmpty
+          ? ref.read(_stationSuggestions)
+          : ref.read(_stationSearchCache)[_query.toLowerCase()] ??
+                ref
+                    .read(_stationSuggestions)
+                    .where(
+                      (s) =>
+                          s.label.toLowerCase().contains(_query.toLowerCase()),
+                    )
+                    .toList();
       _error = null;
       _searched = false;
       _loading = false;
     });
     if (_query.length >= 2) {
-      _debounce = Timer(Duration(milliseconds: 350), _lookup);
+      _debounce = Timer(Duration(milliseconds: 200), _lookup);
     }
   }
 
@@ -563,6 +618,11 @@ class _StationPickerState extends ConsumerState<_StationPicker> {
           .read(trainRepositoryProvider)
           .searchStations(_query);
       if (!mounted || request != _request) return;
+      if (result.isSuccess) {
+        final cache = ref.read(_stationSearchCache);
+        if (cache.length >= 30) cache.remove(cache.keys.first);
+        cache[_query.toLowerCase()] = result.data ?? [];
+      }
       setState(() {
         _loading = false;
         _searched = true;
@@ -602,10 +662,16 @@ class _StationPickerState extends ConsumerState<_StationPicker> {
             onChanged: _changed,
             decoration: InputDecoration(
               labelText: 'Station name or code',
-              hintText: 'At least 2 characters',
+              hintText: 'e.g., Delhi or NDLS',
+              helperText: 'Enter a city, station name or code',
             ),
           ),
           SizedBox(height: 12),
+          if (_query.isEmpty)
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Recent & common stations'),
+            ),
           if (_loading) LinearProgressIndicator(),
           Expanded(
             child: _error != null
@@ -621,7 +687,16 @@ class _StationPickerState extends ConsumerState<_StationPicker> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(_stations[i].name),
                       subtitle: Text(_stations[i].code),
-                      onTap: () => Navigator.pop(context, _stations[i]),
+                      onTap: () {
+                        final selected = _stations[i];
+                        ref.read(_stationSuggestions.notifier).state = [
+                          selected,
+                          ...ref
+                              .read(_stationSuggestions)
+                              .where((s) => s.code != selected.code),
+                        ].take(8).toList();
+                        Navigator.pop(context, selected);
+                      },
                     ),
                   )
                 : Center(

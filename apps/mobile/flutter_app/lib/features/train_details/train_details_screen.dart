@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -16,7 +17,12 @@ import '../../shared/widgets/passenger_components.dart';
 
 class TrainDetailsScreen extends ConsumerStatefulWidget {
   final String trainNumber;
-  const TrainDetailsScreen({super.key, required this.trainNumber});
+  final String? stationCode;
+  const TrainDetailsScreen({
+    super.key,
+    required this.trainNumber,
+    this.stationCode,
+  });
   @override
   ConsumerState<TrainDetailsScreen> createState() => _TrainDetailsScreenState();
 }
@@ -33,12 +39,20 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   int _request = 0;
   String? _journeyDate;
   int? _arrivalIndex;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _refresh();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted &&
+          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        _refresh();
+      }
+    });
   }
 
   @override
@@ -59,6 +73,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _request++;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -97,6 +112,14 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
           ref.read(historyProvider.notifier).add(widget.trainNumber);
         }
         _status = freshStatus ?? _status;
+        if (_arrivalIndex == null &&
+            widget.stationCode != null &&
+            freshStatus != null) {
+          final index = freshStatus.route.indexWhere(
+            (s) => s.station?.code == widget.stationCode,
+          );
+          if (index >= 0) _arrivalIndex = index;
+        }
         _eta = freshEta ?? _eta;
         _statusError = result.status.isSuccess
             ? null
@@ -349,6 +372,15 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                           ),
                         ],
                         if (destination != null) ...[
+                          if (widget.stationCode != null &&
+                              !stops.any(
+                                (s) =>
+                                    s.stop.station?.code == widget.stationCode,
+                              ))
+                            MessagePanel(
+                              message:
+                                  '${widget.stationCode} is not in the returned route. Showing the destination instead.',
+                            ),
                           SectionTitle('Arrival information'),
                           DropdownButtonFormField<int>(
                             value:
