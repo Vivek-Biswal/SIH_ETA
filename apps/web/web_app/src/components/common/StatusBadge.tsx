@@ -20,26 +20,26 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       case 'LIVE':
       case 'ON_TIME':
         return {
-          bg: 'bg-green-100 border-green-200 text-green-700',
-          dot: 'bg-green-500',
+          bg: 'bg-success/15 border-success/30 text-success',
+          dot: 'bg-success',
           defaultText: 'On Time',
         };
       case 'WARNING':
         return {
-          bg: 'bg-amber-100 border-amber-200 text-amber-700',
-          dot: 'bg-amber-500',
+          bg: 'bg-warning/15 border-warning/30 text-warning',
+          dot: 'bg-warning',
           defaultText: 'Delayed',
         };
       case 'CRITICAL':
         return {
-          bg: 'bg-red-100 border-red-200 text-red-700',
-          dot: 'bg-red-500',
+          bg: 'bg-destructive/15 border-destructive/30 text-destructive',
+          dot: 'bg-destructive',
           defaultText: 'Cancelled',
         };
       case 'INFO':
         return {
-          bg: 'bg-blue-100 border-blue-200 text-blue-700',
-          dot: 'bg-blue-500',
+          bg: 'bg-info/15 border-info/30 text-info',
+          dot: 'bg-info',
           defaultText: 'Info',
         };
     }

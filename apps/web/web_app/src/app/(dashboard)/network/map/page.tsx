@@ -1,12 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { Layers, RefreshCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Layers, RefreshCw, ZoomIn, ZoomOut, Train, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-export default function NetworkMapPage() {
+function MapContent() {
+  const searchParams = useSearchParams();
+  const selectedTrain = searchParams.get('train');
+
   return (
-    <div className="relative w-full h-[calc(100vh-8.5rem)] rounded-sm border border-white/10 overflow-hidden bg-[#0D0D0F]">
+    <div className="relative w-full h-[calc(100vh-8.5rem)] rounded-xl border border-border overflow-hidden bg-zinc-950">
       {/* Dark stylized SVG network grid representing Indian Railway corridors */}
       <svg className="w-full h-full opacity-60">
         <defs>
@@ -43,49 +48,76 @@ export default function NetworkMapPage() {
         <text x="710" y="705" fill="#A1A1AA" fontSize="11" fontFamily="monospace">MAS (Chennai)</text>
       </svg>
 
-      {/* Floating Map Legend (Frosted Glass as permitted by DESIGN.md) */}
-      <div className="absolute top-4 left-4 p-4 rounded-sm border border-white/10 bg-[#09090B]/85 backdrop-blur-md space-y-2 text-xs font-mono">
-        <div className="font-bold text-white uppercase text-[11px] mb-2 flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
+      {/* Floating Map Legend */}
+      <div className="absolute top-4 left-4 p-4 rounded-lg border border-border bg-card/85 backdrop-blur-md space-y-2 text-xs font-mono shadow-lg">
+        <div className="font-bold text-foreground uppercase text-[11px] mb-2 flex items-center gap-2">
+          <Layers className="w-3.5 h-3.5 text-primary" />
           Corridor Status Legend
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-1 bg-[#3B82F6] rounded" />
-          <span className="text-[#A1A1AA]">Normal Operation (Free flow)</span>
+          <span className="w-3 h-1 bg-primary rounded" />
+          <span className="text-muted-foreground">Normal Operation (Free flow)</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-1 bg-[#F59E0B] rounded" />
-          <span className="text-[#A1A1AA]">Moderate Congestion (1-14m delay)</span>
+          <span className="w-3 h-1 bg-warning rounded" />
+          <span className="text-muted-foreground">Moderate Congestion (1-14m delay)</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-1 bg-[#EF4444] rounded" />
-          <span className="text-[#A1A1AA]">Critical Conflict (15m+ bottleneck)</span>
+          <span className="w-3 h-1 bg-destructive rounded" />
+          <span className="text-muted-foreground">Critical Conflict (15m+ bottleneck)</span>
         </div>
       </div>
 
+      {/* Contextual Entity Tracking Overlay */}
+      {selectedTrain && (
+        <div className="absolute top-4 right-16 p-4 rounded-lg border border-primary/50 bg-primary/10 backdrop-blur-md shadow-lg flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Train className="w-4 h-4 text-primary" />
+            <span className="font-bold text-foreground text-sm">Tracking: {selectedTrain}</span>
+          </div>
+          <p className="text-xs text-muted-foreground max-w-xs">
+            Train location approximated on operational map. Live GPS telemetry is currently disabled in snapshot view.
+          </p>
+          <Link 
+            href={`/trains/${selectedTrain}`}
+            className="flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground py-1.5 px-3 rounded text-xs font-semibold transition-colors"
+          >
+            View Intelligence <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+      )}
+
       {/* Floating Telemetry Box bottom left */}
-      <div className="absolute bottom-4 left-4 p-4 rounded-sm border border-white/10 bg-[#09090B]/85 backdrop-blur-md max-w-sm space-y-2 text-xs">
+      <div className="absolute bottom-4 left-4 p-4 rounded-lg border border-border bg-card/85 backdrop-blur-md max-w-sm space-y-2 text-xs shadow-lg">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-white font-mono">SECTOR TELEMETRY [DEMO]</span>
+          <span className="font-bold text-foreground font-mono">SECTOR TELEMETRY [DEMO]</span>
           <StatusBadge type="CRITICAL" label="INTERVENTION REQUIRED" />
         </div>
-        <p className="text-xs text-[#A1A1AA]">
+        <p className="text-xs text-muted-foreground">
           Block conflict on CNB-DDU corridor. 2 Rajdhani services in queue behind freight rake #8841.
         </p>
       </div>
 
       {/* Map Action Buttons top right */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        <button className="p-2 rounded bg-[#18181B] border border-white/10 hover:bg-white/5 text-white">
-          <RefreshCw className="w-4 h-4 text-[#A1A1AA]" />
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <button className="p-2 rounded-md bg-card border border-border hover:bg-muted text-foreground transition-colors shadow-sm">
+          <RefreshCw className="w-4 h-4 text-muted-foreground hover:text-foreground" />
         </button>
-        <button className="p-2 rounded bg-[#18181B] border border-white/10 hover:bg-white/5 text-white">
-          <ZoomIn className="w-4 h-4 text-[#A1A1AA]" />
+        <button className="p-2 rounded-md bg-card border border-border hover:bg-muted text-foreground transition-colors shadow-sm">
+          <ZoomIn className="w-4 h-4 text-muted-foreground hover:text-foreground" />
         </button>
-        <button className="p-2 rounded bg-[#18181B] border border-white/10 hover:bg-white/5 text-white">
-          <ZoomOut className="w-4 h-4 text-[#A1A1AA]" />
+        <button className="p-2 rounded-md bg-card border border-border hover:bg-muted text-foreground transition-colors shadow-sm">
+          <ZoomOut className="w-4 h-4 text-muted-foreground hover:text-foreground" />
         </button>
       </div>
     </div>
+  );
+}
+
+export default function NetworkMapPage() {
+  return (
+    <Suspense fallback={<div className="w-full h-full bg-card rounded-xl border border-border animate-pulse" />}>
+      <MapContent />
+    </Suspense>
   );
 }

@@ -1,36 +1,153 @@
 @import "tailwindcss";
+@import "tailwindcss/utilities";
 
 @theme {
-  --color-canvas-bg: #F8FAFC;
-  --color-surface-card: #FFFFFF;
-  --color-surface-hover: #F1F5F9;
-  --color-border-subtle: #E2E8F0;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   
-  --color-text-primary: #0F172A;
-  --color-text-muted: #64748B;
-  
-  --color-sidebar-bg: #141B2D;
-  --color-sidebar-text: #FFFFFF;
-  --color-sidebar-muted: #94A3B8;
-  --color-sidebar-hover: rgba(255, 255, 255, 0.1);
-  --color-sidebar-active: #2563EB;
-  
-  --color-live-green: #22C55E;
-  --color-warning-amber: #F59E0B;
-  --color-critical-red: #EF4444;
-  --color-brand-blue: #2563EB;
-  
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-muted: var(--sidebar-muted);
+
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-sans: var(--font-geist), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
 }
 
-body {
-  background-color: var(--color-canvas-bg);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  :root {
+    /* LIGHT MODE: White + Soft Blue + Deep Navy */
+    --background: #F8FAFC;
+    --foreground: #0F172A;
+
+    --card: #FFFFFF;
+    --card-foreground: #0F172A;
+
+    --popover: #FFFFFF;
+    --popover-foreground: #0F172A;
+
+    --primary: #2563EB;
+    --primary-foreground: #F8FAFC;
+
+    --secondary: #F1F5F9;
+    --secondary-foreground: #1E293B;
+
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+
+    --accent: #E0E7FF;
+    --accent-foreground: #1D4ED8;
+
+    --destructive: #EF4444;
+    --destructive-foreground: #F8FAFC;
+
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #3B82F6;
+
+    --success: #10B981;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+
+    --sidebar-bg: #FFFFFF;
+    --sidebar-foreground: #0F172A;
+    --sidebar-border: #E2E8F0;
+    --sidebar-hover: #F1F5F9;
+    --sidebar-active: #E0E7FF;
+    --sidebar-muted: #64748B;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* DARK MODE: Black + Deep Navy + Railway Blue + Electric Blue */
+    --background: #09090B;
+    --foreground: #F8FAFC;
+
+    --card: #141B2D;
+    --card-foreground: #F8FAFC;
+
+    --popover: #141B2D;
+    --popover-foreground: #F8FAFC;
+
+    --primary: #3B82F6;
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #1E293B;
+    --secondary-foreground: #F8FAFC;
+
+    --muted: #1E293B;
+    --muted-foreground: #94A3B8;
+
+    --accent: #1E3A8A;
+    --accent-foreground: #DBEAFE;
+
+    --destructive: #EF4444;
+    --destructive-foreground: #F8FAFC;
+
+    --border: #2A3B5D; /* subtle blue-gray */
+    --input: #1E293B;
+    --ring: #3B82F6;
+
+    --success: #10B981;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+    
+    --sidebar-bg: #0C1222;
+    --sidebar-foreground: #F8FAFC;
+    --sidebar-border: #1E293B;
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    --sidebar-active: #1D4ED8;
+    --sidebar-muted: #94A3B8;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 /* Tabular figures for monospace elements */
@@ -44,12 +161,12 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-canvas-bg);
+  background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-subtle);
+  background: var(--border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: var(--muted-foreground);
 }

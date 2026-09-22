@@ -22,14 +22,14 @@ export function DataTable<T>({
   emptyMessage = 'No records available',
 }: DataTableProps<T>) {
   return (
-    <div className="w-full overflow-x-auto border border-[var(--color-border-subtle)] rounded-lg bg-[var(--color-surface-card)] shadow-sm">
+    <div className="w-full overflow-x-auto border border-border rounded-lg bg-card shadow-sm transition-colors">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-hover)]">
+          <tr className="border-b border-border bg-muted">
             {columns.map((col, idx) => (
               <th
                 key={idx}
-                className={`py-3.5 px-4 text-xs font-semibold tracking-wide text-[var(--color-text-muted)] ${
+                className={`py-3.5 px-4 text-xs font-semibold tracking-wide text-muted-foreground ${
                   col.align === 'right'
                     ? 'text-right'
                     : col.align === 'center'
@@ -42,12 +42,12 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--color-border-subtle)] text-sm">
+        <tbody className="divide-y divide-border text-sm">
           {data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="py-12 text-center text-[var(--color-text-muted)] text-sm"
+                className="py-12 text-center text-muted-foreground text-sm"
               >
                 {emptyMessage}
               </td>
@@ -59,8 +59,8 @@ export function DataTable<T>({
                 onClick={() => onRowClick && onRowClick(row)}
                 className={`transition-colors ${
                   onRowClick
-                    ? 'cursor-pointer hover:bg-[var(--color-surface-hover)]'
-                    : 'hover:bg-[var(--color-surface-hover)]'
+                    ? 'cursor-pointer hover:bg-muted'
+                    : 'hover:bg-muted'
                 }`}
               >
                 <td
@@ -71,7 +71,7 @@ export function DataTable<T>({
                 {columns.map((col, colIdx) => (
                   <td
                     key={colIdx}
-                    className={`py-4 px-4 text-sm font-medium text-[var(--color-text-primary)] ${
+                    className={`py-4 px-4 text-sm font-medium text-foreground ${
                       col.align === 'right'
                         ? 'text-right'
                         : col.align === 'center'

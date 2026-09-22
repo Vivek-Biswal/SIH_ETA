@@ -1,5 +1,6 @@
 import { Geist, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const geistSans = Geist({
   variable: '--font-geist',
@@ -22,9 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-[#09090B] text-white antialiased overflow-hidden">
-        {children}
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${jetbrainsMono.variable}`}>
+      <body className="bg-background text-foreground antialiased overflow-hidden">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
