@@ -2,70 +2,72 @@
 
 import React, { useEffect, useState } from 'react';
 import { RailwayApiService } from '@/services/api';
-import { TrainStatus } from '@/types/api';
 
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { NetworkHealth } from '@/components/dashboard/NetworkHealth';
-import { KPIGrid } from '@/components/dashboard/KPIGrid';
-import { LiveNetworkOverview } from '@/components/dashboard/LiveNetworkOverview';
-import { TrainOperations } from '@/components/dashboard/TrainOperations';
-import { RecentAlerts } from '@/components/dashboard/RecentAlerts';
-import { NetworkPerformance } from '@/components/dashboard/NetworkPerformance';
+import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { FindTrainsCard } from '@/components/dashboard/FindTrainsCard';
+import { LiveStatusCard } from '@/components/dashboard/LiveStatusCard';
+import { RecentActivity } from '@/components/dashboard/RecentActivity';
+import { RailRadarCard, MultiCityCard } from '@/components/dashboard/ActionCards';
 
 export default function DashboardPage() {
-  const [trains, setTrains] = useState<TrainStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    active_trains: 0,
+    active_routes: 0,
+    avg_delay_mins: 0,
+    total_searches: 0
+  });
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [isLoadingRecent, setIsLoadingRecent] = useState(true);
 
   useEffect(() => {
-    RailwayApiService.searchTrains()
+    RailwayApiService.getDashboardStats()
       .then((data) => {
-        setTrains(data);
-        setIsLoading(false);
+        setStats(data);
+        setIsLoadingStats(false);
       })
       .catch(() => {
-        setError("Unable to load network data. Please try again.");
-        setIsLoading(false);
+        // Fallback gracefully in UI
+        setIsLoadingStats(false);
+      });
+
+    RailwayApiService.getRecentActivity()
+      .then((data) => {
+        setRecentActivities(data);
+        setIsLoadingRecent(false);
+      })
+      .catch(() => {
+        setIsLoadingRecent(false);
       });
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-8">
-      <DashboardHeader />
-      
-      {error ? (
-        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-6 text-center">
-          <p className="text-destructive font-medium">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-background border border-border rounded-md text-sm font-medium hover:bg-muted transition-colors"
-          >
-            Retry
-          </button>
+    <div className="space-y-6 max-w-5xl mx-auto pb-12 pt-4">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+        <p className="text-gray-400">Welcome back! Here is what's happening on the network today.</p>
+      </div>
+
+      {/* Stats row */}
+      <DashboardStats stats={stats} isLoading={isLoadingStats} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
+        
+        {/* Main Action Column */}
+        <div className="lg:col-span-7 space-y-4">
+          <RailRadarCard />
+          <FindTrainsCard />
+          <MultiCityCard />
+          <LiveStatusCard />
         </div>
-      ) : (
-        <>
-          <KPIGrid trains={trains} isLoading={isLoading} />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <LiveNetworkOverview />
-            </div>
-            <div className="lg:col-span-1">
-              <NetworkHealth />
-            </div>
-          </div>
-          
-          <div className="w-full">
-            <TrainOperations trains={trains} isLoading={isLoading} />
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RecentAlerts />
-            <NetworkPerformance trains={trains} isLoading={isLoading} />
-          </div>
-        </>
-      )}
+
+        {/* Sidebar / Secondary Column */}
+        <div className="lg:col-span-5">
+          <RecentActivity activities={recentActivities} isLoading={isLoadingRecent} />
+        </div>
+        
+      </div>
     </div>
   );
 }

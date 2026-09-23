@@ -133,4 +133,18 @@ export class RailwayApiService {
     if (!res.ok) throw new Error('Failed to fetch scenario');
     return res.json();
   }
+
+  // --- Dashboard Endpoints ---
+
+  static async getDashboardStats() {
+    const res = await fetch(\/dashboard/stats);
+    if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+    return res.json();
+  }
+
+  static async getRecentActivity() {
+    const res = await fetch(\/dashboard/recent);
+    if (!res.ok) throw new Error('Failed to fetch recent activity');
+    return res.json();
+  }
 }
