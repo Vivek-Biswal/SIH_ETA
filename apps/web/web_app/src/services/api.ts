@@ -1,6 +1,7 @@
 import { ETAResponse, TrainStatus, NetworkZoneStatus, RouteCongestionSegment } from '../types/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+import { PASSENGER_API } from './passenger';
+const API_BASE_URL = PASSENGER_API;
 
 type NetworkStatusResponse = {
   congestion_hotspots?: Array<{
