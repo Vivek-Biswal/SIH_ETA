@@ -7,7 +7,7 @@ import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { FindTrainsCard } from '@/components/dashboard/FindTrainsCard';
 import { LiveStatusCard } from '@/components/dashboard/LiveStatusCard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import { RailRadarCard, MultiCityCard } from '@/components/dashboard/ActionCards';
+import { RailRadarCard } from '@/components/dashboard/ActionCards';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-7 space-y-4">
           <RailRadarCard />
           <FindTrainsCard />
-          <MultiCityCard />
+
           <LiveStatusCard />
         </div>
 

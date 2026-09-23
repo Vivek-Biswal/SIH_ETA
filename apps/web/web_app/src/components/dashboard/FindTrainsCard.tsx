@@ -1,20 +1,29 @@
+'use client';
+
 import React, { useState } from 'react';
-import { ArrowRight, MapPin, ArrowUpDown, Search } from 'lucide-react';
+import { ArrowRight, ArrowUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { StationAutocomplete } from './StationAutocomplete';
 
 export function FindTrainsCard() {
-  const [origin, setOrigin] = useState('AADR');
-  const [destination, setDestination] = useState('NDLS');
+  const [originCode, setOriginCode] = useState('');
+  const [originName, setOriginName] = useState('');
+  const [destCode, setDestCode] = useState('');
+  const [destName, setDestName] = useState('');
   const router = useRouter();
 
   const handleSwap = () => {
-    setOrigin(destination);
-    setDestination(origin);
+    const tmpCode = originCode;
+    const tmpName = originName;
+    setOriginCode(destCode);
+    setOriginName(destName);
+    setDestCode(tmpCode);
+    setDestName(tmpName);
   };
 
   const handleSearch = () => {
-    if (origin && destination) {
-      router.push(`/trains?from=${origin}&to=${destination}`);
+    if (originCode && destCode) {
+      router.push(`/trains?from=${originCode}&to=${destCode}`);
     }
   };
 
@@ -27,39 +36,36 @@ export function FindTrainsCard() {
       
       <div className="p-5 flex-1 flex flex-col relative">
         <div className="flex flex-col space-y-4 mb-6">
-          <div className="flex items-center space-x-4 bg-[#1F2937] px-4 py-3 rounded-lg border border-gray-700">
-            <MapPin className="w-5 h-5 text-green-500" />
-            <input 
-              type="text" 
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              placeholder="Origin Station"
-              className="bg-transparent border-none text-white focus:outline-none flex-1 font-medium"
-            />
-          </div>
+          <StationAutocomplete
+            value={originCode}
+            displayValue={originName}
+            onChange={(code, name) => { setOriginCode(code); setOriginName(name); }}
+            onClear={() => { setOriginCode(''); setOriginName(''); }}
+            placeholder="Origin Station"
+            iconColor="text-green-500"
+          />
           
-          <div className="flex items-center space-x-4 bg-[#1F2937] px-4 py-3 rounded-lg border border-gray-700">
-            <MapPin className="w-5 h-5 text-blue-500" />
-            <input 
-              type="text" 
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Destination Station"
-              className="bg-transparent border-none text-white focus:outline-none flex-1 font-medium"
-            />
-          </div>
+          <StationAutocomplete
+            value={destCode}
+            displayValue={destName}
+            onChange={(code, name) => { setDestCode(code); setDestName(name); }}
+            onClear={() => { setDestCode(''); setDestName(''); }}
+            placeholder="Destination Station"
+            iconColor="text-blue-500"
+          />
         </div>
 
         <button 
           onClick={handleSwap}
-          className="absolute right-8 top-[4.5rem] bg-[#1F2937] p-2 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors"
+          className="absolute right-8 top-[4.5rem] bg-[#1F2937] p-2 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors z-10"
         >
           <ArrowUpDown className="w-4 h-4" />
         </button>
 
         <button 
           onClick={handleSearch}
-          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-colors flex justify-center items-center space-x-2"
+          disabled={!originCode || !destCode}
+          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/40 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors flex justify-center items-center space-x-2"
         >
           <span>View Trains</span>
           <ArrowRight className="w-4 h-4" />

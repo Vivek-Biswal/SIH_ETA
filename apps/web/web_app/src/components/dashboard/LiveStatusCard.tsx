@@ -1,19 +1,19 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Train, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { TrainAutocomplete } from './TrainAutocomplete';
 
 export function LiveStatusCard() {
   const [query, setQuery] = useState('');
   const router = useRouter();
 
-  const handleSearch = () => {
-    if (query) {
-      router.push(`/live/${query}`);
+  const handleSearch = (trainNo?: string) => {
+    const q = trainNo || query;
+    if (q) {
+      router.push(`/live/${q}`);
     }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
   };
 
   return (
@@ -25,19 +25,15 @@ export function LiveStatusCard() {
       
       <div className="p-5">
         <div className="flex items-center space-x-2">
-          <div className="flex-1 bg-[#1F2937] px-4 py-3.5 rounded-xl border border-gray-700 flex items-center">
-            <input 
-              type="text" 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter train number or name..."
-              className="bg-transparent border-none text-white focus:outline-none flex-1 text-sm md:text-base placeholder-gray-500"
-            />
-          </div>
+          <TrainAutocomplete
+            value={query}
+            onChange={setQuery}
+            onSubmit={handleSearch}
+            placeholder="Enter train number or name..."
+          />
           <button 
-            onClick={handleSearch}
-            className="bg-[#2563EB] hover:bg-blue-600 p-3.5 rounded-xl text-white transition-colors"
+            onClick={() => handleSearch()}
+            className="bg-[#2563EB] hover:bg-blue-600 p-3.5 rounded-xl text-white transition-colors shrink-0"
           >
             <ArrowRight className="w-5 h-5" />
           </button>

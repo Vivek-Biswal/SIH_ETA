@@ -137,14 +137,32 @@ export class RailwayApiService {
   // --- Dashboard Endpoints ---
 
   static async getDashboardStats() {
-    const res = await fetch(\/dashboard/stats);
+    const res = await fetch(`${API_BASE_URL}/dashboard/stats`);
     if (!res.ok) throw new Error('Failed to fetch dashboard stats');
     return res.json();
   }
 
   static async getRecentActivity() {
-    const res = await fetch(\/dashboard/recent);
+    const res = await fetch(`${API_BASE_URL}/dashboard/recent`);
     if (!res.ok) throw new Error('Failed to fetch recent activity');
     return res.json();
+  }
+
+  // --- Autocomplete Endpoints ---
+
+  static async searchStations(q: string): Promise<{ code: string; name: string }[]> {
+    if (q.length < 2) return [];
+    const res = await fetch(`${API_BASE_URL}/stations/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.results ?? data ?? [];
+  }
+
+  static async lookupTrains(q: string): Promise<{ train_number?: string; train_name?: string; number?: string; name?: string }[]> {
+    if (q.length < 2) return [];
+    const res = await fetch(`${API_BASE_URL}/passenger/lookup?q=${encodeURIComponent(q)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.results ?? data ?? [];
   }
 }
