@@ -109,6 +109,18 @@ export class RailwayApiService {
     return res.json();
   }
 
+  static async getAlerts() {
+    const res = await fetch(`${API_BASE_URL.replace('/api/v1', '/api')}/network/alerts`);
+    if (!res.ok) throw new Error('Failed to fetch network alerts');
+    return res.json();
+  }
+
+  static async getWarnings() {
+    const res = await fetch(`${API_BASE_URL.replace('/api/v1', '/api')}/network/warnings`);
+    if (!res.ok) throw new Error('Failed to fetch network warnings');
+    return res.json();
+  }
+
   static async runWhatIf(trainNo: string, action: string, parameters: Record<string, any>) {
     const res = await fetch(`${API_BASE_URL.replace('/api/v1', '/api')}/what-if`, {
       method: 'POST',

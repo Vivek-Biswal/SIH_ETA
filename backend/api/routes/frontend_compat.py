@@ -127,3 +127,15 @@ async def get_scenario(scenario_id: str):
     """Get scenario results."""
     res = await _network_controller.get_scenario(scenario_id)
     return ScenarioResponse(**res)
+
+
+@router.get("/network/alerts")
+async def get_network_alerts():
+    """Operator alert queue."""
+    return await _network_controller.get_operator_alerts()
+
+
+@router.get("/network/warnings")
+async def get_network_warnings():
+    """Top 100 warnings."""
+    return await _network_controller.get_top_warnings()

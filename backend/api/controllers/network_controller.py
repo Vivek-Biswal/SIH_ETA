@@ -42,3 +42,11 @@ class NetworkController:
     async def get_scenario(self, scenario_id: str) -> dict:
         """Delegate to NetworkService.get_scenario."""
         return self._svc.get_scenario(scenario_id)
+
+    async def get_operator_alerts(self) -> list:
+        """Delegate to NetworkService.get_operator_alerts."""
+        return self._svc.get_operator_alerts()
+
+    async def get_top_warnings(self) -> list:
+        """Delegate to NetworkService.get_top_warnings."""
+        return self._svc.get_top_warnings()

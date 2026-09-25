@@ -140,3 +140,11 @@ class NetworkService:
     def get_scenario(self, scenario_id: str) -> dict:
         """Delegate to NetworkIntelligenceAdapter for scenario results."""
         return self._adapter.get_scenario(scenario_id)
+
+    def get_operator_alerts(self) -> list[dict]:
+        """Delegate to NetworkIntelligenceAdapter for operator alerts."""
+        return self._adapter.get_operator_alerts()
+
+    def get_top_warnings(self) -> list[dict]:
+        """Delegate to NetworkIntelligenceAdapter for top warnings."""
+        return self._adapter.get_top_warnings()

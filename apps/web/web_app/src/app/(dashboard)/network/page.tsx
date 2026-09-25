@@ -18,6 +18,8 @@ import { BottleneckPanel } from '@/components/network-intel/BottleneckPanel';
 import { AffectedTrains } from '@/components/network-intel/AffectedTrains';
 import { DelayPropagation } from '@/components/network-intel/DelayPropagation';
 import { OperationalImpact } from '@/components/network-intel/OperationalImpact';
+import { OperatorAlertQueue } from '@/components/network-intel/OperatorAlertQueue';
+import { TopWarnings } from '@/components/network-intel/TopWarnings';
 import { MapWrapper } from '@/components/network/MapWrapper';
 import { RefreshCw, Map, List } from 'lucide-react';
 
@@ -30,12 +32,15 @@ export default function NetworkIntelligencePage() {
   const [segments, setSegments] = useState<RouteCongestionSegment[]>([]);
   const [bottlenecks, setBottlenecks] = useState<BottleneckResponse[]>([]);
   const [propagation, setPropagation] = useState<PropagationResponse | null>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [warnings, setWarnings] = useState<any[]>([]);
 
   // Loading states per section — individual failures don't break the whole page
   const [isLoadingTrains, setIsLoadingTrains] = useState(true);
   const [isLoadingZones, setIsLoadingZones] = useState(true);
   const [isLoadingSegments, setIsLoadingSegments] = useState(true);
   const [isLoadingBottlenecks, setIsLoadingBottlenecks] = useState(true);
+  const [isLoadingAlerts, setIsLoadingAlerts] = useState(true);
 
   const [bottlenecksUnavailable, setBottlenecksUnavailable] = useState(false);
   const [propagationUnavailable, setPropagationUnavailable] = useState(false);
@@ -79,6 +84,15 @@ export default function NetworkIntelligencePage() {
         setBottlenecksUnavailable(true);
         setIsLoadingBottlenecks(false);
       });
+
+    // Fetch Alerts & Warnings
+    RailwayApiService.getAlerts()
+      .then((data) => { setAlerts(data); setIsLoadingAlerts(false); })
+      .catch(() => setIsLoadingAlerts(false));
+      
+    RailwayApiService.getWarnings()
+      .then((data) => setWarnings(data))
+      .catch(console.error);
 
     // Fetch propagation for first delayed train (may not be available)
     // We defer this until after trains load — use a best-effort fetch
@@ -200,6 +214,18 @@ export default function NetworkIntelligencePage() {
               trains={trains}
               zones={zones}
               isLoading={isLoading}
+            />
+          </div>
+
+          {/* Alerts & Warnings */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <OperatorAlertQueue
+              alerts={alerts}
+              isLoading={isLoadingAlerts}
+            />
+            <TopWarnings
+              warnings={warnings}
+              isLoading={isLoadingAlerts}
             />
           </div>
         </>

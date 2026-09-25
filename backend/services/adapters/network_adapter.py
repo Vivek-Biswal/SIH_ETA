@@ -45,3 +45,15 @@ class NetworkIntelligenceAdapter:
     def get_scenario(self, scenario_id: str) -> dict:
         """Get scenario results."""
         return self._provider.get_scenario(scenario_id)
+
+    def get_operator_alerts(self) -> list[dict]:
+        """Request operator alerts."""
+        if hasattr(self._provider, 'get_operator_alerts'):
+            return self._provider.get_operator_alerts()
+        return []
+
+    def get_top_warnings(self) -> list[dict]:
+        """Request top warnings."""
+        if hasattr(self._provider, 'get_top_warnings'):
+            return self._provider.get_top_warnings()
+        return []
