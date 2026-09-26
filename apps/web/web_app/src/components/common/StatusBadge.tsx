@@ -42,6 +42,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
           dot: 'bg-info',
           defaultText: 'Info',
         };
+      default:
+        return {
+          bg: 'bg-muted/15 border-border text-muted-foreground',
+          dot: 'bg-muted-foreground',
+          defaultText: label || String(type) || 'Unknown',
+        };
     }
   };
 

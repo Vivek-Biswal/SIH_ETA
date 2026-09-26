@@ -65,6 +65,7 @@ export const Sidebar: React.FC = () => {
                 <Link
                   key={item.name}
                   href={item.href}
+                  prefetch={false}
                   className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-foreground)] shadow-sm'
@@ -92,6 +93,7 @@ export const Sidebar: React.FC = () => {
                 <Link
                   key={item.name}
                   href={item.href}
+                  prefetch={false}
                   className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-foreground)] shadow-sm'
@@ -112,6 +114,7 @@ export const Sidebar: React.FC = () => {
         <div className="p-4 border-t border-[var(--sidebar-border)]">
           <Link
             href="/settings"
+            prefetch={false}
             className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
               pathname.startsWith('/settings')
                 ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-foreground)] shadow-sm'
