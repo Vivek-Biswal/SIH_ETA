@@ -67,7 +67,7 @@ interface SimMapProps {
 
 export default function SimulationMap({ trains, segments, selectedId, onSelect }: SimMapProps) {
   const { resolvedTheme } = useTheme();
-  const mapTilerKey = process.env.MAPTILER_API_KEY || '';
+  const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || process.env.MAPTILER_API_KEY || '';
   const tileUrl = resolvedTheme === 'dark'
     ? `https://api.maptiler.com/maps/basic-v2-dark/256/{z}/{x}/{y}.png?key=${mapTilerKey}`
     : `https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;

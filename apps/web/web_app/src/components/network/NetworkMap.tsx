@@ -86,7 +86,7 @@ export default function NetworkMap({ trains, onSelectTrain, selectedTrainId }: N
   const { resolvedTheme } = useTheme();
   
   // We use MapTiler as the basemap provider, using keys from the environment
-  const mapTilerKey = process.env.MAPTILER_API_KEY || '';
+  const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || process.env.MAPTILER_API_KEY || '';
   const tileUrl = resolvedTheme === 'dark'
     ? `https://api.maptiler.com/maps/basic-v2-dark/256/{z}/{x}/{y}.png?key=${mapTilerKey}`
     : `https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;

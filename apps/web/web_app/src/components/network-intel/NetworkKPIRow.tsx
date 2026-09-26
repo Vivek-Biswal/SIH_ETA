@@ -19,9 +19,15 @@ export const NetworkKPIRow: React.FC<NetworkKPIRowProps> = ({ trains, zones, seg
   const affectedSegments = segments.filter((s) => s.status !== 'NORMAL').length;
   const criticalSegments = segments.filter((s) => s.status === 'CONFLICT').length;
 
-  const avgDelay = trains.length > 0
-    ? (trains.reduce((sum, t) => sum + t.delay_minutes, 0) / trains.length).toFixed(1)
-    : '—';
+  const avgDelay: string = (() => {
+    if (trains.length === 0) return '—';
+    const total = trains.reduce((sum, t) => {
+      const d = Number(t.delay_minutes);
+      return sum + (isFinite(d) ? d : 0);
+    }, 0);
+    const avg = total / trains.length;
+    return isFinite(avg) ? avg.toFixed(1) : '0.0';
+  })();
 
   const kpis = [
     {
@@ -50,7 +56,7 @@ export const NetworkKPIRow: React.FC<NetworkKPIRowProps> = ({ trains, zones, seg
     },
     {
       label: 'Avg Network Delay',
-      value: isLoading ? '—' : avgDelay === '0.0' ? '0 min' : `${avgDelay} min`,
+      value: isLoading ? '—' : (avgDelay === '—' ? '— min' : (parseFloat(avgDelay) === 0 ? '0 min' : `${avgDelay} min`)),
       icon: null,
       sub: 'Across all trains',
     },
