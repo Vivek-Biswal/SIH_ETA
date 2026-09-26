@@ -19,11 +19,11 @@ _controller = StationController()
 @router.get("/search")
 async def search_stations(
     q: str = Query(
-        ..., min_length=2, description="Station name or code prefix"
+        "", description="Station name or code prefix. If empty, returns top/all stations."
     ),
 ):
     """Search stations by name or code."""
-    if railradar_passenger.configured():
+    if q and railradar_passenger.configured():
         return await run_in_threadpool(railradar_passenger.lookup_stations, q)
     return await _controller.search_stations(q)
 

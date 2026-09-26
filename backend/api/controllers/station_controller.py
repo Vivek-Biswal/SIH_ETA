@@ -18,7 +18,7 @@ class StationController:
     def __init__(self, station_service: Optional[StationService] = None):
         self._svc = station_service or StationService()
 
-    async def search_stations(self, q: str) -> StationSearchResponse:
+    async def search_stations(self, q: str = "") -> StationSearchResponse:
         """Delegate to StationService.search_stations."""
         return self._svc.search_stations(q)
 

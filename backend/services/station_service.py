@@ -17,11 +17,16 @@ class StationService:
     def __init__(self, station_repo: Optional[StationRepository] = None):
         self._repo = station_repo or StationRepository()
 
-    def search_stations(self, query: str) -> StationSearchResponse:
+    def search_stations(self, query: str = "") -> StationSearchResponse:
         """
         Search stations by code prefix and name substring.
         Results are merged and deduplicated.
         """
+        if not query:
+            data = getattr(self._repo, "get_all_stations", lambda limit: [])(limit=50)
+            results = [StationRef(code=row["code"], name=row["name"]) for row in data]
+            return StationSearchResponse(results=results, data_source=getattr(self._repo, "data_source", "unknown"))
+
         by_code = self._repo.search_by_code_prefix(query)
         by_name = self._repo.search_by_name(query)
 

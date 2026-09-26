@@ -163,12 +163,24 @@ export class RailwayApiService {
 
   // --- Autocomplete Endpoints ---
 
-  static async searchStations(q: string): Promise<{ code: string; name: string }[]> {
-    if (q.length < 2) return [];
+  static async searchStations(q: string = ""): Promise<{ code: string; name: string }[]> {
     const res = await fetch(`${API_BASE_URL}/stations/search?q=${encodeURIComponent(q)}`);
     if (!res.ok) return [];
     const data = await res.json();
     return data.results ?? data ?? [];
+  }
+
+  static async getStation(code: string): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/stations/${code}`);
+    if (!res.ok) throw new Error('Failed to fetch station details');
+    return res.json();
+  }
+
+  static async getStationDepartures(code: string): Promise<any[]> {
+    const res = await fetch(`${API_BASE_URL}/passenger/departures/${code}`);
+    if (!res.ok) throw new Error('Failed to fetch station departures');
+    const data = await res.json();
+    return data.results ?? [];
   }
 
   static async lookupTrains(q: string): Promise<{ train_number?: string; train_name?: string; number?: string; name?: string }[]> {

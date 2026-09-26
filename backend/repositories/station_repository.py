@@ -18,6 +18,16 @@ class StationRepository:
         from database.mock_client import MockSupabaseClient
         return "demo" if isinstance(self._db, MockSupabaseClient) else "database"
 
+    def get_all_stations(self, limit: int = 50) -> list[dict]:
+        """Return a base list of stations when no query is provided."""
+        response = (
+            self._db.table("stations")
+            .select("code, name")
+            .limit(limit)
+            .execute()
+        )
+        return response.data or []
+
     def search_by_code_prefix(self, query: str, limit: int = 20) -> list[dict]:
         """Search stations whose code starts with *query* (case-insensitive)."""
         response = (

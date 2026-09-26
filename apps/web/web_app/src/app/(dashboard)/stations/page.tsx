@@ -8,69 +8,80 @@ import { Search, MapPin, Activity, Clock, ArrowRight, TrainFront, LayoutDashboar
 import Link from 'next/link';
 
 export default function StationsPage() {
-  const [trains, setTrains] = useState<TrainStatus[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStationCode, setSelectedStationCode] = useState<string | null>(null);
+  
+  const [selectedStation, setSelectedStation] = useState<any | null>(null);
+  const [stationDepartures, setStationDepartures] = useState<any[]>([]);
+  const [isStationLoading, setIsStationLoading] = useState(false);
+  const [stationError, setStationError] = useState<string | null>(null);
 
   useEffect(() => {
-    RailwayApiService.searchTrains()
+    RailwayApiService.searchStations("")
       .then(data => {
-        setTrains(data);
+        setStations(data as Station[]);
         setIsLoading(false);
       })
-      .catch(() => setIsLoading(false));
+      .catch(e => {
+        setApiError(e.message || "Failed to load stations.");
+        setIsLoading(false);
+      });
   }, []);
 
-  // Derive unique stations from current and next stations of active trains
-  const stations = useMemo(() => {
-    const stationMap = new Map<string, Station>();
-    trains.forEach(t => {
-      if (t.current_station) stationMap.set(t.current_station.code, t.current_station);
-      if (t.next_station) stationMap.set(t.next_station.code, t.next_station);
+  useEffect(() => {
+    if (!selectedStationCode) {
+      setSelectedStation(null);
+      setStationDepartures([]);
+      return;
+    }
+    
+    setIsStationLoading(true);
+    setStationError(null);
+    
+    Promise.all([
+      RailwayApiService.getStation(selectedStationCode),
+      RailwayApiService.getStationDepartures(selectedStationCode).catch(() => [])
+    ]).then(([detail, deps]) => {
+      setSelectedStation(detail);
+      setStationDepartures(deps);
+      setIsStationLoading(false);
+    }).catch(e => {
+      setStationError(e.message || "Failed to load station details.");
+      setIsStationLoading(false);
     });
-    return Array.from(stationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [trains]);
+  }, [selectedStationCode]);
 
   const filteredStations = stations.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     s.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedStation = stations.find(s => s.code === selectedStationCode) || null;
-
   // Station specific intelligence
   const stationIntelligence = useMemo(() => {
     if (!selectedStation) return null;
     
-    // Trains where this is the next station (Arrivals) or current station (Departures/At Platform)
-    // Note: Since we only have a snapshot of current trains, we'll approximate arrivals and departures
-    const incomingTrains = trains.filter(t => t.next_station?.code === selectedStation.code);
-    const atStationTrains = trains.filter(t => t.current_station?.code === selectedStation.code);
+    const activeTrains = stationDepartures.map(d => ({
+      train_number: d.train_number,
+      train_name: d.train_name,
+      next_station: null as any,
+      current_station: { code: selectedStation.code, name: selectedStation.name },
+      delay_minutes: 0,
+      status: 'SCHEDULED' as any
+    }));
     
-    const activeTrains = [...incomingTrains, ...atStationTrains];
-    const delayedTrains = activeTrains.filter(t => t.delay_minutes > 0);
-    const avgDelay = activeTrains.length > 0 
-      ? Math.round(activeTrains.reduce((sum, t) => sum + t.delay_minutes, 0) / activeTrains.length) 
-      : 0;
-
-    let status: 'NORMAL' | 'MINOR DISRUPTION' | 'HIGH CONGESTION' | 'CRITICAL' = 'NORMAL';
-    const delayRatio = activeTrains.length > 0 ? delayedTrains.length / activeTrains.length : 0;
-    
-    if (activeTrains.some(t => t.status === 'CRITICAL')) status = 'CRITICAL';
-    else if (delayRatio > 0.5 || activeTrains.length > 10) status = 'HIGH CONGESTION';
-    else if (delayRatio > 0.2) status = 'MINOR DISRUPTION';
-
     return {
-      incomingTrains,
-      atStationTrains,
-      activeTrains,
-      delayedTrains,
-      avgDelay,
-      status
+      incomingTrains: [] as any[],
+      atStationTrains: activeTrains,
+      activeTrains: activeTrains,
+      delayedTrains: [] as any[],
+      avgDelay: 0,
+      status: 'NORMAL' as 'NORMAL' | 'MINOR DISRUPTION' | 'HIGH CONGESTION' | 'CRITICAL'
     };
-  }, [selectedStation, trains]);
+  }, [selectedStation, stationDepartures]);
 
   return (
     <div className="max-w-7xl mx-auto pb-12 flex flex-col h-[calc(100vh-6rem)]">
@@ -106,6 +117,10 @@ export default function StationsPage() {
                   <div key={i} className="h-14 bg-muted rounded-lg animate-pulse" />
                 ))}
               </div>
+            ) : apiError ? (
+              <div className="text-center py-8 text-sm text-destructive font-medium px-4">
+                {apiError}
+              </div>
             ) : filteredStations.length === 0 ? (
               <div className="text-center py-8 text-sm text-muted-foreground">
                 No stations found
@@ -139,7 +154,19 @@ export default function StationsPage() {
 
         {/* Right Column: Station Overview */}
         <div className="flex-1 flex flex-col min-h-0">
-          {!selectedStation || !stationIntelligence ? (
+          {isStationLoading ? (
+            <div className="flex-1 bg-card border border-border rounded-xl shadow-sm flex flex-col items-center justify-center p-6 space-y-4">
+              <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
+              <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+            </div>
+          ) : stationError ? (
+            <div className="flex-1 bg-card border border-border rounded-xl shadow-sm flex flex-col items-center justify-center p-6 text-center">
+               <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+               <h2 className="text-lg font-bold text-foreground mb-2">Error Loading Station</h2>
+               <p className="text-sm text-muted-foreground">{stationError}</p>
+            </div>
+          ) : !selectedStation || !stationIntelligence ? (
             <div className="flex-1 bg-card border border-border rounded-xl shadow-sm flex flex-col items-center justify-center text-center p-6">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <MapPin className="w-8 h-8 text-muted-foreground" />
