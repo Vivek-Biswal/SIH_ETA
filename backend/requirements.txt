@@ -1,4 +1,4 @@
-fastapi>=0.115.0
+fastapi>=0.115
 uvicorn[standard]>=0.30.0
 supabase>=2.7.0
 pydantic>=2.9.0
@@ -6,3 +6,4 @@ pydantic-settings>=2.4.0
 python-dotenv>=1.0.0
 loguru
 httpx>=0.28,<0.29
+pandas
