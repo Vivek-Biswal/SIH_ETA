@@ -69,15 +69,12 @@ const MapController = ({
 
   useEffect(() => {
     if (selectedTrainId) {
-      // Very basic mock coordinates mapping based on train index for demo
-      // In real life, trains would have lat/lng
       const selectedTrain = trains.find(t => t.train_number === selectedTrainId);
-      if (selectedTrain) {
-        // Use a mock location for the selected train
-        const trainIndex = trains.indexOf(selectedTrain);
-        const mockLat = 28.6139 - (trainIndex * 1.5);
-        const mockLng = 77.2090 + (trainIndex * 0.2);
-        map.flyTo([mockLat, mockLng], 7, { animate: true, duration: 1 });
+      if (selectedTrain && selectedTrain.last_known_location) {
+        const loc = selectedTrain.last_known_location;
+        if (loc.latitude !== undefined && loc.longitude !== undefined && loc.latitude !== null && loc.longitude !== null) {
+          map.flyTo([loc.latitude, loc.longitude], 7, { animate: true, duration: 1 });
+        }
       }
     }
   }, [selectedTrainId, trains, map]);
@@ -88,14 +85,33 @@ const MapController = ({
 export default function NetworkMap({ trains, onSelectTrain, selectedTrainId }: NetworkMapProps) {
   const { resolvedTheme } = useTheme();
   
-  // Choose tile layer based on theme
-  // We use CartoDB basemaps which are clean and professional and don't require API keys
+  // We use MapTiler as the basemap provider, using keys from the environment
+  const mapTilerKey = process.env.MAPTILER_API_KEY || '';
   const tileUrl = resolvedTheme === 'dark'
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    ? `https://api.maptiler.com/maps/basic-v2-dark/256/{z}/{x}/{y}.png?key=${mapTilerKey}`
+    : `https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
 
-  // Generate a mock route line connecting the stations
-  const routePositions: [number, number][] = stations.map(s => [s.lat, s.lng]);
+  // Generate mock corridor segments for congestion overlay
+  const normalCorridor: [number, number][] = [
+    [stations[0].lat, stations[0].lng], // NDLS
+    [stations[1].lat, stations[1].lng], // MTJ
+  ];
+  
+  const moderateCorridor: [number, number][] = [
+    [stations[1].lat, stations[1].lng], // MTJ
+    [stations[2].lat, stations[2].lng], // AGC
+    [stations[3].lat, stations[3].lng], // GWL
+  ];
+
+  const criticalCorridor: [number, number][] = [
+    [stations[3].lat, stations[3].lng], // GWL
+    [stations[4].lat, stations[4].lng], // BPL
+  ];
+  
+  const otherCorridor: [number, number][] = [
+    [stations[4].lat, stations[4].lng], // BPL
+    [stations[5].lat, stations[5].lng], // CSMT
+  ];
 
   return (
     <div className="h-full w-full relative z-0 rounded-xl overflow-hidden border border-border">
@@ -112,9 +128,25 @@ export default function NetworkMap({ trains, onSelectTrain, selectedTrainId }: N
         
         <MapController selectedTrainId={selectedTrainId} trains={trains} />
 
-        {/* Railway Route Line */}
+        {/* Railway Corridor Lines with Congestion States */}
+        {/* Normal Corridor */}
         <Polyline 
-          positions={routePositions} 
+          positions={normalCorridor} 
+          pathOptions={{ color: '#3B82F6', weight: 3, opacity: 0.8 }} 
+        />
+        {/* Moderate Congestion Corridor */}
+        <Polyline 
+          positions={moderateCorridor} 
+          pathOptions={{ color: '#F59E0B', weight: 4, opacity: 0.9, dashArray: '6, 6' }} 
+        />
+        {/* Critical Congestion Corridor */}
+        <Polyline 
+          positions={criticalCorridor} 
+          pathOptions={{ color: '#EF4444', weight: 5, opacity: 1 }} 
+        />
+        {/* Rest of the network */}
+        <Polyline 
+          positions={otherCorridor} 
           pathOptions={{ color: '#3B82F6', weight: 2, opacity: 0.6, dashArray: '4, 8' }} 
         />
 
@@ -134,26 +166,38 @@ export default function NetworkMap({ trains, onSelectTrain, selectedTrainId }: N
         ))}
 
         {/* Train Markers */}
-        {trains.map((train, index) => {
-          // Assign mock coordinates spread along the route for visualization
-          const mockLat = 28.6139 - (index * 1.5);
-          const mockLng = 77.2090 + (index * 0.2);
+        {trains.map((train) => {
+          const loc = train.last_known_location;
           const isSelected = train.train_number === selectedTrainId;
+          
+          if (!loc || loc.latitude === undefined || loc.longitude === undefined || loc.latitude === null || loc.longitude === null) {
+             return null;
+          }
+          
+          const speed = loc.speed_kmh !== undefined && loc.speed_kmh !== null ? `${Math.round(loc.speed_kmh)} km/h` : 'N/A';
+          const delay = loc.delay_minutes ? `${loc.delay_minutes} min late` : 'On Time';
+          const posSource = loc.position_source === 'telemetry_derived' ? 'LIVE / Telemetry-derived position' : (loc.position_source || 'Unknown source');
           
           return (
             <Marker
               key={train.train_number}
-              position={[mockLat, mockLng]}
+              position={[loc.latitude, loc.longitude]}
               icon={createTrainIcon(train.status)}
               eventHandlers={{
                 click: () => onSelectTrain(train),
               }}
               zIndexOffset={isSelected ? 1000 : 0}
             >
-              {/* Optional tiny tooltip, but user requested mainly panel */}
               {isSelected && (
                 <Popup closeButton={false} autoClose={false} className="train-selected-popup">
-                  <div className="font-medium text-xs whitespace-nowrap">{train.train_number}</div>
+                  <div className="font-medium text-xs whitespace-nowrap">
+                    <div className="font-bold text-sm mb-1">{train.train_number}</div>
+                    <div className="text-white/90">Speed: {speed}</div>
+                    <div className="text-white/90">Delay: {delay}</div>
+                    <div className="text-white/80 text-[10px] mt-1 border-t border-white/20 pt-1">
+                      {posSource}
+                    </div>
+                  </div>
                 </Popup>
               )}
             </Marker>

@@ -150,13 +150,56 @@ def status_response(data, now=None):
         "platform": str(row["platform"]) if row.get("platform") is not None else None,
     } for row in data["route"]]
     current = next((row["station"] for row in route if row["station"] and row["station"]["code"] == current_code), None)
+    
+    # Calculate derived position based on sequence and segmentProgress
+    derived_lat = None
+    derived_lng = None
+    seq = location.get("sequence")
+    progress = location.get("segmentProgress", 0.0)
+    if progress and progress > 1.0:
+        progress = progress / 100.0  # normalize to 0-1 if it's a percentage
+
+    if seq is not None and isinstance(data.get("route"), list):
+        curr_row = next((r for r in data["route"] if r.get("sequence") == seq), None)
+        nxt_row = next((r for r in data["route"] if r.get("sequence") == seq + 1), None)
+
+        if curr_row and nxt_row:
+            lat1, lon1 = curr_row.get("latitude"), curr_row.get("longitude")
+            lat2, lon2 = nxt_row.get("latitude"), nxt_row.get("longitude")
+            if lat1 is not None and lon1 is not None and lat2 is not None and lon2 is not None:
+                try:
+                    derived_lat = float(lat1) + (float(lat2) - float(lat1)) * progress
+                    derived_lng = float(lon1) + (float(lon2) - float(lon1)) * progress
+                except (ValueError, TypeError):
+                    pass
+        elif curr_row:
+            lat1, lon1 = curr_row.get("latitude"), curr_row.get("longitude")
+            if lat1 is not None and lon1 is not None:
+                try:
+                    derived_lat = float(lat1)
+                    derived_lng = float(lon1)
+                except (ValueError, TypeError):
+                    pass
+
+    last_known = None
+    if timestamp(data.get("lastUpdatedAt")):
+        last_known = {
+            "station": current,
+            "delay_minutes": data.get("delayMinutes", 0),
+            "updated_at": data.get("lastUpdatedAt"),
+            "latitude": derived_lat,
+            "longitude": derived_lng,
+            "speed_kmh": location.get("speedKmh"),
+            "bearing_degrees": location.get("bearingDegrees"),
+            "position_source": "telemetry_derived" if derived_lat is not None else None,
+            "position_updated_at": data.get("lastUpdatedAt") if derived_lat is not None else None,
+        }
+
     return {
         "train_number": str(data["trainNumber"]), "train_name": data["trainName"],
         "date": data["startDate"], "data_source": "live" if fresh(data, now) else "cached",
-        "current_station": current, "overall_delay_minutes": data.get("delayMinutes"), "status": data.get("status") or "unknown", "route": route,
-        "last_known_location": {"station": current, "delay_minutes": data.get("delayMinutes"),
-                                "updated_at": data.get("lastUpdatedAt")}
-                               if timestamp(data.get("lastUpdatedAt")) else None,
+        "current_station": current, "overall_delay_minutes": data.get("delayMinutes", 0), "status": data.get("status") or "unknown", "route": route,
+        "last_known_location": last_known,
     }
 
 

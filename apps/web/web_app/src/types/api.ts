@@ -50,6 +50,21 @@ export interface TrainStatus {
   status: 'ON_TIME' | 'DELAYED' | 'CRITICAL';
   zone: string;
   speed_kmh?: number;
+  bearing_degrees?: number;
+  position_source?: string;
+  position_updated_at?: string;
+  data_source?: string;
+  last_known_location?: {
+    station?: Station;
+    latitude?: number;
+    longitude?: number;
+    speed_kmh?: number;
+    bearing_degrees?: number;
+    position_source?: string;
+    updated_at?: string;
+    position_updated_at?: string;
+    delay_minutes?: number;
+  };
 }
 
 export interface NetworkZoneStatus {
