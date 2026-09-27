@@ -69,29 +69,27 @@ class ApiClient {
     try {
       final response = await send().timeout(timeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        String? message;
-        try {
-          final body = jsonDecode(response.body);
-          if (body is Map && body['message'] is String) {
-            message = body['message'] as String;
-          }
-        } on FormatException {
-          /* HTTP status remains useful for non-JSON errors. */
-        }
         final status = switch (response.statusCode) {
           404 => ApiResultStatus.notFound,
           400 || 422 => ApiResultStatus.invalid,
+          429 || 502 || 503 || 504 => ApiResultStatus.unavailable,
           _ => ApiResultStatus.error,
         };
+        // Server/provider error bodies can contain internal diagnostics. Keep
+        // passenger guidance predictable, including for non-JSON proxy errors.
         return ApiResult.error(
-          message ??
-              switch (status) {
-                ApiResultStatus.notFound => 'Train or station not found.',
-                ApiResultStatus.invalid => 'Please check the search details.',
-                _ =>
-                  'The service could not complete this request. Please retry.',
-              },
+          switch (status) {
+            ApiResultStatus.notFound =>
+              'No railway information was found for these details.',
+            ApiResultStatus.invalid => 'Please check the search details.',
+            ApiResultStatus.unavailable =>
+              'Railway information is temporarily unavailable. Please try again shortly.',
+            _ => 'The service could not complete this request. Please retry.',
+          },
           status: status,
+          dataState: status == ApiResultStatus.unavailable
+              ? ApiDataState.unavailable
+              : ApiDataState.error,
         );
       }
       try {

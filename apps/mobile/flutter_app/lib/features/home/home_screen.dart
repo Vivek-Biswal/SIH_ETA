@@ -31,6 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _form = GlobalKey<FormState>();
   Station? _from, _to, _trackedStation;
   DateTime? _travelDate;
+  DateTime? _trainStartDate;
   String? _error;
 
   @override
@@ -89,9 +90,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     context.push(
       Uri(
         path: '/trains/${_number.text.trim()}',
-        queryParameters: _trackedStation == null
-            ? null
-            : {'station': _trackedStation!.code},
+        queryParameters: {
+          if (_trackedStation != null) 'station': _trackedStation!.code,
+          if (_trainStartDate != null)
+            'date': formatSearchDate(_trainStartDate!),
+        },
       ).toString(),
     );
   }
@@ -123,13 +126,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(Icons.train_rounded, color: colors.primary),
-            const SizedBox(width: 10),
-            const Text('SIH ETA'),
-          ],
-        ),
+        actions: [
+          IconButton(
+            tooltip: 'Show app guide',
+            onPressed: () => context.push('/guide'),
+            icon: const Icon(Icons.help_outline),
+          ),
+        ],
+        title: const Text('SIH ETA'),
       ),
       bottomNavigationBar: const AppNavigation(selected: 0),
       body: SingleChildScrollView(
@@ -150,6 +154,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: TextStyle(color: colors.onSurfaceVariant),
                 ),
                 const SizedBox(height: 22),
+                PassengerCard(
+                  child: Form(
+                    key: _form,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Track your train',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          key: const Key('train-number'),
+                          controller: _number,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.search,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(5),
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: '5-digit train number',
+                            hintText: 'e.g., 12423',
+                            prefixIcon: Icon(Icons.train_outlined),
+                          ),
+                          validator: (value) =>
+                              RegExp(r'^\d{5}$').hasMatch(value?.trim() ?? '')
+                              ? null
+                              : 'Enter a valid 5-digit train number.',
+                          onFieldSubmitted: (_) => _openTrain(),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            TextButton.icon(
+                              key: const Key('train-start-date'),
+                              icon: const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _trainStartDate == null
+                                    ? 'Train start date · latest available'
+                                    : 'Train starts ${formatSearchDate(_trainStartDate!)}',
+                              ),
+                              onPressed: () async {
+                                final now = DateTime.now().toUtc().add(
+                                  const Duration(hours: 5, minutes: 30),
+                                );
+                                final today = DateTime(
+                                  now.year,
+                                  now.month,
+                                  now.day,
+                                );
+                                final selected = await showDatePicker(
+                                  context: context,
+                                  initialDate: _trainStartDate ?? today,
+                                  firstDate: today.subtract(
+                                    const Duration(days: 365),
+                                  ),
+                                  lastDate: today.add(
+                                    const Duration(days: 120),
+                                  ),
+                                  helpText:
+                                      'Date the train leaves its first station',
+                                );
+                                if (mounted && selected != null) {
+                                  setState(() => _trainStartDate = selected);
+                                }
+                              },
+                            ),
+                            if (_trainStartDate != null)
+                              IconButton(
+                                tooltip: 'Use latest available journey',
+                                onPressed: () =>
+                                    setState(() => _trainStartDate = null),
+                                icon: const Icon(Icons.close, size: 18),
+                              ),
+                          ],
+                        ),
+                        TextButton.icon(
+                          key: const Key('track-station-picker'),
+                          icon: const Icon(
+                            Icons.location_on_outlined,
+                            size: 18,
+                          ),
+                          label: Text(
+                            _trackedStation?.label ??
+                                'Station to track · e.g., Delhi (optional)',
+                          ),
+                          onPressed: () async {
+                            final station = await _choose('Station to track');
+                            if (mounted && station != null) {
+                              setState(() => _trackedStation = station);
+                            }
+                          },
+                        ),
+                        if (_trackedStation != null)
+                          TextButton(
+                            onPressed: () =>
+                                setState(() => _trackedStation = null),
+                            child: const Text('Clear station'),
+                          ),
+                        const SizedBox(height: 6),
+                        FilledButton.tonalIcon(
+                          key: const Key('find-train'),
+                          onPressed: _openTrain,
+                          icon: const Icon(Icons.arrow_forward),
+                          label: const Text('View train status'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 PassengerCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -217,7 +340,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             label: Text(
                               _travelDate == null
-                                  ? 'Choose travel date'
+                                  ? 'Choose train start date'
                                   : formatSearchDate(_travelDate!),
                             ),
                             onPressed: () async {
@@ -236,6 +359,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     : today,
                                 firstDate: today,
                                 lastDate: today.add(const Duration(days: 120)),
+                                helpText:
+                                    'Date the train leaves its first station',
                               );
                               if (mounted && selected != null) {
                                 setState(() => _travelDate = selected);
@@ -271,75 +396,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                PassengerCard(
-                  child: Form(
-                    key: _form,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Have a train number?',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        TextFormField(
-                          key: const Key('train-number'),
-                          controller: _number,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.search,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(5),
-                          ],
-                          decoration: const InputDecoration(
-                            labelText: '5-digit train number',
-                            hintText: 'e.g., 12423',
-                            prefixIcon: Icon(Icons.train_outlined),
-                          ),
-                          validator: (value) =>
-                              RegExp(r'^\d{5}$').hasMatch(value?.trim() ?? '')
-                              ? null
-                              : 'Enter a valid 5-digit train number.',
-                          onFieldSubmitted: (_) => _openTrain(),
-                        ),
-                        const SizedBox(height: 10),
-                        TextButton.icon(
-                          key: const Key('track-station-picker'),
-                          icon: const Icon(
-                            Icons.location_on_outlined,
-                            size: 18,
-                          ),
-                          label: Text(
-                            _trackedStation?.label ??
-                                'Station to track · e.g., Delhi (optional)',
-                          ),
-                          onPressed: () async {
-                            final station = await _choose('Station to track');
-                            if (mounted && station != null) {
-                              setState(() => _trackedStation = station);
-                            }
-                          },
-                        ),
-                        if (_trackedStation != null)
-                          TextButton(
-                            onPressed: () =>
-                                setState(() => _trackedStation = null),
-                            child: const Text('Clear station'),
-                          ),
-                        const SizedBox(height: 6),
-                        FilledButton.tonalIcon(
-                          key: const Key('find-train'),
-                          onPressed: _openTrain,
-                          icon: const Icon(Icons.arrow_forward),
-                          label: const Text('View train status'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,

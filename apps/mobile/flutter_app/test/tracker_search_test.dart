@@ -98,23 +98,24 @@ void main() {
     },
   );
 
-  testWidgets('route comes first and both station fields suggest immediately', (
-    tester,
-  ) async {
-    phone(tester);
-    await pumpApp(tester, TestRepository());
-    expect(
-      tester.getTopLeft(find.text('Find a route')).dy,
-      lessThan(tester.getTopLeft(find.text('Have a train number?')).dy),
-    );
-    for (final key in ['origin-picker', 'track-station-picker']) {
-      await revealTap(tester, find.byKey(Key(key)));
-      expect(find.text('New Delhi'), findsOneWidget);
-      expect(find.text('Recent & common stations'), findsOneWidget);
-      expect(find.text('e.g., Delhi or NDLS'), findsOneWidget);
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
-    }
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'train tracking comes first and both station fields suggest immediately',
+    (tester) async {
+      phone(tester);
+      await pumpApp(tester, TestRepository());
+      expect(
+        tester.getTopLeft(find.text('Track your train')).dy,
+        lessThan(tester.getTopLeft(find.text('Find a route')).dy),
+      );
+      for (final key in ['origin-picker', 'track-station-picker']) {
+        await revealTap(tester, find.byKey(Key(key)));
+        expect(find.text('New Delhi'), findsOneWidget);
+        expect(find.text('Recent & common stations'), findsOneWidget);
+        expect(find.text('e.g., Delhi or NDLS'), findsOneWidget);
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
