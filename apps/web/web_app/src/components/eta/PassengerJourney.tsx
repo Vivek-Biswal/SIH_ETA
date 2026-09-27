@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type Journey, type Stop } from '@/services/passenger';
 
-export function PassengerJourney({ number, date = '', target = '', compact = false }: { number: string; date?: string; target?: string; compact?: boolean }) {
+export function PassengerJourney({ number, date = '', target = '', compact = false, autoRefresh = false }: { number: string; date?: string; target?: string; compact?: boolean; autoRefresh?: boolean }) {
   const [journey, setJourney] = useState<Journey | null>(null), [error, setError] = useState('');
   const [loading, setLoading] = useState(true), [revision, refresh] = useState(0);
   const [selected, select] = useState(target), [now, setNow] = useState(() => Date.now());
@@ -14,9 +14,9 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
     return () => controller.abort();
   }, [number, date, revision]);
   useEffect(() => {
-    const timer = setInterval(() => { setNow(Date.now()); }, 30000);
+    const timer = setInterval(() => { setNow(Date.now()); if (autoRefresh && document.visibilityState === 'visible') refresh(n => n + 1); }, 30000);
     return () => clearInterval(timer);
-  }, []);
+  }, [autoRefresh]);
   const status = journey?.status, eta = journey?.eta || null;
   const predictions = eta?.remaining_stations || [];
   const defaultPrediction = predictions.find(p => usablePrediction(eta, p)) || predictions.at(-1);

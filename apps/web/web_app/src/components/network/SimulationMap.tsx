@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTheme } from 'next-themes';
 import { SimTrain, SimSegment } from '@/types/simulation';
 import { SIM_STATIONS } from '@/hooks/useSimulation';
+import { MapTiles } from './MapTiles';
 
 // ---- Icons ----
 const createSimTrainIcon = (status: SimTrain['status'], isSelected: boolean) => {
@@ -67,10 +68,6 @@ interface SimMapProps {
 
 export default function SimulationMap({ trains, segments, selectedId, onSelect }: SimMapProps) {
   const { resolvedTheme } = useTheme();
-  const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || process.env.MAPTILER_API_KEY || '';
-  const tileUrl = resolvedTheme === 'dark'
-    ? `https://api.maptiler.com/maps/basic-v2-dark/256/{z}/{x}/{y}.png?key=${mapTilerKey}`
-    : `https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
 
   // Bottleneck stations
   const bottleneckStations = new Set(
@@ -83,9 +80,9 @@ export default function SimulationMap({ trains, segments, selectedId, onSelect }
         center={[26.8, 78.0]}
         zoom={7}
         style={{ height: '100%', width: '100%', backgroundColor: resolvedTheme === 'dark' ? '#0f172a' : '#f8fafc' }}
-        zoomControl={false}
+        zoomControl={true}
       >
-        <TileLayer url={tileUrl} attribution='&copy; MapTiler &copy; OpenStreetMap' />
+        <MapTiles />
 
         {/* Corridor segments — coloured by congestion */}
         {segments.map((seg) => {
@@ -169,7 +166,7 @@ export default function SimulationMap({ trains, segments, selectedId, onSelect }
       </MapContainer>
 
       {/* SIMULATION MODE overlay badge */}
-      <div className="absolute top-3 left-3 z-[500] flex items-center gap-1.5 bg-amber-500/90 text-black text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg pointer-events-none select-none">
+      <div className="absolute top-3 left-14 z-[500] flex items-center gap-1.5 bg-amber-500/90 text-black text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg pointer-events-none select-none">
         <span className="w-2 h-2 rounded-full bg-black/60 animate-pulse inline-block" />
         SIMULATION MODE
       </div>

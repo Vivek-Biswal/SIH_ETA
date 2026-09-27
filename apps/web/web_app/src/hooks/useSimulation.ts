@@ -149,8 +149,8 @@ function computeMetrics(
       : 0;
 
   let recoveryPct = 0;
-  if ((state === 'RECOVERY' || state === 'RECOVERED') && mitigationAt) {
-    const recoveryDuration = 30_000; // 30s sim time at 1×
+  if ((state === 'RECOVERY' || state === 'RECOVERED') && mitigationAt !== null) {
+    const recoveryDuration = 18_000;
     recoveryPct = Math.min(100, Math.round(((now - mitigationAt) / recoveryDuration) * 100));
     if (state === 'RECOVERED') recoveryPct = 100;
   }
@@ -205,6 +205,7 @@ export function useSimulation(): UseSimulationReturn {
 
   const bottleneckAt  = useRef<number | null>(null);
   const mitigationAt  = useRef<number | null>(null);
+  const clock = useRef(0);
 
   const sync = (
     newTrains: SimTrain[],
@@ -222,7 +223,8 @@ export function useSimulation(): UseSimulationReturn {
   const tick = useCallback(() => {
     if (!runningRef.current) return;
 
-    const now   = Date.now();
+    clock.current += TICK_MS * speedRef.current;
+    const now = clock.current;
     const segs  = segmentsRef.current.map((s) => ({ ...s }));
     const curState = stateRef.current;
     let newState   = curState;
@@ -230,10 +232,8 @@ export function useSimulation(): UseSimulationReturn {
     // -------------------------------------------------------------------
     // 1. Determine segment congestion targets based on elapsed time
     // -------------------------------------------------------------------
-    const bnElapsed = bottleneckAt.current ? now - bottleneckAt.current : 0;
-    const mtElapsed = mitigationAt.current ? now - mitigationAt.current : 0;
-    const simElapsed = bnElapsed / speedRef.current;
-    const recElapsed = mtElapsed  / speedRef.current;
+    const simElapsed = bottleneckAt.current !== null ? now - bottleneckAt.current : 0;
+    const recElapsed = mitigationAt.current !== null ? now - mitigationAt.current : 0;
 
     if (curState === 'BUILDING') {
       // ramp up over 12 seconds of real time
@@ -298,7 +298,7 @@ export function useSimulation(): UseSimulationReturn {
 
       // Smooth speed transition
       const smoothed = t.speedKmh * 0.85 + targetSpeed * 0.15;
-      const speedMs  = (smoothed / 3600) * 1000; // km → per ms
+      const speedMs  = smoothed / 3600; // kilometres per second
       const tickSec  = (TICK_MS / 1000) * speedRef.current;
       const distPerTick = (speedMs * tickSec) / distKm; // progress per tick
 
@@ -376,12 +376,15 @@ export function useSimulation(): UseSimulationReturn {
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { speedRef.current = speed; }, [speed]);
 
-  const metrics = computeMetrics(trains, segments, state, mitigationAt.current, Date.now());
+  const metrics = computeMetrics(trains, segments, state, mitigationAt.current, clock.current);
 
   // Public API
-  const start = () => setRunning(true);
-  const pause = () => setRunning(false);
+  const start = () => { runningRef.current = true; setRunning(true); };
+  const pause = () => { runningRef.current = false; setRunning(false); };
   const reset = () => {
+    clock.current = 0;
+    speedRef.current = 1;
+    setSpeedVal(1);
     setRunning(false);
     runningRef.current = false;
     bottleneckAt.current  = null;
@@ -398,7 +401,7 @@ export function useSimulation(): UseSimulationReturn {
 
   const triggerBottleneck = () => {
     if (stateRef.current !== 'NORMAL') return;
-    bottleneckAt.current = Date.now();
+    bottleneckAt.current = clock.current;
     stateRef.current = 'BUILDING';
     setState('BUILDING');
     if (!runningRef.current) {
@@ -409,7 +412,7 @@ export function useSimulation(): UseSimulationReturn {
 
   const runMitigation = () => {
     if (stateRef.current !== 'CRITICAL' && stateRef.current !== 'BUILDING') return;
-    mitigationAt.current = Date.now();
+    mitigationAt.current = clock.current;
     stateRef.current = 'MITIGATION';
     setState('MITIGATION');
     // Apply mitigation to trains: reduce delay by 30%, restore some speed

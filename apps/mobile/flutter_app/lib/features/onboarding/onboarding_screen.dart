@@ -228,7 +228,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               color: colors.primaryContainer,
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            child: Icon(
+                            child: _page == 0 ? Image.asset('assets/brand/logo.png', height: 110) : Icon(
                               step.icon,
                               size: 72,
                               color: colors.onPrimaryContainer,

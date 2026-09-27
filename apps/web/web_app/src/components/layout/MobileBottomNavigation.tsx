@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Train, Bell, User } from 'lucide-react';
+import { LayoutDashboard, Train, Bell, User, Network } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Trains', href: '/trains', icon: Train },
+  { name: 'Network', href: '/network', icon: Network },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Profile', href: '/settings', icon: User },
 ];

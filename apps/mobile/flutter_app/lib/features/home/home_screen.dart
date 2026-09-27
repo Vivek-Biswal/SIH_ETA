@@ -133,7 +133,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.help_outline),
           ),
         ],
-        title: const Text('SIH ETA'),
+        title: Row(children: [
+          ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/brand/logo.png', width: 36, height: 36, semanticLabel: 'Equinox')),
+          const SizedBox(width: 10),
+          const Text('SIH ETA'),
+        ]),
       ),
       bottomNavigationBar: const AppNavigation(selected: 0),
       body: SingleChildScrollView(

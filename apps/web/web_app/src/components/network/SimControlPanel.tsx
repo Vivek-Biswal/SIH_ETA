@@ -58,7 +58,7 @@ export function SimControlPanel({
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Simulation Scenario</span>
-          <span className="text-[10px] text-muted-foreground/60">Agra–Jhansi Corridor · North Central Railway</span>
+          <span className="text-[10px] text-muted-foreground/60">Delhi–Jhansi illustrative corridor</span>
         </div>
         <div className={`flex items-center gap-1.5 border text-xs font-bold px-2.5 py-1 rounded-full ${cfg.bg}`} style={{ color: cfg.color }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: cfg.color }} />
@@ -72,7 +72,7 @@ export function SimControlPanel({
         <MetricBox label="Affected Trains" value={metrics.affectedTrains} />
         <MetricBox label="Avg Delay" value={metrics.avgDelayMinutes} unit="min" accent={delayAccent} />
         <MetricBox label="Critical Sections" value={metrics.criticalSections} accent={metrics.criticalSections > 0 ? 'text-red-500' : ''} />
-        <MetricBox label="Throughput" value={metrics.throughputPct} unit="%" />
+        <MetricBox label="Flow index (model)" value={metrics.throughputPct} unit="%" />
         <MetricBox label="Recovery" value={metrics.recoveryPct} unit="%" accent={metrics.recoveryPct > 50 ? 'text-emerald-500' : ''} />
       </div>
 
@@ -160,12 +160,12 @@ export function SimControlPanel({
 
       {/* State description */}
       <div className="text-[11px] text-muted-foreground bg-muted/20 rounded-lg px-3 py-2 border border-border/50">
-        {state === 'NORMAL'     && '▶ All trains moving normally on the Agra–Jhansi corridor. Click "Trigger Bottleneck" to begin the scenario.'}
+        {state === 'NORMAL'     && 'All simulated trains begin at nominal speed. Trigger a bottleneck to reduce capacity on the AGC–DHO section.'}
         {state === 'BUILDING'   && '⚠ Capacity reduction event active on AGC–DHO section. Trains are slowing and queuing. Congestion is building.'}
         {state === 'CRITICAL'   && '🔴 Bottleneck CRITICAL. Severe delay propagation in progress across multiple trains. Run mitigation to intervene.'}
-        {state === 'MITIGATION' && '🔵 Network mitigation actions applied: train sequencing, controlled holding, and speed/headway adjustment initiated.'}
+        {state === 'MITIGATION' && 'Illustrative mitigation applied: model delays reduced by 30%, followed by gradual speed recovery.'}
         {state === 'RECOVERY'   && '↗ Congestion clearing. Trains recovering speed and headway. Queue shrinking progressively.'}
-        {state === 'RECOVERED'  && '✅ Network fully recovered. All trains returned to nominal operations on the corridor.'}
+        {state === 'RECOVERED'  && 'Section capacity restored in the model. Trains may still retain accumulated delay.'}
       </div>
 
       {/* Data integrity notice */}

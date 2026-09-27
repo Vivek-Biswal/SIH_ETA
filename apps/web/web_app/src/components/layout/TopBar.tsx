@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Search, Sun, Moon, TrainFront } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import Image from 'next/image';
 import { lookup, type SearchTrain } from '@/services/passenger';
 
 export function TopBar() {
@@ -19,7 +20,7 @@ export function TopBar() {
     return () => { clearTimeout(timer); controller.abort(); };
   }, [query]);
   return <header className="h-16 bg-card border-b border-border px-4 md:px-6 flex items-center justify-between gap-4 shrink-0 z-40">
-    <Link href="/dashboard" className="flex gap-2 items-center font-semibold shrink-0"><TrainFront size={20} className="text-primary" />SIH ETA</Link>
+    <Link href="/dashboard" className="flex gap-2 items-center font-semibold shrink-0"><Image src="/brand/logo.png" alt="Equinox" width={36} height={36} className="rounded-lg" />SIH ETA</Link>
     <div className="hidden sm:block relative w-full max-w-md" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
       <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
       <input aria-label="Find a train by name or number" placeholder="Train name or number" value={query} onChange={e => { setQuery(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }} className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm" />

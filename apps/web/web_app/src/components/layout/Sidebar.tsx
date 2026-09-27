@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -37,7 +38,7 @@ export const Sidebar: React.FC = () => {
         {/* Brand Header */}
         <div className="h-16 border-b border-[var(--sidebar-border)] flex items-center px-4 gap-3">
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
-            <Train className="w-5 h-5" />
+            <Image src="/brand/logo.png" alt="Equinox" width={40} height={40} className="rounded-lg" />
           </div>
           <div className="flex flex-col">
             <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)] leading-tight">
@@ -58,7 +59,7 @@ export const Sidebar: React.FC = () => {
             {primaryNavigation.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                (item.href !== '/dashboard' && item.href !== '/network' && pathname.startsWith(item.href));
               const Icon = item.icon;
 
               return (
