@@ -25,7 +25,7 @@ const primaryNavigation = [
 
 const secondaryNavigation = [
   { name: 'Stations', href: '/stations', icon: MapPin },
-  { name: 'Routes', href: '/routes', icon: Navigation },
+  { name: 'Routes', href: '/network/congestion', icon: Navigation },
 ];
 
 export const Sidebar: React.FC = () => {
