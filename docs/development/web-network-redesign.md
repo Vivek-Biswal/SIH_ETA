@@ -29,7 +29,10 @@ at runtime. The response intentionally exposes the browser key to MapTiler's
 client tile layer; use a MapTiler browser key restricted to the website domains.
 Do not put an administrative credential in this variable. Tiles use MapTiler's
 256-pixel raster endpoint with MapTiler and OpenStreetMap attribution visible.
-Missing configuration and failed tile requests show explicit errors and retry.
+Missing configuration and failed tile requests show an explicit warning and switch
+to an OpenStreetMap fallback so geographic context remains visible. Retry MapTiler
+rechecks the configured key. The satellite layer appears once the authorized key
+is accepted.
 
 The connected Vercel account in this work session listed only `sport-assess`.
 The railway project's environment values and tile authorization therefore remain
