@@ -9,7 +9,7 @@ from .interfaces import PropagationProvider, BottleneckProvider, ScenarioProvide
 logger = logging.getLogger(__name__)
 
 # Base directory for the repository
-BASE_DIR = Path(__file__).resolve().parents[4]
+BASE_DIR = Path(__file__).resolve().parents[3]
 NOTEBOOKS_DIR = BASE_DIR / "notebooks" / "outputs"
 
 
@@ -39,7 +39,7 @@ class RealNetworkProvider(PropagationProvider, BottleneckProvider, ScenarioProvi
                             "time_window": f"{row.get('gap_minutes', 0)} min gap",
                             "risk": row.get("risk_band", "unknown").lower(),
                             "confidence": float(row.get("risk_score", 0)),
-                            "data_state": "live",
+                            "data_state": "cached",
                             "risk_score": float(row.get("risk_score", 0)),
                             "risk_percentage": float(row.get("risk_score", 0)) * 100,
                             "risk_band": row.get("risk_band", "UNKNOWN"),
@@ -54,7 +54,7 @@ class RealNetworkProvider(PropagationProvider, BottleneckProvider, ScenarioProvi
                 "time_window": "N/A",
                 "risk": "low",
                 "confidence": 0.0,
-                "data_state": "live",
+                "data_state": "unavailable",
             }
         except Exception as e:
             logger.warning("RealNetworkProvider get_propagation failed: %s", e)
@@ -92,12 +92,12 @@ class RealNetworkProvider(PropagationProvider, BottleneckProvider, ScenarioProvi
 
                     bottlenecks.append({
                         "location": row.get("station", "Unknown"),
-                        "time_window": "Active",
+                        "time_window": "Historical analysis · observation time unavailable",
                         "risk": risk,
                         "affected_trains": int(row.get("high_risk_interactions", 0)),
                         "reason": f"Bottleneck Score: {float(row.get('bottleneck_score', 0)):.2f}",
                         "confidence": risk_score,
-                        "data_state": "live",
+                        "data_state": "cached",
                         # Extra fields to match the UI requirements if needed
                         "station": row.get("station", "Unknown"),
                         "interactions": int(row.get("interactions", 0)),

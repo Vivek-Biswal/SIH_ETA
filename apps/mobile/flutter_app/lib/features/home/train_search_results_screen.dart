@@ -184,7 +184,7 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
                           label: Text(
                             _date == null
                                 ? 'All running days'
-                                : formatSearchDate(_date!),
+                                : 'Train starts ${formatSearchDate(_date!)}',
                           ),
                           onPressed: _loading
                               ? null
@@ -205,6 +205,8 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
                                     lastDate: today.add(
                                       const Duration(days: 120),
                                     ),
+                                    helpText:
+                                        'Date the train leaves its first station',
                                   );
                                   if (mounted && selected != null) {
                                     setState(() => _date = selected);
@@ -228,7 +230,7 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
                       const Padding(
                         padding: EdgeInsets.only(bottom: 12),
                         child: Text(
-                          'Published running days are not confirmation of operation. Unknown running days remain visible.',
+                          'Date means departure from the train’s first station. Published running days are not confirmation of operation. Unknown running days remain visible.',
                           style: TextStyle(fontSize: 12),
                         ),
                       ),
@@ -282,7 +284,7 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
                       if (trains.isEmpty)
                         const MessagePanel(
                           message:
-                              'No trains match these endpoints. Try another origin or destination.',
+                              'No matching services on this page. Try another date, station or result page.',
                           icon: Icons.search_off,
                         ),
                       for (final train in trains)
@@ -290,8 +292,16 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
                           padding: const EdgeInsets.only(top: 12),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
-                            onTap: () =>
-                                context.push('/trains/${train.trainNumber}'),
+                            onTap: () => context.push(
+                              Uri(
+                                path: '/trains/${train.trainNumber}',
+                                queryParameters: {
+                                  'station': widget.to,
+                                  if (_date != null)
+                                    'date': formatSearchDate(_date!),
+                                },
+                              ).toString(),
+                            ),
                             child: PassengerCard(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

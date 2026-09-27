@@ -8,6 +8,7 @@ from typing import Optional
 
 from repositories.network_repository import NetworkRepository
 from services.adapters.network_adapter import NetworkIntelligenceAdapter
+from services.network_insights import NetworkInsightsService
 from models.schemas.network import (
     NetworkStatusResponse,
     CongestionHotspot,
@@ -25,6 +26,9 @@ class NetworkService:
     ):
         self._repo = network_repo or NetworkRepository()
         self._adapter = network_adapter or NetworkIntelligenceAdapter()
+
+    def get_network_insights(self, query: str = "", limit: int = 50) -> dict:
+        return NetworkInsightsService().get_insights(query, limit)
 
     # ── Network status ───────────────────────────────────────────────────
 

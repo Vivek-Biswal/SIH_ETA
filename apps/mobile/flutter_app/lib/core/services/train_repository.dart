@@ -35,13 +35,13 @@ class ApiTrainRepository implements TrainRepository {
       Uri.parse('$baseUrl/$path').replace(queryParameters: query).toString();
 
   @override
-  Future<ApiResult<List<Station>>> searchStations(String query) => _client.get(
-    _url('stations/search', {'q': query.trim()}),
-    (json) {
-      if (jsonObject(json)['data_source'] != 'database') throw const FormatException('Station source unverified');
-      return jsonList(jsonObject(json)['results'], Station.fromJson);
-    },
-  );
+  Future<ApiResult<List<Station>>> searchStations(String query) =>
+      _client.get(_url('stations/search', {'q': query.trim()}), (json) {
+        if (jsonObject(json)['data_source'] != 'database') {
+          throw const FormatException('Station source unverified');
+        }
+        return jsonList(jsonObject(json)['results'], Station.fromJson);
+      });
 
   @override
   Future<ApiResult<TrainSearchPage>> searchTrains(
@@ -62,14 +62,21 @@ class ApiTrainRepository implements TrainRepository {
 
   @override
   Future<JourneyResult> getJourney(String trainNumber, {String? date}) async {
-    final id = Uri.encodeComponent(trainNumber.trim());
+    final number = trainNumber.trim();
+    final id = Uri.encodeComponent(number);
     var status = await _client.get(
       _url('trains/$id/status', date == null ? null : {'date': date}),
       (json) => TrainStatus.fromJson(jsonObject(json)),
     );
-    if (date != null &&
-        status.data?.date != null &&
-        status.data!.date != date) {
+    // Validate identity before using the returned date in another request.
+    if (status.data != null && status.data!.trainNumber != number) {
+      status = ApiResult.error(
+        'The returned status is for a different train. Please refresh.',
+      );
+    } else if (status.data != null &&
+        (status.data!.date == null ||
+            status.data!.date!.trim().isEmpty ||
+            (date != null && status.data!.date != date))) {
       status = ApiResult.error(
         'No status was returned for the selected journey date.',
       );
@@ -83,19 +90,12 @@ class ApiTrainRepository implements TrainRepository {
       (json) => ETAModel.fromJson(jsonObject(json)),
     );
     if (eta.data != null &&
-        ((journeyDate != null &&
-                eta.data!.date != null &&
-                eta.data!.date != journeyDate) ||
-            eta.data!.trainNumber != trainNumber.trim())) {
+        (eta.data!.date == null ||
+            eta.data!.date!.trim().isEmpty ||
+            (journeyDate != null && eta.data!.date != journeyDate) ||
+            eta.data!.trainNumber != number)) {
       eta = ApiResult.error(
         'Prediction belongs to a different journey. Please refresh.',
-      );
-    }
-    if (status.data != null && status.data!.trainNumber != trainNumber.trim()) {
-      return JourneyResult(
-        ApiResult.error('Unexpected train in server response.'),
-        eta,
-        DateTime.now(),
       );
     }
     return JourneyResult(status, eta, DateTime.now());

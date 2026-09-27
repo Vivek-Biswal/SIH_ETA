@@ -63,6 +63,12 @@ class LastKnownLocation(BaseModel):
     station: Optional[StationRef] = None
     delay_minutes: int = 0
     updated_at: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    speed_kmh: Optional[float] = None
+    bearing_degrees: Optional[float] = None
+    position_source: Optional[str] = None
+    position_updated_at: Optional[str] = None
 
 
 class StationRunningStatus(BaseModel):

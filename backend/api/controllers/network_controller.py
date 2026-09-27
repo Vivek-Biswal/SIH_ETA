@@ -17,6 +17,10 @@ class NetworkController:
     def __init__(self, network_service: Optional[NetworkService] = None):
         self._svc = network_service or NetworkService()
 
+    def get_network_insights(self, query: str = "", limit: int = 50) -> dict:
+        """Return dated, explicitly historical network analysis."""
+        return self._svc.get_network_insights(query, limit)
+
     async def get_network_status(self) -> NetworkStatusResponse:
         """Delegate to NetworkService.get_network_status."""
         return self._svc.get_network_status()

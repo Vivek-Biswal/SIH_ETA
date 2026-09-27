@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/services/preferences.dart';
+import '../../core/services/saved_journeys.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/train_models.dart';
@@ -18,10 +19,12 @@ import '../../shared/widgets/passenger_components.dart';
 class TrainDetailsScreen extends ConsumerStatefulWidget {
   final String trainNumber;
   final String? stationCode;
+  final String? journeyDate;
   const TrainDetailsScreen({
     super.key,
     required this.trainNumber,
     this.stationCode,
+    this.journeyDate,
   });
   @override
   ConsumerState<TrainDetailsScreen> createState() => _TrainDetailsScreenState();
@@ -33,9 +36,11 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   ETAModel? _eta;
   String? _statusError;
   String? _etaError;
-  DateTime? _fetchedAt;
+  DateTime? _statusFetchedAt;
+  DateTime? _etaFetchedAt;
   bool _loading = true;
   bool _busy = false;
+  bool _savingJourney = false;
   int _request = 0;
   String? _journeyDate;
   int? _arrivalIndex;
@@ -44,32 +49,55 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   @override
   void initState() {
     super.initState();
+    _journeyDate = widget.journeyDate;
     WidgetsBinding.instance.addObserver(this);
     _refresh();
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted &&
-          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
-          ModalRoute.of(context)?.isCurrent == true) {
-        _refresh();
-      }
+      if (_canAutoRefresh) _refresh();
     });
   }
 
   @override
   void didUpdateWidget(TrainDetailsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.trainNumber != widget.trainNumber) {
-      _request++;
-      _status = null;
-      _eta = null;
-      _fetchedAt = null;
-      _statusError = null;
-      _etaError = null;
-      _busy = false;
-      _loading = true;
+    if (oldWidget.trainNumber != widget.trainNumber ||
+        oldWidget.journeyDate != widget.journeyDate) {
+      _resetJourney(widget.journeyDate);
       _refresh();
+    } else if (oldWidget.stationCode != widget.stationCode) {
+      _arrivalIndex = _uniqueStationIndex(_status, widget.stationCode);
     }
   }
+
+  void _resetJourney(String? date) {
+    _request++;
+    _journeyDate = date;
+    _status = null;
+    _eta = null;
+    _statusFetchedAt = null;
+    _etaFetchedAt = null;
+    _statusError = null;
+    _etaError = null;
+    _arrivalIndex = null;
+    _busy = false;
+    _loading = true;
+  }
+
+  int? _uniqueStationIndex(TrainStatus? status, String? code) {
+    if (status == null || code == null) return null;
+    final matches = <int>[
+      for (var i = 0; i < status.route.length; i++)
+        if (status.route[i].station?.code == code) i,
+    ];
+    return matches.length == 1 ? matches.single : null;
+  }
+
+  bool get _canAutoRefresh =>
+      mounted &&
+      (WidgetsBinding.instance.lifecycleState == null ||
+          WidgetsBinding.instance.lifecycleState ==
+              AppLifecycleState.resumed) &&
+      ModalRoute.of(context)?.isCurrent == true;
 
   @override
   void dispose() {
@@ -81,7 +109,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _refresh();
+    if (state == AppLifecycleState.resumed && _canAutoRefresh) _refresh();
   }
 
   Future<void> _refresh() async {
@@ -103,33 +131,47 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
       setState(() {
         final freshStatus = result.status.data;
         final freshEta = result.eta.data;
+        final selectedCode =
+            _arrivalIndex != null &&
+                _status != null &&
+                _arrivalIndex! < _status!.route.length
+            ? _status!.route[_arrivalIndex!].station?.code
+            : widget.stationCode;
         // Never retain data from a different journey during partial refresh.
-        if (freshStatus != null && _eta?.date != freshStatus.date) _eta = null;
-        if (freshEta != null && _status?.date != freshEta.date) _status = null;
-        if (result.status.status == ApiResultStatus.notFound) _status = null;
-        if (result.eta.status == ApiResultStatus.notFound) _eta = null;
+        if (freshStatus != null && _eta?.date != freshStatus.date) {
+          _eta = null;
+          _etaFetchedAt = null;
+        }
+        if (freshEta != null && _status?.date != freshEta.date) {
+          _status = null;
+          _statusFetchedAt = null;
+        }
+        if (result.status.status == ApiResultStatus.notFound) {
+          _status = null;
+          _statusFetchedAt = null;
+        }
+        if (result.eta.status == ApiResultStatus.notFound) {
+          _eta = null;
+          _etaFetchedAt = null;
+        }
         if (freshStatus != null) {
           ref.read(historyProvider.notifier).add(widget.trainNumber);
         }
         _status = freshStatus ?? _status;
-        if (_arrivalIndex == null &&
-            widget.stationCode != null &&
-            freshStatus != null) {
-          final index = freshStatus.route.indexWhere(
-            (s) => s.station?.code == widget.stationCode,
-          );
-          if (index >= 0) _arrivalIndex = index;
+        if (freshStatus != null) {
+          _arrivalIndex = _uniqueStationIndex(freshStatus, selectedCode);
+          _statusFetchedAt = result.fetchedAt;
         }
         _eta = freshEta ?? _eta;
+        if (freshEta != null) _etaFetchedAt = result.fetchedAt;
+        // Once resolved, keep this journey stable across midnight and refreshes.
+        _journeyDate ??= freshStatus?.date ?? freshEta?.date;
         _statusError = result.status.isSuccess
             ? null
             : result.status.errorMessage ?? 'Status is unavailable.';
         _etaError = result.eta.isSuccess
             ? null
             : result.eta.errorMessage ?? 'Arrival predictions are unavailable.';
-        if (freshStatus != null || freshEta != null) {
-          _fetchedAt = result.fetchedAt;
-        }
         _loading = false;
         _busy = false;
       });
@@ -161,6 +203,25 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
         : stops[_arrivalIndex != null && _arrivalIndex! < stops.length
               ? _arrivalIndex!
               : stops.length - 1];
+    final selectedStation = destination?.stop.station;
+    final uniqueStation =
+        selectedStation != null &&
+        stops
+                .where((s) => s.stop.station?.code == selectedStation.code)
+                .length ==
+            1;
+    final savedJourney = status == null
+        ? null
+        : SavedJourney(
+            trainNumber: status.trainNumber,
+            trainName: status.trainName,
+            journeyDate: status.date,
+            stationCode: uniqueStation ? selectedStation.code : null,
+            stationName: uniqueStation ? selectedStation.name : null,
+          );
+    final isSaved =
+        savedJourney != null &&
+        ref.watch(savedJourneysProvider).any((s) => s.id == savedJourney.id);
     final progressKnown = stops.any((s) => s.stage != StopStage.unknown);
     return Scaffold(
       appBar: AppBar(
@@ -180,22 +241,25 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
             onPressed: _busy
                 ? null
                 : () async {
-                    final today = DateTime.now();
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    final firstDate = today.subtract(const Duration(days: 365));
+                    final lastDate = today.add(const Duration(days: 120));
+                    final selectedDate =
+                        DateTime.tryParse(_journeyDate ?? '') ?? today;
                     final chosen = await showDatePicker(
                       context: context,
-                      initialDate:
-                          DateTime.tryParse(_journeyDate ?? '') ?? today,
-                      firstDate: today.subtract(const Duration(days: 365)),
-                      lastDate: today.add(const Duration(days: 120)),
+                      initialDate: selectedDate.isBefore(firstDate)
+                          ? firstDate
+                          : selectedDate.isAfter(lastDate)
+                          ? lastDate
+                          : selectedDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
                       helpText: 'Date the train starts its journey',
                     );
                     if (chosen == null || !mounted) return;
-                    setState(() {
-                      _journeyDate = chosen.toIso8601String().split('T').first;
-                      _status = null;
-                      _eta = null;
-                      _loading = true;
-                    });
+                    setState(() => _resetJourney(formatSearchDate(chosen)));
                     _refresh();
                   },
           ),
@@ -299,7 +363,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             ),
                           SizedBox(height: 12),
                           Text(
-                            'Last fetched: ${_fetchedAt == null ? 'Unavailable' : displayTime(_fetchedAt!.toUtc().toIso8601String())}',
+                            'Status fetched: ${_statusFetchedAt == null ? 'Unavailable' : displayTime(_statusFetchedAt!.toUtc().toIso8601String())}',
                             style: TextStyle(
                               color: Theme.of(
                                 context,
@@ -307,6 +371,16 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                               fontSize: 12,
                             ),
                           ),
+                          if (eta != null)
+                            Text(
+                              'Arrival information fetched: ${_etaFetchedAt == null ? 'Unavailable' : displayTime(_etaFetchedAt!.toUtc().toIso8601String())}',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontSize: 12,
+                              ),
+                            ),
                           Text(
                             'Last observation: ${displayTime(status?.observedAt)}',
                             style: TextStyle(
@@ -338,6 +412,28 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             message:
                                 '${_etaError!}${eta == null ? '' : ' Showing last fetched arrival information; it may be stale.'}',
                             onRetry: _busy ? null : _refresh,
+                          ),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 12),
+                          child: Text(
+                            'Checks for updates every 30 seconds while this screen is open. Pull down to refresh now.',
+                            style: TextStyle(fontSize: 12, height: 1.5),
+                          ),
+                        ),
+                        if (_journeyDate != null &&
+                            status == null &&
+                            eta == null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: DataTag('Journey start date: $_journeyDate'),
+                          ),
+                        if (_journeyDate != null &&
+                            (status != null || eta != null) &&
+                            status?.date == null &&
+                            eta?.date == null)
+                          MessagePanel(
+                            message:
+                                'No dated journey record was returned for $_journeyDate. Check the journey start date using the calendar above.',
                           ),
                         if (status != null) ...[
                           SectionTitle('Journey status'),
@@ -373,16 +469,21 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                         ],
                         if (destination != null) ...[
                           if (widget.stationCode != null &&
-                              !stops.any(
-                                (s) =>
-                                    s.stop.station?.code == widget.stationCode,
-                              ))
+                              stops
+                                      .where(
+                                        (s) =>
+                                            s.stop.station?.code ==
+                                            widget.stationCode,
+                                      )
+                                      .length !=
+                                  1)
                             MessagePanel(
                               message:
-                                  '${widget.stationCode} is not in the returned route. Showing the destination instead.',
+                                  '${widget.stationCode} could not be uniquely matched in this route. Choose an arrival station below.',
                             ),
                           SectionTitle('Arrival information'),
                           DropdownButtonFormField<int>(
+                            key: const Key('arrival-station'),
                             value:
                                 _arrivalIndex != null &&
                                     _arrivalIndex! < stops.length
@@ -406,6 +507,73 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             onChanged: (value) =>
                                 setState(() => _arrivalIndex = value),
                           ),
+                          if (savedJourney != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: OutlinedButton.icon(
+                                key: const Key('save-journey'),
+                                icon: Icon(
+                                  isSaved
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                ),
+                                label: Text(
+                                  _savingJourney
+                                      ? 'Saving…'
+                                      : isSaved
+                                      ? 'Journey saved'
+                                      : !uniqueStation
+                                      ? 'Save train and date'
+                                      : status?.date == null
+                                      ? 'Save train'
+                                      : 'Save journey',
+                                ),
+                                onPressed: _savingJourney
+                                    ? null
+                                    : () async {
+                                        setState(() => _savingJourney = true);
+                                        final saved = ref.read(
+                                          savedJourneysProvider.notifier,
+                                        );
+                                        try {
+                                          if (isSaved) {
+                                            await saved.remove(savedJourney.id);
+                                          } else {
+                                            await saved.save(savedJourney);
+                                          }
+                                          if (!context.mounted) return;
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                isSaved
+                                                    ? 'Journey removed from saved journeys.'
+                                                    : 'Journey saved. Open it from the Saved tab.',
+                                              ),
+                                            ),
+                                          );
+                                        } catch (_) {
+                                          if (!context.mounted) return;
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Could not update saved journeys. Please retry.',
+                                              ),
+                                            ),
+                                          );
+                                        } finally {
+                                          if (mounted) {
+                                            setState(
+                                              () => _savingJourney = false,
+                                            );
+                                          }
+                                        }
+                                      },
+                              ),
+                            ),
                           const SizedBox(height: 12),
                           EtaDisplay(
                             destination:

@@ -77,7 +77,7 @@ Future<void> pumpApp(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [trainRepositoryProvider.overrideWithValue(repository)],
-      child: SihEtaMobileApp(router: router),
+      child: SihEtaMobileApp(router: router, enableOnboarding: false),
     ),
   );
   await tester.pumpAndSettle();
@@ -192,7 +192,7 @@ void main() {
       expect(repo.searchedDate, isNull);
       expect(find.text('Train search results'), findsOneWidget);
       expect(find.text('Have a train number?'), findsNothing);
-      expect(find.textContaining('No trains match'), findsOneWidget);
+      expect(find.textContaining('No matching services'), findsOneWidget);
       await tester.tap(find.byTooltip('Back to search'));
       await tester.pumpAndSettle();
       expect(find.text('Find your train'), findsOneWidget);
@@ -257,7 +257,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [trainRepositoryProvider.overrideWithValue(repo)],
-        child: SihEtaMobileApp(router: router),
+        child: SihEtaMobileApp(router: router, enableOnboarding: false),
       ),
     );
     await tester.pump();

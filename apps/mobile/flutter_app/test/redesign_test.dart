@@ -138,7 +138,7 @@ void main() {
           ],
           child: RepaintBoundary(
             key: const Key('preview'),
-            child: SihEtaMobileApp(router: router),
+            child: SihEtaMobileApp(router: router, enableOnboarding: false),
           ),
         ),
       );

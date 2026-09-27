@@ -10,15 +10,21 @@ class AppNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) => NavigationBar(
     selectedIndex: selected,
-    onDestinationSelected: (i) => context.go(['/', '/explore', '/network'][i]),
+    onDestinationSelected: (i) =>
+        context.go(['/', '/saved', '/network', '/explore'][i]),
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.train_outlined),
         selectedIcon: Icon(Icons.train),
-        label: 'Journeys',
+        label: 'Search',
       ),
-      NavigationDestination(icon: Icon(Icons.tune), label: 'Travel tools'),
+      NavigationDestination(
+        icon: Icon(Icons.bookmark_border),
+        selectedIcon: Icon(Icons.bookmark),
+        label: 'Saved',
+      ),
       NavigationDestination(icon: Icon(Icons.hub_outlined), label: 'Network'),
+      NavigationDestination(icon: Icon(Icons.help_outline), label: 'Help'),
     ],
   );
 }
@@ -27,11 +33,92 @@ class ExploreScreen extends ConsumerWidget {
   const ExploreScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Travel tools')),
-    bottomNavigationBar: const AppNavigation(selected: 1),
+    appBar: AppBar(title: const Text('Help & settings')),
+    bottomNavigationBar: const AppNavigation(selected: 3),
     body: ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        PassengerCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'A little help for your journey',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Learn to find your train, read arrival estimates and save a journey.',
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                key: const Key('replay-guide'),
+                onPressed: () => context.push('/guide'),
+                icon: const Icon(Icons.explore_outlined),
+                label: const Text('Show app guide'),
+              ),
+            ],
+          ),
+        ),
+        const SectionTitle('Understanding your arrival time'),
+        const PassengerCard(
+          child: Column(
+            children: [
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('What does ETA mean?'),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'ETA means expected time of arrival. It is an estimate that can change as new information arrives. Scheduled arrival is the timetable time. Actual arrival means the train has been reported at that station.',
+                      style: TextStyle(height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('Which date should I choose?'),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'Choose the date your train leaves its first station. For an overnight or multi-day train, this can be earlier than the date you board. You can change it with the calendar in train details.',
+                      style: TextStyle(height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('Why is an update old or unavailable?'),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'Train details checks for updates every 30 seconds while open. A recent check can still return an older railway observation. Check the last observation time. If the connection fails, previously loaded details are labelled as old; saved journeys are shortcuts and need internet for new updates.',
+                      style: TextStyle(height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('Will I get a station alert?'),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'Saving a journey does not send alerts. The reminder option opens your phone clock for you to confirm an alarm. That alarm uses the device time zone and will not adjust if the train is delayed.',
+                      style: TextStyle(height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         const SectionTitle('Make it yours'),
         PassengerCard(
           child: Column(
@@ -90,70 +177,11 @@ class ExploreScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         const PassengerCard(
           child: Text(
-            'Fares, seat availability, PNR and coach positions require a connected railway data provider. These data feeds are not currently available in this project.',
+            'Ticket booking, fares, seat availability and PNR are not available in this app.',
             style: TextStyle(height: 1.6),
           ),
         ),
       ],
-    ),
-  );
-}
-
-class NetworkSpace extends StatelessWidget {
-  const NetworkSpace({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Network intelligence')),
-    bottomNavigationBar: const AppNavigation(selected: 2),
-    body: Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(24),
-          children: [
-            Icon(
-              Icons.hub_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'A wider view of your journey',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Network intelligence is planned for a future release. No network feed is connected yet.',
-              textAlign: TextAlign.center,
-              style: TextStyle(height: 1.6),
-            ),
-            const SizedBox(height: 28),
-            const PassengerCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Planned coverage',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'Congestion across stations and routes\nDelay propagation and affected services\nDisruptions and network alerts',
-                    style: TextStyle(height: 2),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.go('/'),
-              child: const Text('Find your train'),
-            ),
-          ],
-        ),
-      ),
     ),
   );
 }
