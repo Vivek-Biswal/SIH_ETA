@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { PASSENGER_API, validDate, type Status, time } from '@/services/passenger';
-import { MapWrapper } from './MapWrapper';
+import { useEffect, useRef, useState } from 'react';
+import { PASSENGER_API, stationDetails, validDate, type Status, time } from '@/services/passenger';
+import { MapWrapper, type TrainRoutePoint } from './MapWrapper';
 import { PassengerJourney } from '@/components/eta/PassengerJourney';
 import type { TrainStatus } from '@/types/api';
 
@@ -10,6 +10,9 @@ export function LiveNetwork() {
   const [number, setNumber] = useState(''), [date, setDate] = useState('');
   const [tracked, track] = useState<{ number: string; date: string } | null>(null);
   const [status, setStatus] = useState<LocatedStatus | null>(null), [error, setError] = useState(''), [loading, setLoading] = useState(false);
+  const [routePoints, setRoutePoints] = useState<TrainRoutePoint[]>([]);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const routeCache = useRef(new Map<string, TrainRoutePoint | null>());
   useEffect(() => {
     if (!tracked) return;
     const controller = new AbortController(); let busy = false; let pinnedDate = tracked.date;
@@ -19,7 +22,7 @@ export function LiveNetwork() {
         const response = await fetch(`${PASSENGER_API}/trains/${tracked!.number}/status${pinnedDate ? `?date=${pinnedDate}` : ''}`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(45000)]), cache: 'no-store' });
         if (!response.ok) throw new Error('Train status unavailable. Check the number and start date, then retry.');
         const data = await response.json();
-        if (data.train_number !== tracked!.number || !validDate(data.date) || (pinnedDate && data.date !== pinnedDate) || !['live', 'cached', 'database'].includes(data.data_source)) throw new Error('The train observation could not be verified.');
+        if (data.train_number !== tracked!.number || !validDate(data.date) || !Array.isArray(data.route) || (pinnedDate && data.date !== pinnedDate) || !['live', 'cached', 'database'].includes(data.data_source)) throw new Error('The train observation could not be verified.');
         if (!controller.signal.aborted) { pinnedDate = data.date; setStatus(data); setError(''); }
       } catch (e) { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'Train status unavailable.'); }
       finally { busy = false; if (!controller.signal.aborted) setLoading(false); }
@@ -27,13 +30,56 @@ export function LiveNetwork() {
     load(); const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 30000);
     return () => { controller.abort(); clearInterval(timer); };
   }, [tracked]);
+  useEffect(() => {
+    if (!status) { setRoutePoints([]); setRouteLoading(false); return; }
+    const controller = new AbortController();
+    const currentCode = status.current_station?.code?.toUpperCase() || '';
+    const routeStops = status.route
+      .map((stop, index) => ({ stop, index, code: stop.station?.code?.trim().toUpperCase() || '' }))
+      .filter(stop => Boolean(stop.code));
+    const routeCodes = new Map<string, { stop: typeof routeStops[number]['stop']; index: number }>();
+    routeStops.forEach(({ stop, index, code }) => { if (!routeCodes.has(code)) routeCodes.set(code, { stop, index }); });
+    if (!routeCodes.size) { setRoutePoints([]); setRouteLoading(false); return () => controller.abort(); }
+    setRouteLoading(true);
+    (async () => {
+      const points = await Promise.all([...routeCodes.entries()].map(async ([code, entry]) => {
+        const cached = routeCache.current.get(code);
+        if (cached !== undefined) return cached ? { ...cached, sequence: entry.index } : null;
+        const inlineLatitude = Number(entry.stop.station?.latitude);
+        const inlineLongitude = Number(entry.stop.station?.longitude);
+        if (Number.isFinite(inlineLatitude) && Number.isFinite(inlineLongitude) && Math.abs(inlineLatitude) <= 90 && Math.abs(inlineLongitude) <= 180) {
+          const point: TrainRoutePoint = { code, name: entry.stop.station?.name || code, latitude: inlineLatitude, longitude: inlineLongitude, sequence: entry.index };
+          routeCache.current.set(code, point);
+          return point;
+        }
+        try {
+          const detail = await stationDetails(code, controller.signal);
+          const latitude = Number(detail.latitude), longitude = Number(detail.longitude);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) throw new Error('Station has no usable coordinates.');
+          const point: TrainRoutePoint = { code, name: detail.name, latitude, longitude, sequence: entry.index };
+          routeCache.current.set(code, point);
+          return point;
+        } catch (e) {
+          if (!controller.signal.aborted) routeCache.current.set(code, null);
+          return null;
+        }
+      }));
+      if (controller.signal.aborted) return;
+      const valid = points.filter((point): point is TrainRoutePoint => Boolean(point)).sort((a, b) => a.sequence - b.sequence);
+      const currentSequence = valid.find(point => point.code === currentCode)?.sequence;
+      const nextIndex = currentSequence === undefined ? -1 : valid.findIndex(point => point.sequence > currentSequence);
+      setRoutePoints(valid.map((point, pointIndex) => ({ ...point, current: point.code === currentCode, next: nextIndex >= 0 && pointIndex === nextIndex, passed: currentSequence !== undefined && point.sequence < currentSequence })));
+      setRouteLoading(false);
+    })();
+    return () => controller.abort();
+  }, [status]);
   const location = status?.last_known_location;
   const old = status?.data_source !== 'live' || !location?.updated_at || !Number.isFinite(Date.parse(location.updated_at)) || Date.now() - Date.parse(location.updated_at) > 300000;
   const mapTrains: TrainStatus[] = status ? [{ train_number: status.train_number, train_name: status.train_name, data_source: status.data_source, current_station: status.current_station || { code: '', name: 'Unavailable' }, next_station: { code: '', name: 'Unavailable' }, predicted_next_arrival: '', scheduled_departure: '', zone: '', delay_minutes: status.overall_delay_minutes ?? 0, status: status.overall_delay_minutes ? 'DELAYED' : 'ON_TIME', last_known_location: location }] : [];
   return <section className="space-y-5"><div><h2 className="text-xl font-semibold">Follow a train’s current journey</h2><p className="text-sm text-muted-foreground mt-1">Track a train to see available position, route stops and arrival estimates. Updates every 30 seconds while this view is active.</p></div>
     <form onSubmit={e => { e.preventDefault(); setStatus(null); setError(''); track({ number, date }); }} className="rounded-2xl border border-border bg-card p-5 flex flex-wrap gap-4 items-end"><label className="text-xs text-muted-foreground flex-1 min-w-40">Train number<input required pattern="[0-9]{5}" inputMode="numeric" maxLength={5} value={number} onChange={e => setNumber(e.target.value)} placeholder="e.g. 12423" className="block mt-2 rounded-xl border border-border bg-background p-3 text-sm text-foreground w-full" /></label><label className="text-xs text-muted-foreground flex-1 min-w-40">Train start date · optional<input type="date" value={date} onChange={e => setDate(e.target.value)} className="block mt-2 rounded-xl border border-border bg-background p-3 text-sm text-foreground w-full" /></label><button disabled={loading} className="rounded-xl bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold disabled:opacity-50">{loading ? 'Checking…' : 'Track train'}</button></form>
     {error && <p role="alert" className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-sm">{error}{status && ' The map retains the previous observation.'}</p>}
-    <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="px-5 py-4 flex flex-wrap justify-between gap-2 text-sm"><strong>Geographic view</strong><span className="text-muted-foreground">{status ? `${error || old ? 'Previous / cached observation' : 'Latest available observation'} · ${time(location?.updated_at)}` : 'Choose a train to begin'}</span></div><div className="h-[420px]"><MapWrapper trains={mapTrains} selectedTrainId={status?.train_number || null} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">Position source: {location?.position_source || 'Unavailable'}. Derived positions are estimates between reported stops. Network-wide signalling and track occupancy are not supplied by this feed.</p></div>
+    <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="px-5 py-4 flex flex-wrap justify-between gap-2 text-sm"><strong>Geographic view</strong><span className="text-muted-foreground">{status ? `${error || old ? 'Previous / cached observation' : 'Latest available observation'} · ${time(location?.updated_at)}` : 'Choose a train to begin'}</span></div><div className="h-[420px]"><MapWrapper trains={mapTrains} route={routePoints} routeLoading={routeLoading} selectedTrainId={status?.train_number || null} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">Blue line: scheduled train route through mapped stations. Position source: {location?.position_source || 'Unavailable'}. Derived positions are estimates between reported stops. Network-wide signalling and track occupancy are not supplied by this feed.</p></div>
     {tracked && status && <PassengerJourney key={`${tracked.number}-${status.date}`} number={tracked.number} date={status.date} autoRefresh />}
   </section>;
 }

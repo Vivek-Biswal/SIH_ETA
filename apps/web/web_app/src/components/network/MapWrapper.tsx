@@ -20,6 +20,19 @@ interface MapWrapperProps {
   trains: TrainStatus[];
   onSelectTrain: (train: TrainStatus | null) => void;
   selectedTrainId: string | null;
+  route?: TrainRoutePoint[];
+  routeLoading?: boolean;
+}
+
+export interface TrainRoutePoint {
+  code: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  sequence: number;
+  current?: boolean;
+  next?: boolean;
+  passed?: boolean;
 }
 
 export const MapWrapper: React.FC<MapWrapperProps> = (props) => {

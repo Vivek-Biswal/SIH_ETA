@@ -135,7 +135,23 @@ def fresh(data, now):
 
 def station(row):
     code = row.get("stationCode")
-    return {"code": code, "name": row.get("stationName") or ""} if code else None
+    if not code:
+        return None
+    result = {"code": code, "name": row.get("stationName") or ""}
+    # RailRadar includes station geography on many route records. Preserve it
+    # in the passenger contract so clients can draw the verified route without
+    # making one station-detail request per stop.
+    for field in ("latitude", "longitude"):
+        value = row.get(field)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            continue
+        if field == "latitude" and -90 <= value <= 90:
+            result[field] = value
+        elif field == "longitude" and -180 <= value <= 180:
+            result[field] = value
+    return result
 
 
 def status_response(data, now=None):

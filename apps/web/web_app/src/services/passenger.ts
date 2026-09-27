@@ -2,7 +2,15 @@
 export const PASSENGER_API = (process.env.NEXT_PUBLIC_API_BASE_URL ||
   'https://sih-eta-backend-a819.onrender.com/api/v1').replace(/\/+$/, '').replace(/(?:\/api\/v1)?$/, '/api/v1');
 
-export type Station = { code: string; name: string };
+export type Station = { code: string; name: string; latitude?: number | null; longitude?: number | null };
+export type StationDetail = Station & {
+  state?: string | null;
+  zone?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  platform_count?: number | null;
+  is_junction?: boolean | null;
+};
 export type Stop = {
   station: Station | null; scheduled_arrival?: string | null; scheduled_departure?: string | null;
   actual_arrival?: string | null; actual_departure?: string | null; platform?: string | null; has_departed?: boolean;
@@ -46,6 +54,18 @@ export async function stations(query: string, signal?: AbortSignal): Promise<Sta
   const data = await request<{ results: Station[] }>(`stations/search?${new URLSearchParams({ q: query.trim() })}`, signal);
   if (!Array.isArray(data.results) || data.results.some(s => !s.code || !s.name)) throw new Error('Station information is unavailable.');
   return data.results;
+}
+export async function stationDetails(code: string, signal?: AbortSignal): Promise<StationDetail> {
+  const expected = code.trim().toUpperCase();
+  if (!/^[A-Z0-9]{2,10}$/.test(expected)) throw new Error('Station code is invalid.');
+  const response = await fetch(`${PASSENGER_API}/stations/${encodeURIComponent(expected)}`, {
+    cache: 'no-store',
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(45000)]) : AbortSignal.timeout(45000),
+  });
+  if (!response.ok) throw new Error('Station geography is unavailable.');
+  const data = await response.json() as StationDetail;
+  if (String(data?.code || '').toUpperCase() !== expected || !data?.name) throw new Error('Station geography is unavailable.');
+  return data;
 }
 export async function lookup(query: string, signal?: AbortSignal): Promise<SearchTrain[]> {
   const data = await request<{ results: SearchTrain[] }>(`passenger/lookup?${new URLSearchParams({ q: query.trim() })}`, signal);
