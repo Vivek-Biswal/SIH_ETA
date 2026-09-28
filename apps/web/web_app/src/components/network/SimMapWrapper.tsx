@@ -22,6 +22,8 @@ interface SimMapWrapperProps {
   segments:   SimSegment[];
   selectedId: string | null;
   onSelect:   (id: string | null) => void;
+  disruptionSegmentId?: string;
+  disruptionStationCode?: string;
 }
 
 export const SimMapWrapper: React.FC<SimMapWrapperProps> = (props) => (

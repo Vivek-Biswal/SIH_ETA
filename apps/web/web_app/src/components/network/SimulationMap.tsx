@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MapContainer, Marker, Popup, Polyline, CircleMarker, Tooltip } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, CircleMarker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTheme } from 'next-themes';
@@ -10,10 +10,10 @@ import { SIM_STATIONS } from '@/hooks/useSimulation';
 import { MapTiles } from './MapTiles';
 
 // ---- Icons ----
-const createSimTrainIcon = (status: SimTrain['status'], isSelected: boolean) => {
+const createSimTrainIcon = (status: SimTrain['status'], isSelected: boolean, dimmed: boolean) => {
   const color = status === 'CRITICAL' ? '#EF4444' : status === 'DELAYED' ? '#F59E0B' : '#10B981';
-  const size  = isSelected ? 18 : 14;
-  const glow  = isSelected ? `box-shadow:0 0 12px ${color};` : `box-shadow:0 0 6px ${color}80;`;
+  const size  = isSelected ? 22 : 14;
+  const glow  = isSelected ? `box-shadow:0 0 14px ${color};` : `box-shadow:0 0 6px ${color}80;`;
   return L.divIcon({
     className: '',
     html: `<div style="
@@ -21,27 +21,29 @@ const createSimTrainIcon = (status: SimTrain['status'], isSelected: boolean) => 
       background:${color};
       border-radius:50%;
       border:2px solid white;
+      opacity:${dimmed ? 0.28 : 1};
       ${glow}
       transition:all 0.2s;
-    "></div>`,
+    ">${isSelected ? '<span style="display:block;width:6px;height:6px;background:white;border-radius:50%;margin:6px auto"></span>' : ''}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
 };
 
-const createStationIcon = (isBottleneck: boolean) => {
-  const color = isBottleneck ? '#EF4444' : '#3B82F6';
+const createStationIcon = (kind: 'current' | 'upcoming' | 'past' | 'disruption') => {
+  const color = kind === 'disruption' ? '#EF4444' : kind === 'current' ? '#2563EB' : kind === 'past' ? '#94A3B8' : '#10B981';
+  const size = kind === 'current' || kind === 'disruption' ? 14 : 10;
   return L.divIcon({
     className: '',
     html: `<div style="
-      width:10px;height:10px;
-      background:white;
+      width:${size}px;height:${size}px;
+      background:${kind === 'past' ? '#E2E8F0' : 'white'};
       border-radius:50%;
       border:2.5px solid ${color};
       box-shadow:0 0 4px ${color}60;
     "></div>`,
-    iconSize: [10, 10],
-    iconAnchor: [5, 5],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 };
 
@@ -64,10 +66,27 @@ interface SimMapProps {
   segments:   SimSegment[];
   selectedId: string | null;
   onSelect:   (id: string | null) => void;
+  disruptionSegmentId?: string;
+  disruptionStationCode?: string;
 }
 
-export default function SimulationMap({ trains, segments, selectedId, onSelect }: SimMapProps) {
+function MapViewportControls({ trains, selectedId }: { trains: SimTrain[]; selectedId: string | null }) {
+  const map = useMap();
+  const fitRoute = () => map.fitBounds(L.latLngBounds(SIM_STATIONS.map((station) => [station.lat, station.lng] as [number, number])), { padding: [28, 28] });
+  const followTrain = () => {
+    const train = trains.find((candidate) => candidate.id === selectedId);
+    if (train) map.flyTo([train.lat, train.lng], Math.max(map.getZoom(), 8), { duration: 0.6 });
+  };
+  return <div className="absolute right-3 top-3 z-[500] flex flex-col gap-1 rounded-xl border border-slate-700/30 bg-slate-950/90 p-1 shadow-lg">
+    <button onClick={fitRoute} className="rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-white transition hover:bg-white/10">Fit route</button>
+    <button onClick={followTrain} disabled={!selectedId} className="rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-blue-200 transition hover:bg-white/10 disabled:opacity-40">Follow train</button>
+  </div>;
+}
+
+export default function SimulationMap({ trains, segments, selectedId, onSelect, disruptionSegmentId, disruptionStationCode }: SimMapProps) {
   const { resolvedTheme } = useTheme();
+  const selectedTrain = trains.find((train) => train.id === selectedId);
+  const selectedStart = selectedTrain ? segments.findIndex((segment) => segment.id === selectedTrain.segmentId) : -1;
 
   // Bottleneck stations
   const bottleneckStations = new Set(
@@ -83,26 +102,30 @@ export default function SimulationMap({ trains, segments, selectedId, onSelect }
         zoomControl={true}
       >
         <MapTiles />
+        <MapViewportControls trains={trains} selectedId={selectedId} />
 
         {/* Corridor segments — coloured by congestion */}
-        {segments.map((seg) => {
+        {segments.map((seg, index) => {
           const positions: [number, number][] = [
             [seg.from.lat, seg.from.lng],
             [seg.to.lat,   seg.to.lng],
           ];
+          const isSelectedRoute = selectedStart < 0 || index >= selectedStart;
+          const isCurrent = selectedTrain?.segmentId === seg.id;
+          const isDisruption = seg.id === disruptionSegmentId || seg.isBottleneck;
           return (
             <React.Fragment key={seg.id}>
               <Polyline
                 positions={positions}
                 pathOptions={{
-                  color:   segColor(seg.congestion),
-                  weight:  segWeight(seg.congestion),
-                  opacity: segOpacity(seg.congestion),
+                  color:   isDisruption ? '#EF4444' : isCurrent ? '#2563EB' : segColor(seg.congestion),
+                  weight:  isCurrent ? 6 : isDisruption ? 5 : segWeight(seg.congestion),
+                  opacity: isSelectedRoute ? (isCurrent || isDisruption ? 1 : 0.85) : 0.18,
                   dashArray: segDash(seg.congestion),
                 }}
               />
               {/* Bottleneck pulse ring */}
-              {seg.isBottleneck && (
+              {isDisruption && (
                 <CircleMarker
                   center={[
                     (seg.from.lat + seg.to.lat) / 2,
@@ -118,16 +141,20 @@ export default function SimulationMap({ trains, segments, selectedId, onSelect }
 
         {/* Station markers */}
         {SIM_STATIONS.map((st) => {
-          const isHot = bottleneckStations.has(st.code);
+          const isHot = bottleneckStations.has(st.code) || st.code === disruptionStationCode;
+          const currentIndex = selectedTrain ? SIM_STATIONS.findIndex((station) => station.code === selectedTrain.fromStation.code) : -1;
+          const stationIndex = SIM_STATIONS.findIndex((station) => station.code === st.code);
+          const kind = isHot ? 'disruption' : stationIndex === currentIndex ? 'current' : stationIndex < currentIndex ? 'past' : 'upcoming';
           return (
             <Marker
               key={st.code}
               position={[st.lat, st.lng]}
-              icon={createStationIcon(isHot)}
+              icon={createStationIcon(kind)}
             >
               <Tooltip direction="top" offset={[0, -6]} opacity={0.92} permanent={false}>
                 <span className="text-xs font-semibold">{st.name}</span>
-                {isHot && <span className="text-red-500 ml-1">⚠ BOTTLENECK</span>}
+                {isHot && <span className="text-red-500 ml-1">⚠ DISRUPTION</span>}
+                {kind === 'current' && <span className="text-blue-500 ml-1">· TRAIN HERE</span>}
               </Tooltip>
             </Marker>
           );
@@ -136,11 +163,12 @@ export default function SimulationMap({ trains, segments, selectedId, onSelect }
         {/* Simulated train markers */}
         {trains.map((train) => {
           const isSelected = train.id === selectedId;
+          const isDimmed = Boolean(selectedId) && !isSelected;
           return (
             <Marker
               key={train.id}
               position={[train.lat, train.lng]}
-              icon={createSimTrainIcon(train.status, isSelected)}
+              icon={createSimTrainIcon(train.status, isSelected, isDimmed)}
               zIndexOffset={isSelected ? 1000 : 0}
               eventHandlers={{ click: () => onSelect(isSelected ? null : train.id) }}
             >

@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Network, Radio, FlaskConical, RefreshCw, Search, ArrowRight } from 'lucide-react';
 import { loadInsights, type Insights } from '@/services/networkInsights';
 import { LiveNetwork } from './LiveNetwork';
-import { useSimulation } from '@/hooks/useSimulation';
-import { SimControlPanel } from './SimControlPanel';
-import { SimMapWrapper } from './SimMapWrapper';
+import { SimulationExperience } from './SimulationExperience';
 
 type Mode = 'history' | 'live' | 'simulation';
 export function NetworkWorkspace({ initialMode = 'live' }: { initialMode?: Mode }) {
@@ -49,6 +47,5 @@ function HistoricalInsights() {
   </section>;
 }
 function Simulation() {
-  const sim = useSimulation(); const [selected, select] = useState<string | null>(null);
-  return <section className="space-y-4"><div><h2 className="text-xl font-semibold">Explore a corridor disruption</h2><p className="text-sm text-muted-foreground mt-1">1. Start the scenario · 2. Create a bottleneck · 3. Apply mitigation and observe recovery.</p></div><SimControlPanel running={sim.running} speed={sim.speed} state={sim.state} metrics={sim.metrics} onStart={sim.start} onPause={sim.pause} onReset={() => { sim.reset(); select(null); }} onTriggerBottleneck={sim.triggerBottleneck} onRunMitigation={sim.runMitigation} onSetSpeed={sim.setSpeed} /><div className="h-[520px] rounded-2xl overflow-hidden border border-border"><SimMapWrapper trains={sim.trains} segments={sim.segments} selectedId={selected} onSelect={select} /></div><p className="text-xs text-muted-foreground">Illustrative model on a geographic basemap. Straight lines connect approximate station locations; they are not surveyed railway track geometry. Speeds, delays and mitigation outcomes are simulated.</p><div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">{sim.trains.map(t => <button key={t.id} onClick={() => select(t.id)} className={`text-left p-4 border rounded-xl bg-card ${selected === t.id ? 'border-primary' : 'border-border'}`}><strong className="text-sm">{t.name}</strong><p className="text-xs text-muted-foreground mt-2">{t.fromStation.code} → {t.toStation.code}</p><p className="text-sm mt-2">{Math.round(t.speedKmh)} km/h · {t.delayMinutes.toFixed(1)} min delay</p></button>)}</div></section>;
+  return <SimulationExperience />;
 }
