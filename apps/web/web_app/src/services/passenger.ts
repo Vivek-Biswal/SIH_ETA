@@ -77,7 +77,7 @@ export async function routeSearch(from: string, to: string, date = '', page = 1,
   if (!Array.isArray(data.trains) || !Number.isFinite(data.total)) throw new Error('Route information is unavailable.');
   return data;
 }
-export async function loadJourney(number: string, date = '', signal?: AbortSignal): Promise<Journey> {
+export async function loadJourney(number: string, date = '', signal?: AbortSignal, includeETA = true): Promise<Journey> {
   if (!/^\d{5}$/.test(number)) throw new Error('Enter a five-digit train number.');
   if (date && !validDate(date)) throw new Error('Choose a valid journey start date.');
   const result: Journey = { status: null, eta: null };
@@ -90,7 +90,7 @@ export async function loadJourney(number: string, date = '', signal?: AbortSigna
     if (!Array.isArray(status.route)) throw new Error('Route information is unavailable.');
     result.status = status;
   } catch (error) { result.statusError = error instanceof Error ? error.message : 'Train status unavailable.'; }
-  if (signal?.aborted) return result;
+  if (signal?.aborted || !includeETA) return result;
   const journeyDate = date || result.status?.date || '';
   try {
     const eta = await request<ETA>(`trains/${number}/eta${journeyDate ? `?date=${journeyDate}` : ''}`, signal);

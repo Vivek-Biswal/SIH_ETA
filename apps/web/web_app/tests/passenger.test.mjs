@@ -10,6 +10,15 @@ const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 const response = data => new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
 
+test('route-only simulation does not spend an ETA API request', async () => {
+  let requests = 0;
+  globalThis.fetch = async url => { requests++; assert.match(url,/\/status/); return response({train_number:'12423',date:'2026-09-28',data_source:'live',route:[]}); };
+  const result = await api.loadJourney('12423','',undefined,false);
+  assert.ok(result.status);
+  assert.equal(result.eta,null);
+  assert.equal(requests,1);
+});
+
 test('route query uses selected stations, page and date without timezone shifting', () => {
   const q = api.searchQuery(' ndls ', 'cnb', '2026-01-05', 2);
   assert.equal(q.get('from_station'), 'NDLS'); assert.equal(q.get('to_station'), 'CNB');

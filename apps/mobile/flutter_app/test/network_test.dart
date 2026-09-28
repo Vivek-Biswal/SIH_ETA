@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,7 @@ import 'package:sih_eta/core/services/network_insights_repository.dart';
 import 'package:sih_eta/core/services/train_repository.dart';
 import 'package:sih_eta/features/train_details/train_details_screen.dart';
 import 'package:sih_eta/main.dart';
+import 'package:sih_eta/features/network/journey_workspace_screen.dart';
 import 'passenger_flow_test.dart' show TestRepository, revealTap, phone;
 
 Map<String, dynamic> networkFixture({String query = ''}) => {
@@ -62,6 +64,33 @@ class TestNetworkRepository implements NetworkInsightsRepository {
 }
 
 void main() {
+  testWidgets(
+    'journey insights opens the shared route and simulation workspace',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      phone(tester);
+      final router = createAppRouter(initialLocation: '/network');
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            networkInsightsRepositoryProvider.overrideWithValue(
+              TestNetworkRepository(),
+            ),
+          ],
+          child: SihEtaMobileApp(router: router, enableOnboarding: false),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Live route, maps & delay simulation'));
+      await tester.pumpAndSettle();
+      expect(find.byType(JourneyWorkspaceScreen), findsOneWidget);
+      expect(find.text('Open journey workspace'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      debugDefaultTargetPlatformOverride = null;
+    },
+  );
   test(
     'network endpoint parses object, sends query, requires dated historical provenance',
     () async {

@@ -16,9 +16,11 @@ export function LiveNetwork() {
   useEffect(() => {
     if (!tracked) return;
     const controller = new AbortController();
-    let busy = false, failures = 0, nextAttempt = 0, pinnedDate = tracked.date;
+    let busy = false, failures = 0, nextAttempt = 0, pinnedDate = tracked.date, appActive = true;
+    const pause = () => { appActive = false; };
+    const resume = () => { appActive = true; void load(); };
     async function load() {
-      if (busy || document.visibilityState === 'hidden' || Date.now() < nextAttempt) return;
+      if (busy || !appActive || document.visibilityState === 'hidden' || Date.now() < nextAttempt) return;
       busy = true; setLoading(true);
       try {
         const result = await loadJourney(tracked!.number, pinnedDate, controller.signal);
@@ -40,14 +42,16 @@ export function LiveNetwork() {
     void load();
     const timer = setInterval(load, 30000);
     document.addEventListener('visibilitychange', load);
-    return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', load); refresh.current = () => {}; };
+    window.addEventListener('journey-pause', pause);
+    window.addEventListener('journey-resume', resume);
+    return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', load); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); refresh.current = () => {}; };
   }, [tracked]);
   const status = journey?.status;
   useEffect(() => {
     if (!status) return;
     const controller = new AbortController();
     setRouteLoading(true);
-    resolveRoute(status, controller.signal).then(points => { if (!controller.signal.aborted) setRoute(points); }).finally(() => { if (!controller.signal.aborted) setRouteLoading(false); });
+    resolveRoute(status, controller.signal).then(points => { if (!controller.signal.aborted) setRoute(points); }).catch(() => { if (!controller.signal.aborted) setError('Route geography is unavailable. Arrival information remains below.'); }).finally(() => { if (!controller.signal.aborted) setRouteLoading(false); });
     return () => controller.abort();
   }, [status]);
   const location = status?.last_known_location;

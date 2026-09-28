@@ -18,6 +18,8 @@ export function coordinates(latitude: unknown, longitude: unknown): Geography | 
 
 export async function resolveRoute(status: Status, signal: AbortSignal): Promise<RoutePoint[]> {
   const directory = await stationDirectory();
+  // Missing minor stations must not hold the complete mapped route indefinitely.
+  signal = AbortSignal.any([signal, AbortSignal.timeout(12000)]);
   const geography = new Map<string, Geography>();
   for (const stop of status.route) {
     const station = stop.station;

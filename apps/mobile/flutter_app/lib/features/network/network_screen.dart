@@ -122,6 +122,12 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(20),
           children: [
+            FilledButton.icon(
+              onPressed: () => context.push('/journey-workspace'),
+              icon: const Icon(Icons.route),
+              label: const Text('Live route, maps & delay simulation'),
+            ),
+            const SizedBox(height: 18),
             Text(
               'Could delays affect my journey?',
               style: Theme.of(
@@ -287,9 +293,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
                             score: station.riskScore,
                           ),
                           const SizedBox(height: 12),
-                          Text(
-                            '${station.interactions} past train pairs',
-                          ),
+                          Text('${station.interactions} past train pairs'),
                           Text(
                             'Earlier train’s average delay: ${station.meanDelay.toStringAsFixed(1)} min',
                           ),
@@ -404,6 +408,10 @@ class _RiskLabel extends StatelessWidget {
   Widget build(BuildContext context) => ExpansionTile(
     tilePadding: EdgeInsets.zero,
     title: const Text('View details', style: TextStyle(fontSize: 14)),
-    children: [Text('$risk historical model rating · score ${score.toStringAsFixed(3)}. This compares past records; it is not a prediction for your journey.')],
+    children: [
+      Text(
+        '$risk historical model rating · score ${score.toStringAsFixed(3)}. This compares past records; it is not a prediction for your journey.',
+      ),
+    ],
   );
 }

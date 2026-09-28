@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Network, Radio, FlaskConical, RefreshCw, Search, ArrowRight } from 'lucide-react';
 import { loadInsights, type Insights } from '@/services/networkInsights';
 import { LiveNetwork } from './LiveNetwork';
-import { SimulationExperience } from './SimulationExperience';
+import { RouteSimulation } from './RouteSimulation';
 
 type Mode = 'history' | 'live' | 'simulation';
 export function NetworkWorkspace({ initialMode = 'live' }: { initialMode?: Mode }) {
@@ -47,5 +47,5 @@ function HistoricalInsights() {
   </section>;
 }
 function Simulation() {
-  return <SimulationExperience />;
+  return <RouteSimulation />;
 }

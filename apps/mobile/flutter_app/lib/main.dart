@@ -13,6 +13,7 @@ import 'features/train_details/train_details_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/saved/saved_journeys_screen.dart';
 import 'features/network/network_screen.dart';
+import 'features/network/journey_workspace_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,10 @@ final _router = createAppRouter();
 GoRouter createAppRouter({String initialLocation = '/'}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
+    GoRoute(
+      path: '/journey-workspace',
+      builder: (context, state) => const JourneyWorkspaceScreen(),
+    ),
     GoRoute(
       path: '/guide',
       builder: (context, state) => OnboardingScreen(
