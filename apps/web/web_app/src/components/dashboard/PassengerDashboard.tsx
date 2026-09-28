@@ -7,6 +7,7 @@ import { CompactTrainCard } from './CompactTrainCard';
 import { QuickActions } from './QuickActions';
 import { RecentSearches, saveRecentSearch } from './RecentSearches';
 import { LiveSnapshot } from './LiveSnapshot';
+import { Sparkles } from 'lucide-react';
 
 export function PassengerDashboard() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export function PassengerDashboard() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 pt-6 sm:pt-10 px-4 space-y-12">
+    <div className="max-w-6xl mx-auto pb-12 pt-6 sm:pt-10 px-4 space-y-10">
       {/* Hero Section */}
       <section className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="space-y-4">
@@ -53,33 +54,20 @@ export function PassengerDashboard() {
         </section>
       )}
 
-      {!selectedTrain && (
-        <div className="grid md:grid-cols-[1fr_300px] gap-8 items-start animate-in fade-in duration-700 delay-150 fill-mode-both">
-          {/* Main Column */}
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-lg font-semibold mb-4 text-foreground">Quick Actions</h2>
-              <QuickActions />
-            </section>
-            
-            <section>
-              <RecentSearches onSelect={handleSearchSelect} />
-            </section>
-          </div>
-
-          {/* Sidebar / Snapshot */}
-          <div className="space-y-8">
-            <LiveSnapshot />
-            
-            <div className="rounded-2xl border border-primary/10 bg-primary/5 p-5">
-              <h3 className="font-semibold text-primary mb-2">Pro Tip</h3>
-              <p className="text-sm text-muted-foreground">
-                You can search by 5-digit train number (e.g., 12423) for the fastest results, or just type the train name.
-              </p>
+      {!selectedTrain && <section className="animate-in fade-in duration-700 delay-150 fill-mode-both">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
+          <div className="rounded-[1.6rem] border border-border/80 bg-card/80 p-5 shadow-sm sm:p-6">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+              <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-primary">Your next move</p><h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Choose how to explore</h2><p className="mt-1 text-sm text-muted-foreground">Start with a train, a station, or the network around you.</p></div>
+              <span className="hidden rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">Live tools</span>
             </div>
+            <QuickActions />
+            <div className="mt-5 flex items-start gap-3 border-t border-border/70 pt-4"><span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600"><Sparkles size={15} /></span><div><p className="text-sm font-semibold text-foreground">Fastest lookup</p><p className="mt-0.5 text-xs leading-5 text-muted-foreground">Enter a 5-digit train number such as <span className="font-mono font-semibold text-foreground">12423</span>, or search by the train name.</p></div></div>
+            <div className="mt-5"><RecentSearches onSelect={handleSearchSelect} /></div>
           </div>
+          <LiveSnapshot />
         </div>
-      )}
+      </section>}
     </div>
   );
 }
