@@ -11,7 +11,7 @@ class AppNavigation extends StatelessWidget {
   Widget build(BuildContext context) => NavigationBar(
     selectedIndex: selected,
     onDestinationSelected: (i) =>
-        context.go(['/', '/saved', '/network', '/explore'][i]),
+        context.go(['/', '/saved', '/journey-workspace', '/explore'][i]),
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.train_outlined),
@@ -23,7 +23,7 @@ class AppNavigation extends StatelessWidget {
         selectedIcon: Icon(Icons.bookmark),
         label: 'Saved',
       ),
-      NavigationDestination(icon: Icon(Icons.hub_outlined), label: 'Network'),
+      NavigationDestination(icon: Icon(Icons.hub_outlined), label: 'Insights'),
       NavigationDestination(icon: Icon(Icons.help_outline), label: 'Help'),
     ],
   );

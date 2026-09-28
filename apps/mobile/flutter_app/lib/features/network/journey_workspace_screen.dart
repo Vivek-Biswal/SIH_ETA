@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../explore/explore_screen.dart';
 
 /// Shares the deployed journey workspace, including its map configuration.
 class JourneyWorkspaceScreen extends StatefulWidget {
@@ -119,7 +120,21 @@ class _JourneyWorkspaceScreenState extends State<JourneyWorkspaceScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Journey workspace')),
+    appBar: AppBar(
+      title: const Text('Journey insights'),
+      actions: [
+        IconButton(
+          tooltip: 'Open native past delay analysis',
+          onPressed: () async {
+            didChangeAppLifecycleState(AppLifecycleState.inactive);
+            await context.push('/network');
+            if (mounted) didChangeAppLifecycleState(AppLifecycleState.resumed);
+          },
+          icon: const Icon(Icons.history),
+        ),
+      ],
+    ),
+    bottomNavigationBar: const AppNavigation(selected: 2),
     body: SafeArea(
       child: _error != null
           ? Center(

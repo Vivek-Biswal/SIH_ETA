@@ -65,7 +65,7 @@ class TestNetworkRepository implements NetworkInsightsRepository {
 
 void main() {
   testWidgets(
-    'journey insights opens the shared route and simulation workspace',
+    'Insights navigation opens the full workspace and retains native analysis',
     (tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.linux;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
@@ -83,10 +83,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Live route, maps & delay simulation'));
+      await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.byType(JourneyWorkspaceScreen), findsOneWidget);
       expect(find.text('Open journey workspace'), findsOneWidget);
+      expect(find.text('Journey insights'), findsOneWidget);
+      await tester.tap(find.byTooltip('Open native past delay analysis'));
+      await tester.pumpAndSettle();
+      expect(find.text('Could delays affect my journey?'), findsOneWidget);
       expect(tester.takeException(), isNull);
       debugDefaultTargetPlatformOverride = null;
     },
