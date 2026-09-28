@@ -83,11 +83,12 @@ export function MapTiles() {
           eventHandlers={{ tileerror: onTileError }}
         />
       )}
-      <div
+      <details
         className="absolute top-3 right-3 z-[1000] flex flex-col gap-2 rounded-xl border border-border bg-card p-2 text-foreground shadow-lg"
         onPointerDown={(event) => event.stopPropagation()}
         onDoubleClick={(event) => event.stopPropagation()}
       >
+        <summary className="cursor-pointer text-sm font-semibold">Map options</summary>
         <label className="text-xs font-semibold">
           Map layer
           <select aria-label="Map layer" value={style} onChange={(event) => setStyle(event.target.value as MapStyle)} className="block mt-1 rounded-lg border border-border bg-background p-2 text-sm">
@@ -96,8 +97,8 @@ export function MapTiles() {
         </label>
         <button className="rounded-lg p-2 text-xs hover:bg-muted" onClick={() => map.fitBounds([[6.5, 68], [37, 97.5]])}>Focus India</button>
         <button aria-pressed={expanded} className="rounded-lg p-2 text-xs hover:bg-muted" onClick={() => setExpanded(value => !value)}>{expanded ? 'Exit full screen' : 'Full screen'}</button>
-      </div>
-      {(error || !url) && <div role={error ? 'alert' : 'status'} className="absolute bottom-8 left-3 right-3 z-[1000] rounded-xl border border-border bg-card p-4 text-sm text-foreground shadow-lg">{error || 'Connecting to geographic map…'}{error && <button className="ml-3 underline" onClick={() => retry(value => value + 1)}>Retry MapTiler</button>}</div>}
+      </details>
+      {(error || !url) && <details className="absolute bottom-8 right-3 z-[1000] max-w-[70%] rounded-xl border border-border bg-card p-2 text-xs text-foreground shadow-lg"><summary className="cursor-pointer">{error ? 'Standard map active · details' : 'Connecting to map…'}</summary><p className="mt-2 max-w-xs">{error}</p>{error && <button className="mt-2 underline" onClick={() => retry(value => value + 1)}>Retry preferred map</button>}</details>}
     </>
   );
 }

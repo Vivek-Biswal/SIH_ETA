@@ -30,9 +30,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _load();
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_active) _load();
-    });
+    // Historical records are refreshed on request, not polled like live status.
   }
 
   bool get _active =>
@@ -107,7 +105,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Network intelligence'),
+        title: const Text('Journey insights'),
         actions: [
           IconButton(
             key: const Key('refresh-network'),
@@ -125,15 +123,21 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              'Understand delay patterns',
+              'Could delays affect my journey?',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Explore where trains have faced bottlenecks and where delays may have affected following trains.',
+              'See where trains were delayed in the past and how nearby trains may have been affected. Check your train for today’s arrival time.',
               style: TextStyle(height: 1.5),
+            ),
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: () => context.push('/explore'),
+              icon: const Icon(Icons.train),
+              label: const Text('Check my train’s latest arrival'),
             ),
             const SizedBox(height: 18),
             PassengerCard(
@@ -192,7 +196,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
               children: [
                 FilledButton(
                   onPressed: _busy ? null : _find,
-                  child: const Text('Search network'),
+                  child: const Text('Find past patterns'),
                 ),
                 if (_query.isNotEmpty)
                   TextButton(
@@ -245,13 +249,13 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: const Text('Station bottlenecks'),
+                    label: const Text('Busy stations'),
                     selected: !_showInteractions,
                     onSelected: (_) =>
                         setState(() => _showInteractions = false),
                   ),
                   ChoiceChip(
-                    label: const Text('Delay propagation'),
+                    label: const Text('Delays between trains'),
                     selected: _showInteractions,
                     onSelected: (_) => setState(() => _showInteractions = true),
                   ),
@@ -260,7 +264,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
               const SizedBox(height: 12),
               if (!_showInteractions) ...[
                 Text(
-                  'Top ${data.stations.length} of ${data.stationCount} matching stations · ranked by bottleneck score',
+                  'Top ${data.stations.length} of ${data.stationCount} matching stations · ranked by past delay patterns',
                   style: const TextStyle(fontSize: 12),
                 ),
                 for (final station in data.stations)
@@ -284,10 +288,10 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            '${station.interactions} recorded train interactions',
+                            '${station.interactions} past train pairs',
                           ),
                           Text(
-                            'Average preceding-train delay: ${station.meanDelay.toStringAsFixed(1)} min',
+                            'Earlier train’s average delay: ${station.meanDelay.toStringAsFixed(1)} min',
                           ),
                           Text(
                             'Average gap between trains: ${station.meanGap.toStringAsFixed(1)} min',
@@ -298,7 +302,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
                                 ? null
                                 : () => _station(station.station),
                             icon: const Icon(Icons.alt_route),
-                            label: const Text('Explore recorded interactions'),
+                            label: const Text('See examples at this station'),
                           ),
                         ],
                       ),
@@ -306,7 +310,7 @@ class _NetworkScreenState extends ConsumerState<NetworkScreen>
                   ),
               ] else ...[
                 const Text(
-                  'Delay propagation means one delayed train may affect another nearby service. A model score alone does not prove causation.',
+                  'Delays between trains means one delayed train may affect another nearby service. A model score alone does not prove causation.',
                   style: TextStyle(height: 1.5),
                 ),
                 const SizedBox(height: 8),
@@ -397,13 +401,9 @@ class _RiskLabel extends StatelessWidget {
   final double score;
   const _RiskLabel({required this.risk, required this.score});
   @override
-  Widget build(BuildContext context) => Text(
-    '${risk[0].toUpperCase()}${risk.substring(1)} historical risk · model score ${score.toStringAsFixed(3)}',
-    style: TextStyle(
-      fontWeight: FontWeight.w600,
-      color: risk == 'critical' || risk == 'high'
-          ? Theme.of(context).colorScheme.error
-          : Theme.of(context).colorScheme.primary,
-    ),
+  Widget build(BuildContext context) => ExpansionTile(
+    tilePadding: EdgeInsets.zero,
+    title: const Text('View details', style: TextStyle(fontSize: 14)),
+    children: [Text('$risk historical model rating · score ${score.toStringAsFixed(3)}. This compares past records; it is not a prediction for your journey.')],
   );
 }

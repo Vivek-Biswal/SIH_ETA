@@ -18,7 +18,7 @@ export type Stop = {
 export type Status = {
   train_number: string; train_name: string; date: string; data_source: string; status: string;
   current_station?: Station | null; overall_delay_minutes?: number | null; route: Stop[];
-  last_known_location?: { updated_at?: string; delay_minutes?: number | null } | null;
+  last_known_location?: { updated_at?: string; delay_minutes?: number | null; latitude?: number; longitude?: number; position_source?: string } | null;
 };
 export type Prediction = { station: Station | null; scheduled_arrival?: string | null;
   predicted_arrival?: string | null; predicted_delay_minutes?: number | null };

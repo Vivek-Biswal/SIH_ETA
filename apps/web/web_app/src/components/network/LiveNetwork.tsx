@@ -1,85 +1,71 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { PASSENGER_API, stationDetails, validDate, type Status, time } from '@/services/passenger';
-import { MapWrapper, type TrainRoutePoint } from './MapWrapper';
+import { loadJourney, validDate, time, delayLabel, type Journey } from '@/services/passenger';
+import { resolveRoute, type RoutePoint } from '@/services/routeGeometry';
+import { MapWrapper } from './MapWrapper';
 import { PassengerJourney } from '@/components/eta/PassengerJourney';
 import type { TrainStatus } from '@/types/api';
 
-type LocatedStatus = Status & { last_known_location?: TrainStatus['last_known_location'] };
 export function LiveNetwork() {
   const [number, setNumber] = useState(''), [date, setDate] = useState('');
   const [tracked, track] = useState<{ number: string; date: string } | null>(null);
-  const [status, setStatus] = useState<LocatedStatus | null>(null), [error, setError] = useState(''), [loading, setLoading] = useState(false);
-  const [routePoints, setRoutePoints] = useState<TrainRoutePoint[]>([]);
-  const [routeLoading, setRouteLoading] = useState(false);
-  const routeCache = useRef(new Map<string, TrainRoutePoint | null>());
+  const [journey, setJourney] = useState<Journey | null>(null);
+  const [error, setError] = useState(''), [loading, setLoading] = useState(false);
+  const [route, setRoute] = useState<RoutePoint[]>([]), [routeLoading, setRouteLoading] = useState(false);
+  const refresh = useRef<() => void>(() => {});
   useEffect(() => {
     if (!tracked) return;
-    const controller = new AbortController(); let busy = false; let pinnedDate = tracked.date;
-    async function load() {
-      if (busy) return; busy = true; setLoading(true);
-      try {
-        const response = await fetch(`${PASSENGER_API}/trains/${tracked!.number}/status${pinnedDate ? `?date=${pinnedDate}` : ''}`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(45000)]), cache: 'no-store' });
-        if (!response.ok) throw new Error('Train status unavailable. Check the number and start date, then retry.');
-        const data = await response.json();
-        if (data.train_number !== tracked!.number || !validDate(data.date) || !Array.isArray(data.route) || (pinnedDate && data.date !== pinnedDate) || !['live', 'cached', 'database'].includes(data.data_source)) throw new Error('The train observation could not be verified.');
-        if (!controller.signal.aborted) { pinnedDate = data.date; setStatus(data); setError(''); }
-      } catch (e) { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'Train status unavailable.'); }
-      finally { busy = false; if (!controller.signal.aborted) setLoading(false); }
-    }
-    load(); const timer = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 30000);
-    return () => { controller.abort(); clearInterval(timer); };
-  }, [tracked]);
-  useEffect(() => {
-    if (!status) { setRoutePoints([]); setRouteLoading(false); return; }
     const controller = new AbortController();
-    const currentCode = status.current_station?.code?.toUpperCase() || '';
-    const routeStops = status.route
-      .map((stop, index) => ({ stop, index, code: stop.station?.code?.trim().toUpperCase() || '' }))
-      .filter(stop => Boolean(stop.code));
-    const routeCodes = new Map<string, { stop: typeof routeStops[number]['stop']; index: number }>();
-    routeStops.forEach(({ stop, index, code }) => { if (!routeCodes.has(code)) routeCodes.set(code, { stop, index }); });
-    if (!routeCodes.size) { setRoutePoints([]); setRouteLoading(false); return () => controller.abort(); }
+    let busy = false, failures = 0, nextAttempt = 0, pinnedDate = tracked.date;
+    async function load() {
+      if (busy || document.visibilityState === 'hidden' || Date.now() < nextAttempt) return;
+      busy = true; setLoading(true);
+      try {
+        const result = await loadJourney(tracked!.number, pinnedDate, controller.signal);
+        if (controller.signal.aborted) return;
+        if (!result.status) throw new Error(result.statusError || 'Train information is temporarily unavailable.');
+        if (!validDate(result.status.date)) throw new Error('The journey date could not be verified.');
+        pinnedDate = result.status.date;
+        setJourney(result); setError(result.etaError || '');
+        failures = result.etaError ? Math.min(failures + 1, 3) : 0;
+      } catch (cause) {
+        if (!controller.signal.aborted) { setError(cause instanceof Error ? cause.message : 'Please retry.'); failures = Math.min(failures + 1, 3); }
+      } finally {
+        nextAttempt = Date.now() + 30000 * 2 ** failures;
+        busy = false;
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    refresh.current = load;
+    void load();
+    const timer = setInterval(load, 30000);
+    document.addEventListener('visibilitychange', load);
+    return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', load); refresh.current = () => {}; };
+  }, [tracked]);
+  const status = journey?.status;
+  useEffect(() => {
+    if (!status) return;
+    const controller = new AbortController();
     setRouteLoading(true);
-    (async () => {
-      const points = await Promise.all([...routeCodes.entries()].map(async ([code, entry]) => {
-        const cached = routeCache.current.get(code);
-        if (cached !== undefined) return cached ? { ...cached, sequence: entry.index } : null;
-        const inlineLatitude = Number(entry.stop.station?.latitude);
-        const inlineLongitude = Number(entry.stop.station?.longitude);
-        if (Number.isFinite(inlineLatitude) && Number.isFinite(inlineLongitude) && Math.abs(inlineLatitude) <= 90 && Math.abs(inlineLongitude) <= 180) {
-          const point: TrainRoutePoint = { code, name: entry.stop.station?.name || code, latitude: inlineLatitude, longitude: inlineLongitude, sequence: entry.index };
-          routeCache.current.set(code, point);
-          return point;
-        }
-        try {
-          const detail = await stationDetails(code, controller.signal);
-          const latitude = Number(detail.latitude), longitude = Number(detail.longitude);
-          if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) throw new Error('Station has no usable coordinates.');
-          const point: TrainRoutePoint = { code, name: detail.name, latitude, longitude, sequence: entry.index };
-          routeCache.current.set(code, point);
-          return point;
-        } catch (e) {
-          if (!controller.signal.aborted) routeCache.current.set(code, null);
-          return null;
-        }
-      }));
-      if (controller.signal.aborted) return;
-      const valid = points.filter((point): point is TrainRoutePoint => Boolean(point)).sort((a, b) => a.sequence - b.sequence);
-      const currentSequence = valid.find(point => point.code === currentCode)?.sequence;
-      const nextIndex = currentSequence === undefined ? -1 : valid.findIndex(point => point.sequence > currentSequence);
-      setRoutePoints(valid.map((point, pointIndex) => ({ ...point, current: point.code === currentCode, next: nextIndex >= 0 && pointIndex === nextIndex, passed: currentSequence !== undefined && point.sequence < currentSequence })));
-      setRouteLoading(false);
-    })();
+    resolveRoute(status, controller.signal).then(points => { if (!controller.signal.aborted) setRoute(points); }).finally(() => { if (!controller.signal.aborted) setRouteLoading(false); });
     return () => controller.abort();
   }, [status]);
   const location = status?.last_known_location;
-  const old = status?.data_source !== 'live' || !location?.updated_at || !Number.isFinite(Date.parse(location.updated_at)) || Date.now() - Date.parse(location.updated_at) > 300000;
-  const mapTrains: TrainStatus[] = status ? [{ train_number: status.train_number, train_name: status.train_name, data_source: status.data_source, current_station: status.current_station || { code: '', name: 'Unavailable' }, next_station: { code: '', name: 'Unavailable' }, predicted_next_arrival: '', scheduled_departure: '', zone: '', delay_minutes: status.overall_delay_minutes ?? 0, status: status.overall_delay_minutes ? 'DELAYED' : 'ON_TIME', last_known_location: location }] : [];
-  return <section className="space-y-5"><div><h2 className="text-xl font-semibold">Follow a train’s current journey</h2><p className="text-sm text-muted-foreground mt-1">Track a train to see available position, route stops and arrival estimates. Updates every 30 seconds while this view is active.</p></div>
-    <form onSubmit={e => { e.preventDefault(); setStatus(null); setError(''); track({ number, date }); }} className="rounded-2xl border border-border bg-card p-5 flex flex-wrap gap-4 items-end"><label className="text-xs text-muted-foreground flex-1 min-w-40">Train number<input required pattern="[0-9]{5}" inputMode="numeric" maxLength={5} value={number} onChange={e => setNumber(e.target.value)} placeholder="e.g. 12423" className="block mt-2 rounded-xl border border-border bg-background p-3 text-sm text-foreground w-full" /></label><label className="text-xs text-muted-foreground flex-1 min-w-40">Train start date · optional<input type="date" value={date} onChange={e => setDate(e.target.value)} className="block mt-2 rounded-xl border border-border bg-background p-3 text-sm text-foreground w-full" /></label><button disabled={loading} className="rounded-xl bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold disabled:opacity-50">{loading ? 'Checking…' : 'Track train'}</button></form>
-    {error && <p role="alert" className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-sm">{error}{status && ' The map retains the previous observation.'}</p>}
-    <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="px-5 py-4 flex flex-wrap justify-between gap-2 text-sm"><strong>Geographic view</strong><span className="text-muted-foreground">{status ? `${error || old ? 'Previous / cached observation' : 'Latest available observation'} · ${time(location?.updated_at)}` : 'Choose a train to begin'}</span></div><div className="h-[420px]"><MapWrapper trains={mapTrains} route={routePoints} routeLoading={routeLoading} selectedTrainId={status?.train_number || null} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">Blue line: scheduled train route through mapped stations. Position source: {location?.position_source || 'Unavailable'}. Derived positions are estimates between reported stops. Network-wide signalling and track occupancy are not supplied by this feed.</p></div>
-    {tracked && status && <PassengerJourney key={`${tracked.number}-${status.date}`} number={tracked.number} date={status.date} autoRefresh />}
+  const trains: TrainStatus[] = status ? [{ train_number: status.train_number, train_name: status.train_name, data_source: status.data_source, current_station: status.current_station || { code: '', name: 'Unavailable' }, next_station: { code: '', name: 'Unavailable' }, predicted_next_arrival: '', scheduled_departure: '', zone: '', delay_minutes: status.overall_delay_minutes ?? 0, status: status.overall_delay_minutes ? 'DELAYED' : 'ON_TIME', last_known_location: location ? { ...location, delay_minutes: location.delay_minutes ?? undefined } : undefined }] : [];
+  return <section className="space-y-5">
+    <div><h2 className="text-2xl font-semibold">Where is my train?</h2><p className="text-sm text-muted-foreground mt-2">Enter a train number to see its route, latest reported position and arrival times.</p></div>
+    <form onSubmit={event => { event.preventDefault(); if (!/^\d{5}$/.test(number) || (date && !validDate(date))) { setError('Enter a five-digit train number and a valid start date.'); return; } setJourney(null); setRoute([]); setRouteLoading(false); setError(''); track({ number, date }); }} className="rounded-2xl border border-border bg-card p-5 flex flex-wrap gap-4 items-end">
+      <label className="text-sm flex-1 min-w-40">Train number<input required pattern="[0-9]{5}" inputMode="numeric" maxLength={5} value={number} onChange={event => setNumber(event.target.value)} placeholder="e.g. 12423" className="block mt-2 rounded-xl border border-border bg-background p-3 w-full" /></label>
+      <label className="text-sm flex-1 min-w-40">Journey start date · optional<input type="date" value={date} onChange={event => setDate(event.target.value)} className="block mt-2 rounded-xl border border-border bg-background p-3 w-full" /></label>
+      <button className="rounded-xl bg-primary text-primary-foreground px-6 py-3 font-semibold">Track train</button>
+    </form>
+    {error && <p role="alert" className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-sm">{error}{status && ' Last available information remains visible.'}</p>}
+    {loading && !status && <p role="status">Finding your train…</p>}
+    {status && <>
+      <div className="rounded-2xl border border-border bg-card p-5"><p className="text-xs text-primary font-semibold">{status.train_number} · {status.date}</p><h3 className="text-xl font-semibold mt-1">{status.train_name}</h3><p className="mt-2 text-sm">{status.route[0]?.station?.name || 'Origin unavailable'} → {status.route.at(-1)?.station?.name || 'Destination unavailable'}</p><div className="flex flex-wrap gap-5 mt-4 text-sm"><span>Last reported: <strong>{status.current_station?.name || 'Unavailable'}</strong></span><span>{delayLabel(status.overall_delay_minutes)}</span><span>Updated: {time(location?.updated_at)}</span></div></div>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-4 flex justify-between gap-3"><strong>Your train’s route</strong><button disabled={loading} onClick={() => refresh.current()} className="text-primary disabled:opacity-50">{loading ? 'Refreshing…' : 'Refresh'}</button></div><div className="h-[520px]"><MapWrapper key={status.train_number + status.date} trains={trains} route={route} routeLoading={routeLoading} selectedTrainId={status.train_number} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">{route.length} of {status.route.length} stops mapped. Dashed lines connect station locations approximately; exact railway track geometry is unavailable. Updates every 30 seconds while visible, with longer waits after errors.</p></div>
+      <PassengerJourney number={status.train_number} date={status.date} suppliedJourney={journey!} refreshing={loading} onRefresh={() => refresh.current()} />
+    </>}
+    {!tracked && <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-10 text-center"><h3 className="font-semibold">Your journey, on one map</h3><p className="mt-2 text-sm text-muted-foreground">Choose a train above to begin. Only your selected train will appear here.</p></div>}
   </section>;
 }

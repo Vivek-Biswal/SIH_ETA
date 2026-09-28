@@ -130,11 +130,11 @@ void main() {
     expect(find.text('Historical analysis'), findsOneWidget);
     expect(find.textContaining('2024-09-01 to 2024-09-30'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Explore recorded interactions'),
+      find.text('See examples at this station'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    await revealTap(tester, find.text('Explore recorded interactions'));
+    await revealTap(tester, find.text('See examples at this station'));
     expect(repo.queries.last, 'NDLS');
     await tester.scrollUntilVisible(
       find.text('Train 12301'),
@@ -185,7 +185,7 @@ void main() {
       );
       await tester.ensureVisible(find.byKey(const Key('network-query')));
       await tester.enterText(find.byKey(const Key('network-query')), 'CNB');
-      await revealTap(tester, find.text('Search network'));
+      await revealTap(tester, find.text('Find past patterns'));
       expect(repo.queries.last, 'CNB');
       expect(
         find.textContaining('Showing the last fetched analysis'),

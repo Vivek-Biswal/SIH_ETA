@@ -3,20 +3,23 @@ import { useEffect, useState } from 'react';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type Journey, type Stop } from '@/services/passenger';
 
-export function PassengerJourney({ number, date = '', target = '', compact = false, autoRefresh = false }: { number: string; date?: string; target?: string; compact?: boolean; autoRefresh?: boolean }) {
-  const [journey, setJourney] = useState<Journey | null>(null), [error, setError] = useState('');
-  const [loading, setLoading] = useState(true), [revision, refresh] = useState(0);
+export function PassengerJourney({ number, date = '', target = '', compact = false, autoRefresh = false, suppliedJourney, refreshing = false, onRefresh }: { number: string; date?: string; target?: string; compact?: boolean; autoRefresh?: boolean; suppliedJourney?: Journey; refreshing?: boolean; onRefresh?: () => void }) {
+  const [localJourney, setJourney] = useState<Journey | null>(null), [error, setError] = useState('');
+  const [localLoading, setLoading] = useState(true), [revision, refresh] = useState(0);
+  const journey = suppliedJourney ?? localJourney;
+  const loading = suppliedJourney ? refreshing : localLoading;
   const [selected, select] = useState(target), [now, setNow] = useState(() => Date.now());
   useEffect(() => {
+    if (suppliedJourney) return;
     const controller = new AbortController();
     setLoading(true); setJourney(null); setError('');
     loadJourney(number, date, controller.signal).then(data => { if (!controller.signal.aborted) setJourney(data); }).catch(e => { if (!controller.signal.aborted) setError(e.message); }).finally(() => { if (!controller.signal.aborted) { setLoading(false); setNow(Date.now()); } });
     return () => controller.abort();
-  }, [number, date, revision]);
+  }, [number, date, revision, suppliedJourney]);
   useEffect(() => {
-    const timer = setInterval(() => { setNow(Date.now()); if (autoRefresh && document.visibilityState === 'visible') refresh(n => n + 1); }, 30000);
+    const timer = setInterval(() => { setNow(Date.now()); if (!suppliedJourney && autoRefresh && document.visibilityState === 'visible') refresh(n => n + 1); }, 30000);
     return () => clearInterval(timer);
-  }, [autoRefresh]);
+  }, [autoRefresh, suppliedJourney]);
   const status = journey?.status, eta = journey?.eta || null;
   const predictions = eta?.remaining_stations || [];
   const defaultPrediction = predictions.find(p => usablePrediction(eta, p)) || predictions.at(-1);
@@ -34,10 +37,10 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
     <div className="rounded-3xl border border-primary/25 bg-card overflow-hidden shadow-sm">
       <div className="bg-primary/5 px-5 sm:px-8 py-5 flex flex-wrap justify-between gap-3 items-center border-b border-primary/15">
         <div><p className="text-xs uppercase tracking-[.16em] font-semibold text-primary mb-2">Arrival intelligence · {number}</p><h2 className="text-xl font-semibold">{status?.train_name || `Train ${number}`}</h2></div>
-        <button disabled={loading} onClick={() => refresh(n => n + 1)} className="flex items-center gap-2 border border-border bg-card rounded-full px-4 py-2 text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />Refresh</button>
+        <button disabled={loading} onClick={() => onRefresh ? onRefresh() : refresh(n => n + 1)} className="flex items-center gap-2 border border-border bg-card rounded-full px-4 py-2 text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />Refresh</button>
       </div>
       <div className="p-5 sm:p-8">
-        {loading ? <div role="status" className="py-10 flex gap-3 items-center text-muted-foreground"><Clock3 className="animate-pulse" />Fetching the latest available arrival information…</div> : <>
+        {loading && !journey ? <div role="status" className="py-10 flex gap-3 items-center text-muted-foreground"><Clock3 className="animate-pulse" />Fetching the latest available arrival information…</div> : <>
           {(error || journey?.statusError) && <p role="alert" className="mb-4 text-destructive">{error || journey?.statusError}</p>}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <label className="text-sm text-muted-foreground">Arrival at<select aria-label="Arrival station" className="block mt-2 max-w-full rounded-xl border border-border bg-background text-foreground px-3 py-2" value={destination} onChange={e => select(e.target.value)}>
