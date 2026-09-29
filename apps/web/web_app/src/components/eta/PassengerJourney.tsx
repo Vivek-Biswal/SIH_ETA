@@ -60,7 +60,7 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
             <div className="sm:border-l border-border sm:pl-6 space-y-4"><div><p className="text-sm text-muted-foreground">Scheduled arrival</p><p className="text-xl font-medium mt-1 tabular-nums">{time(prediction?.scheduled_arrival || stop?.scheduled_arrival)}</p></div><div><p className="text-sm text-muted-foreground">Last reported running delay</p><p className="font-medium mt-1">{typeof status?.last_known_location?.delay_minutes === 'number' ? `${status.last_known_location.delay_minutes} min` : 'Unavailable'}</p></div></div>
           </div>
           <details className="mt-7 rounded-xl border border-border p-4"><summary className="cursor-pointer text-primary font-semibold">Why this ETA?</summary><div className="pt-1 text-sm text-muted-foreground space-y-2">
-            <DelayExamples />
+            <DelayExamples delayMinutes={prediction?.predicted_delay_minutes ?? status?.last_known_location?.delay_minutes} />
           </div></details>
           <ArrivalWeather number={number} date={status?.date || date} station={destination} predicted={hasPrediction ? prediction?.predicted_arrival : null} />
           <div className="mt-5 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2"><span>Status: <strong className="text-foreground">{status?.status || 'Unavailable'}</strong></span><span>Last reported at: <strong className="text-foreground">{status?.current_station?.name || 'Unavailable'}</strong></span><span>Journey started: {status?.date || date || 'Unavailable'}</span></div>
