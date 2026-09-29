@@ -168,6 +168,7 @@ class DelayFactor {
 }
 
 class ETAModel {
+  final String? explanation;
   final String trainNumber;
   final String trainName;
   final String? date;
@@ -178,7 +179,8 @@ class ETAModel {
   final List<StationPrediction> remainingStations;
   final List<DelayFactor> delayFactors;
   ETAModel.fromJson(Map<String, dynamic> json)
-    : trainNumber = requiredText(json, 'train_number'),
+    : explanation = json['explanation'] as String?,
+      trainNumber = requiredText(json, 'train_number'),
       trainName = requiredText(json, 'train_name'),
       date = json['date'] as String?,
       generatedAt = json['prediction_generated_at'] as String?,

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { ArrivalWeather } from './ArrivalWeather';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type Journey, type Stop } from '@/services/passenger';
 
@@ -32,7 +33,8 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
   const observed = eta?.observation_timestamp || status?.last_known_location?.updated_at;
   const observationAge = observed ? now - Date.parse(observed) : NaN;
   const stale = eta?.data_source === 'cached' || status?.data_source === 'cached' || (Number.isFinite(observationAge) && observationAge > 300000);
-  const hasPrediction = usablePrediction(eta, prediction) && !stale;
+  const notRunning = ['not-started', 'cancelled', 'canceled', 'completed', 'terminated'].includes(status?.status.replaceAll('_', '-').toLowerCase() || '');
+  const hasPrediction = usablePrediction(eta, prediction) && !stale && !notRunning;
   return <section className="space-y-5" aria-busy={loading} aria-label="Train ETA and status">
     <div className="rounded-3xl border border-primary/25 bg-card overflow-hidden shadow-sm">
       <div className="bg-primary/5 px-5 sm:px-8 py-5 flex flex-wrap justify-between gap-3 items-center border-b border-primary/15">
@@ -57,10 +59,12 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
             <div className="sm:border-l border-border sm:pl-6 space-y-4"><div><p className="text-sm text-muted-foreground">Scheduled arrival</p><p className="text-xl font-medium mt-1 tabular-nums">{time(prediction?.scheduled_arrival || stop?.scheduled_arrival)}</p></div><div><p className="text-sm text-muted-foreground">Last reported running delay</p><p className="font-medium mt-1">{typeof status?.last_known_location?.delay_minutes === 'number' ? `${status.last_known_location.delay_minutes} min` : 'Unavailable'}</p></div></div>
           </div>
           <details className="mt-7 rounded-xl border border-border p-4"><summary className="cursor-pointer text-primary font-semibold">Why this ETA?</summary><div className="pt-3 text-sm text-muted-foreground space-y-2">
-            <p>{hasPrediction ? eta?.explanation || `The backend returned this prediction using the ${eta?.prediction_method} method.` : 'There is no usable current ETA for this selection. A timetable is not a live prediction.'}</p>
+            <p>{notRunning ? 'This journey has not started or is no longer running. Scheduled arrival is shown separately; it is not a live ETA.' : stale ? 'The running observation is older than five minutes. Refresh for a current ETA.' : eta?.explanation || 'There is no usable current ETA for this selection. A timetable is not a live prediction.'}</p>
+            {hasPrediction && <p className="font-medium text-foreground">{time(prediction?.scheduled_arrival)} scheduled + {prediction?.predicted_delay_minutes ?? 'unknown'} min running delay = {time(prediction?.predicted_arrival)} estimated arrival.</p>}
             <p>Observation: {time(observed)}. Prediction generated: {time(eta?.prediction_generated_at)}.</p>
-            <p>Specific disruption causes are not provided by this feed. No weather, signal or congestion cause is inferred.</p>
+            <p>The running delay is observed; its cause is not supplied. Weather outlook is shown separately below.</p>
           </div></details>
+          <ArrivalWeather number={number} date={status?.date || date} station={destination} predicted={hasPrediction ? prediction?.predicted_arrival : null} />
           <div className="mt-5 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2"><span>Status: <strong className="text-foreground">{status?.status || 'Unavailable'}</strong></span><span>Last reported at: <strong className="text-foreground">{status?.current_station?.name || 'Unavailable'}</strong></span><span>Journey started: {status?.date || date || 'Unavailable'}</span></div>
         </>}
       </div>

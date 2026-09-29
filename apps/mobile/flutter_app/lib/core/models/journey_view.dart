@@ -28,6 +28,13 @@ List<JourneyStop> journeyStops(TrainStatus status, ETAModel? eta) {
       JourneyStop(
         status.route[i],
         sameJourney &&
+                ![
+                  'not-started',
+                  'cancelled',
+                  'canceled',
+                  'completed',
+                  'terminated',
+                ].contains(status.status.replaceAll('_', '-').toLowerCase()) &&
                 eta!.hasPredictions &&
                 codes[status.route[i].station?.code] == 1
             ? uniquePrediction(eta, status.route[i].station?.code)

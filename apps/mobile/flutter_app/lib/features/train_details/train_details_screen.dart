@@ -12,6 +12,7 @@ import '../../core/network/api_client.dart';
 import '../../core/services/train_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/eta_display.dart';
+import '../../shared/widgets/arrival_weather.dart';
 import '../../shared/widgets/station_reminder.dart';
 import '../../shared/widgets/station_timeline.dart';
 import '../../shared/widgets/passenger_components.dart';
@@ -590,6 +591,8 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             method:
                                 eta?.methodLabel ?? 'Prediction unavailable',
                           ),
+                          if (status != null && destination.stop.station != null)
+                            ArrivalWeather(key: ValueKey('${widget.trainNumber}-${status.date}-${destination.stop.station!.code}'), number: widget.trainNumber, date: status.date ?? '', station: destination.stop.station!.code, predicted: destination.prediction?.predictedArrival),
                         ],
                         if (status != null) ...[
                           StationReminderButton(

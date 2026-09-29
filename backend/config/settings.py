@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     )
 
     RAILRADAR_API_KEY: str = Field(default="", repr=False)
+    WEATHER_API_KEY: str = Field(default="", repr=False, validation_alias=AliasChoices("WEATHER_API_KEY", "OPENWEATHER_API_KEY", "OPENWEATHERMAP_API_KEY"))
 
     # ── Application ───────────────────────────────────────────────────────────
     APP_ENV: str = Field(default="development")

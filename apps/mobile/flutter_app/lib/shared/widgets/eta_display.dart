@@ -130,18 +130,22 @@ class EtaDisplay extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text('Method: $method'),
                       const SizedBox(height: 12),
-                      Text(switch (evidence?.method) {
-                        'delay_adjusted' =>
-                          'Scheduled arrival plus the latest reported running delay. This estimate assumes the delay persists; it does not assume recovery, congestion or weather effects.',
-                        'schedule_only' =>
-                          'Only timetable information is available. The service has not supplied a delay-adjusted arrival prediction.',
-                        'stored' =>
-                          'This arrival was retrieved from stored predictions. It has not necessarily been recalculated from a fresh observation.',
-                        'inference' =>
-                          'The service reports a computed prediction. Only the evidence returned with that response is shown below.',
-                        _ =>
-                          'The service has not supplied a verified prediction method.',
-                      }, style: const TextStyle(height: 1.5)),
+                      Text(
+                        evidence?.explanation ??
+                            switch (evidence?.method) {
+                              'delay_adjusted' =>
+                                'Scheduled arrival plus the latest reported running delay. This estimate assumes the delay persists; it does not assume recovery, congestion or weather effects.',
+                              'schedule_only' =>
+                                'Only timetable information is available. The service has not supplied a delay-adjusted arrival prediction.',
+                              'stored' =>
+                                'This arrival was retrieved from stored predictions. It has not necessarily been recalculated from a fresh observation.',
+                              'inference' =>
+                                'The service reports a computed prediction. Only the evidence returned with that response is shown below.',
+                              _ =>
+                                'The service has not supplied a verified prediction method.',
+                            },
+                        style: const TextStyle(height: 1.5),
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'Prediction generated: ${displayTime(evidence?.generatedAt)}',

@@ -11,9 +11,14 @@ from fastapi import APIRouter, Query
 from starlette.concurrency import run_in_threadpool
 
 from api.controllers.train_controller import TrainController
-from services import railradar_passenger
+from services import railradar_passenger, weather_service
 
 router = APIRouter(prefix="/api/v1/trains", tags=["trains"])
+
+@router.get("/{train_number}/weather")
+async def get_arrival_weather(train_number: str, station_code: str = Query(..., pattern="^[A-Z0-9]{2,10}$"), date: Optional[str] = None):
+    data = await run_in_threadpool(railradar_passenger.fetch_live, train_number, date)
+    return await run_in_threadpool(weather_service.weather_for_journey, data, station_code)
 
 # Module-level controller instance (simple DI — no framework needed)
 _controller = TrainController()

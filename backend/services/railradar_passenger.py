@@ -222,7 +222,9 @@ def status_response(data, now=None):
 def eta_response(data, now=None):
     now = now or datetime.now(timezone.utc)
     delay = data.get("delayMinutes")
-    usable = fresh(data, now) and type(delay) is int
+    state = str(data.get("status", "")).lower().replace("_", "-")
+    not_running = state in {"not-started", "cancelled", "canceled", "completed", "terminated"}
+    usable = fresh(data, now) and type(delay) is int and not not_running
     predictions = []
     for row in data["route"]:
         scheduled = timestamp(row.get("scheduledArrival"))
@@ -240,6 +242,6 @@ def eta_response(data, now=None):
         "prediction_method": "delay_adjusted" if adjusted else "schedule_only",
         "model_version": "observed-delay-baseline-v1", "prediction_generated_at": now.isoformat() if adjusted else None,
         "remaining_stations": predictions, "delay_factors": [], "confidence_score": None, "overall_delay_minutes": delay,
-        "explanation": "Scheduled arrival plus the latest reported running delay. Assumes the delay persists; no recovery or additional disruption is inferred." if adjusted else "No fresh observation is available for an adjusted prediction.",
+        "explanation": "Scheduled arrival plus the latest reported running delay. Assumes the delay persists; no recovery or additional disruption is inferred." if adjusted else ("This journey has not started or is no longer running. The timetable is available, but a live arrival estimate cannot be calculated." if not_running else "No fresh running observation and upcoming dated arrival are available for an adjusted prediction."),
         "observation_timestamp": data.get("lastUpdatedAt"),
     }
