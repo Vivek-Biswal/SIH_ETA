@@ -27,7 +27,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Welcome to Eternal'), findsOneWidget);
+      expect(find.text('Welcome to Etaernal'), findsOneWidget);
       for (var page = 0; page < 3; page++) {
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();

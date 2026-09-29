@@ -29,7 +29,7 @@ export function PassengerDashboard() {
       <section className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="space-y-4">
           <p className="text-sm uppercase tracking-[0.2em] text-primary/80 font-bold">
-            SIH ETA Intelligence
+            Etaernal Intelligence
           </p>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
             Where is your train going?

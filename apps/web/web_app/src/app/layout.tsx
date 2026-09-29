@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: 'SIH ETA — Operations & Network Intelligence',
+  title: 'Etaernal — Operations & Network Intelligence',
   description: 'Dynamic Train Arrival Prediction System and Operations Cockpit',
 };
 

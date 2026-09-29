@@ -10,7 +10,7 @@ import { RouteSimulation } from './RouteSimulation';
 
 const JourneyAnalytics = dynamic(() => import('../analytics/JourneyAnalytics'), { loading: () => <p role="status" className="p-6 text-muted-foreground">Loading analytics…</p> });
 type Mode = 'history' | 'live' | 'simulation' | 'analytics';
-export function NetworkWorkspace({ initialMode = 'live', brand = 'Equinox' }: { initialMode?: Mode; brand?: string }) {
+export function NetworkWorkspace({ initialMode = 'live', brand = 'Etaernal' }: { initialMode?: Mode; brand?: string }) {
   const [mode, setMode] = useState<Mode>(initialMode);
   return <div className={`${styles.workspace} max-w-7xl mx-auto space-y-6 pb-10`}>
     <header className={styles.hero}>

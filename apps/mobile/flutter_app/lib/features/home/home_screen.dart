@@ -134,9 +134,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
         title: Row(children: [
-          ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/brand/logo.png', width: 36, height: 36, semanticLabel: 'Eternal')),
+          ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/brand/logo.png', width: 36, height: 36, semanticLabel: 'Etaernal')),
           const SizedBox(width: 10),
-          const Text('Eternal'),
+          const Text('Etaernal'),
         ]),
       ),
       bottomNavigationBar: const AppNavigation(selected: 0),

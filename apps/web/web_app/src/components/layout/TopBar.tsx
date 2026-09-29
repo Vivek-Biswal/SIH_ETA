@@ -20,7 +20,7 @@ export function TopBar() {
     return () => { clearTimeout(timer); controller.abort(); };
   }, [query]);
   return <header className="h-16 bg-card border-b border-border px-4 md:px-6 flex items-center justify-between gap-4 shrink-0 z-40">
-    <Link href="/dashboard" className="flex gap-2 items-center font-semibold shrink-0"><Image src="/brand/logo.png" alt="Equinox" width={36} height={36} className="rounded-lg" />SIH ETA</Link>
+    <Link href="/dashboard" className="flex gap-2 items-center font-semibold shrink-0"><Image src="/brand/logo.png" alt="Etaernal" width={36} height={36} className="rounded-lg" />Etaernal</Link>
     <div className="hidden sm:block relative w-full max-w-md" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
       <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
       <input aria-label="Find a train by name or number" placeholder="Train name or number" value={query} onChange={e => { setQuery(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }} className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm" />

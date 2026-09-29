@@ -1,4 +1,4 @@
-# Eternal passenger app
+# Etaernal passenger app
 
 Flutter passenger app for problem statement 26028. Version 1.1.0 adds an automatic first-launch guide, saved journeys and working Network Intelligence screens.
 
@@ -53,4 +53,4 @@ flutter test integration_test/passenger_flow_test.dart -d emulator-5554 --dart-d
 flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=API_BASE_URL=https://sih-eta-backend-a819.onrender.com
 ```
 
-Output: `build/app/outputs/flutter-apk/app-release.apk`. This includes ARM64 phones and x64 emulators. Release signing uses the existing local `android/key.properties`; never commit it or the keystore. Release networking requires HTTPS. The app launcher name is Eternal. Journey insights includes tracking, analytics, past delays and simulation through the shared online workspace; CSV exports open the native share sheet.
+Output: `build/app/outputs/flutter-apk/app-release.apk`. This includes ARM64 phones and x64 emulators. Release signing uses the existing local `android/key.properties`; never commit it or the keystore. Release networking requires HTTPS. The app launcher name is Etaernal. Journey insights includes tracking, analytics, past delays and simulation through the shared online workspace; CSV exports open the native share sheet.

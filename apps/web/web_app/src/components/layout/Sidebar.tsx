@@ -38,11 +38,11 @@ export const Sidebar: React.FC = () => {
         {/* Brand Header */}
         <div className="h-16 border-b border-[var(--sidebar-border)] flex items-center px-4 gap-3">
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
-            <Image src="/brand/logo.png" alt="Equinox" width={40} height={40} className="rounded-lg" />
+            <Image src="/brand/logo.png" alt="Etaernal" width={40} height={40} className="rounded-lg" />
           </div>
           <div className="flex flex-col">
             <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)] leading-tight">
-              EQUINOX01
+              Etaernal
             </span>
             <span className="text-[11px] text-[var(--sidebar-muted)] font-medium leading-tight">
               Railway Intelligence
