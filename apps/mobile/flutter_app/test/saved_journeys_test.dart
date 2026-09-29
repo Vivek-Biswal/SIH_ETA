@@ -104,7 +104,7 @@ void main() {
       );
       await launch();
       await tester.pumpAndSettle();
-      expect(find.text('Welcome to SIH ETA'), findsOneWidget);
+      expect(find.text('Welcome to Eternal'), findsOneWidget);
       await tester.tap(find.text('Skip'));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('train-number')), findsOneWidget);
@@ -121,7 +121,7 @@ void main() {
       router = createAppRouter();
       await launch();
       await tester.pumpAndSettle();
-      expect(find.text('Welcome to SIH ETA'), findsNothing);
+      expect(find.text('Welcome to Eternal'), findsNothing);
       expect(find.byKey(const Key('train-number')), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       router.dispose();

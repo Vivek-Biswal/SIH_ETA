@@ -153,7 +153,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Text(
                           widget.replay
                               ? 'Your travel guide'
-                              : 'Welcome to SIH ETA',
+                              : 'Welcome to Eternal',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
