@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/models/train_models.dart';
 import 'passenger_components.dart';
+import 'delay_examples.dart';
 
 // A time-only schedule has no day offset. Never guess across midnight.
 int? arrivalDifference(String? scheduled, String? predicted) {
@@ -181,6 +182,7 @@ class EtaDisplay extends StatelessWidget {
                         'Weather, signal holds and congestion are not assumed. Reported factors may not explain the entire difference between the timetable and prediction.',
                         style: TextStyle(height: 1.5),
                       ),
+                      const DelayExamples(),
                     ],
                   ),
                 ),
