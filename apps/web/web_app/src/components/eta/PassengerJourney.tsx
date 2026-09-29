@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { ArrivalWeather } from './ArrivalWeather';
 import { DelayExamples } from './DelayExamples';
+import { EtaFeedback } from './EtaFeedback';
+import { IncidentReport } from './IncidentReport';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type Journey, type Stop } from '@/services/passenger';
 
@@ -63,6 +65,17 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
             <DelayExamples delayMinutes={prediction?.predicted_delay_minutes ?? status?.last_known_location?.delay_minutes} />
           </div></details>
           <ArrivalWeather number={number} date={status?.date || date} station={destination} predicted={hasPrediction ? prediction?.predicted_arrival : null} />
+          <EtaFeedback
+            trainNumber={number}
+            destination={destination}
+            predictedEta={hasPrediction ? prediction?.predicted_arrival : undefined}
+            date={status?.date || date}
+          />
+          <IncidentReport
+            trainNumber={number}
+            date={status?.date || date}
+            currentStation={status?.current_station?.name}
+          />
           <div className="mt-5 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2"><span>Status: <strong className="text-foreground">{status?.status || 'Unavailable'}</strong></span><span>Last reported at: <strong className="text-foreground">{status?.current_station?.name || 'Unavailable'}</strong></span><span>Journey started: {status?.date || date || 'Unavailable'}</span></div>
         </>}
       </div>
