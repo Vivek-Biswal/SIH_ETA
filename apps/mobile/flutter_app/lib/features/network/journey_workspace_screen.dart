@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:share_plus/share_plus.dart';
+import 'journey_export.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +27,37 @@ class _JourneyWorkspaceScreenState extends State<JourneyWorkspaceScreen>
   WebViewController? _controller;
   int _progress = 0;
   String? _error;
+  bool _sharing = false;
+
+  Future<void> _exportJourney(JavaScriptMessage message) async {
+    if (_sharing) return;
+    _sharing = true;
+    try {
+      final current = Uri.tryParse(await _controller?.currentUrl() ?? '');
+      if (current?.origin != _url.origin || !mounted) return;
+      final file = parseJourneyExport(message.message);
+      final box = context.findRenderObject() as RenderBox?;
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile.fromData(utf8.encode(file.csv), mimeType: 'text/csv')],
+          fileNameOverrides: [file.filename],
+          sharePositionOrigin: box == null
+              ? null
+              : box.localToGlobal(Offset.zero) & box.size,
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not export this journey. Please try again.'),
+          ),
+        );
+      }
+    } finally {
+      _sharing = false;
+    }
+  }
 
   @override
   void initState() {
@@ -40,6 +74,7 @@ class _JourneyWorkspaceScreenState extends State<JourneyWorkspaceScreen>
     }
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel('JourneyExport', onMessageReceived: _exportJourney)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (value) {

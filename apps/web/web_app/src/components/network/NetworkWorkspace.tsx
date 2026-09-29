@@ -1,24 +1,27 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Network, Radio, FlaskConical, RefreshCw, Search, ArrowRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { ArrowUpRight, Network, Radio, FlaskConical, RefreshCw, Search, ArrowRight, ChartNoAxesCombined } from 'lucide-react';
+import styles from './JourneyWorkspace.module.css';
 import { loadInsights, type Insights } from '@/services/networkInsights';
 import { LiveNetwork } from './LiveNetwork';
 import { RouteSimulation } from './RouteSimulation';
 
-type Mode = 'history' | 'live' | 'simulation';
+const JourneyAnalytics = dynamic(() => import('../analytics/JourneyAnalytics'), { loading: () => <p role="status" className="p-6 text-muted-foreground">Loading analytics…</p> });
+type Mode = 'history' | 'live' | 'simulation' | 'analytics';
 export function NetworkWorkspace({ initialMode = 'live' }: { initialMode?: Mode }) {
   const [mode, setMode] = useState<Mode>(initialMode);
-  return <div className="max-w-7xl mx-auto space-y-6 pb-10">
-    <header className="rounded-3xl bg-[#071c40] text-white p-6 sm:p-9 relative overflow-hidden">
-      <p className="text-xs uppercase tracking-[.2em] text-blue-200 mb-3">Equinox · Railway intelligence</p>
-      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">Your journey, made clearer.<br /><span className="text-blue-300">Know where you stand.</span></h1>
-      <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300">Explore station delay patterns, follow a train’s latest journey, or test how a disruption affects a corridor.</p>
+  return <div className={`${styles.workspace} max-w-7xl mx-auto space-y-6 pb-10`}>
+    <header className={styles.hero}>
+      <p className={styles.eyebrow}>Equinox / Journey insights</p>
+      <h1>Your journey, made clearer.</h1>
+      <p className={styles.intro}>Follow your train, understand its delays, and explore what could change your arrival.</p>
     </header>
-    <nav aria-label="Network modes" className="grid grid-cols-1 sm:grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2">
-      {([{ id: 'history', title: 'Past delay patterns', subtitle: 'Historical patterns', icon: Network }, { id: 'live', title: 'Track my train', subtitle: 'Train status & route', icon: Radio }, { id: 'simulation', title: 'Simulation mode', subtitle: 'Explore a what-if scenario', icon: FlaskConical }] as const).map(item => <button key={item.id} aria-pressed={mode === item.id} onClick={() => setMode(item.id)} className={`flex items-center gap-3 rounded-xl p-3 text-left transition-colors ${mode === item.id ? 'bg-primary/10 text-primary ring-1 ring-primary/25' : 'hover:bg-muted'}`}><item.icon size={20} /><span><span className="block text-sm font-semibold">{item.title}</span><span className="text-xs text-muted-foreground">{item.subtitle}</span></span></button>)}
+    <nav aria-label="Journey insights sections" className={styles.navigation}>
+      {([{ id: 'live', title: 'Track my train', subtitle: 'Position & arrival times', icon: Radio }, { id: 'analytics', title: 'Analytics', subtitle: 'Your journey in numbers', icon: ChartNoAxesCombined }, { id: 'history', title: 'Past delays', subtitle: 'Learn from past journeys', icon: Network }, { id: 'simulation', title: 'Simulation', subtitle: 'Explore a what-if journey', icon: FlaskConical }] as const).map(item => <button key={item.id} aria-pressed={mode === item.id} aria-controls="journey-content" onClick={() => setMode(item.id)} className={styles.tab}><span className={styles.tabIcon}><item.icon size={20} /></span><span className={styles.tabText}><span className={styles.tabTitle}>{item.title}</span><span className={styles.tabSubtitle}>{item.subtitle}</span></span></button>)}
     </nav>
-    {mode === 'history' ? <HistoricalInsights /> : mode === 'live' ? <LiveNetwork /> : <Simulation />}
+    <div id="journey-content" className={styles.content}>{mode === 'history' ? <HistoricalInsights /> : mode === 'live' ? <LiveNetwork /> : mode === 'analytics' ? <JourneyAnalytics embedded /> : <Simulation />}</div>
   </div>;
 }
 function HistoricalInsights() {
