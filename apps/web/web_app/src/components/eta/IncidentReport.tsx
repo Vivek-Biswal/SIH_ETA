@@ -119,24 +119,18 @@ export function IncidentReport({
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {INCIDENT_TYPES.map(t => (
-            <label
+            <button
               key={t.value}
-              className={`flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 text-sm transition-colors
+              type="button"
+              onClick={() => { setIncidentType(t.value); setError(''); }}
+              className={`flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 text-sm transition-colors text-left
                 ${incidentType === t.value
                   ? 'border-destructive/60 bg-destructive/10 text-foreground'
                   : 'border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground'
                 }`}
             >
-              <input
-                type="radio"
-                name="incident-type"
-                value={t.value}
-                checked={incidentType === t.value}
-                onChange={() => { setIncidentType(t.value); setError(''); }}
-                className="sr-only"
-              />
               {t.label}
-            </label>
+            </button>
           ))}
         </div>
       </div>
