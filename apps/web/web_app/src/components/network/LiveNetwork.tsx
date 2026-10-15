@@ -19,8 +19,9 @@ export function LiveNetwork() {
     let busy = false, failures = 0, nextAttempt = 0, pinnedDate = tracked.date, appActive = true;
     const pause = () => { appActive = false; };
     const resume = () => { appActive = true; void load(); };
-    async function load() {
-      if (busy || !appActive || document.visibilityState === 'hidden' || Date.now() < nextAttempt) return;
+    async function load(manual = false) {
+      if (busy || !appActive || document.visibilityState === 'hidden' || ((!manual || failures > 0) && Date.now() < nextAttempt)) return;
+      const attemptedAt = Date.now();
       busy = true; setLoading(true);
       try {
         const result = await loadJourney(tracked!.number, pinnedDate, controller.signal);
@@ -33,18 +34,20 @@ export function LiveNetwork() {
       } catch (cause) {
         if (!controller.signal.aborted) { setError(cause instanceof Error ? cause.message : 'Please retry.'); failures = Math.min(failures + 1, 3); }
       } finally {
-        nextAttempt = Date.now() + 30000 * 2 ** failures;
+        nextAttempt = attemptedAt + 120000 * 2 ** failures;
         busy = false;
         if (!controller.signal.aborted) setLoading(false);
       }
     }
-    refresh.current = load;
+    // Manual checks use the same backend cache and still respect error backoff.
+    refresh.current = () => { void load(true); };
     void load();
-    const timer = setInterval(load, 30000);
-    document.addEventListener('visibilitychange', load);
+    const autoLoad = () => { void load(); };
+    const timer = setInterval(autoLoad, 120000);
+    document.addEventListener('visibilitychange', autoLoad);
     window.addEventListener('journey-pause', pause);
     window.addEventListener('journey-resume', resume);
-    return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', load); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); refresh.current = () => {}; };
+    return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', autoLoad); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); refresh.current = () => {}; };
   }, [tracked]);
   const status = journey?.status;
   useEffect(() => {
@@ -67,7 +70,7 @@ export function LiveNetwork() {
     {loading && !status && <p role="status">Finding your train…</p>}
     {status && <>
       <div className="rounded-2xl border border-border bg-card p-5"><p className="text-xs text-primary font-semibold">{status.train_number} · {status.date}</p><h3 className="text-xl font-semibold mt-1">{status.train_name}</h3><p className="mt-2 text-sm">{status.route[0]?.station?.name || 'Origin unavailable'} → {status.route.at(-1)?.station?.name || 'Destination unavailable'}</p><div className="flex flex-wrap gap-5 mt-4 text-sm"><span>Last reported: <strong>{status.current_station?.name || 'Unavailable'}</strong></span><span>{delayLabel(status.overall_delay_minutes)}</span><span>Updated: {time(location?.updated_at)}</span></div></div>
-      <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-4 flex justify-between gap-3"><strong>Your train’s route</strong><button disabled={loading} onClick={() => refresh.current()} className="text-primary disabled:opacity-50">{loading ? 'Refreshing…' : 'Refresh'}</button></div><div className="h-[520px]"><MapWrapper key={status.train_number + status.date} trains={trains} route={route} routeLoading={routeLoading} selectedTrainId={status.train_number} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">{route.length} of {status.route.length} stops mapped. Dashed lines connect station locations approximately; exact railway track geometry is unavailable. Updates every 30 seconds while visible, with longer waits after errors.</p></div>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-4 flex justify-between gap-3"><strong>Your train’s route</strong><button disabled={loading} onClick={() => refresh.current()} className="text-primary disabled:opacity-50">{loading ? 'Refreshing…' : 'Refresh'}</button></div><div className="h-[520px]"><MapWrapper key={status.train_number + status.date} trains={trains} route={route} routeLoading={routeLoading} selectedTrainId={status.train_number} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">{route.length} of {status.route.length} stops mapped. Dashed lines connect station locations approximately; exact railway track geometry is unavailable. Checks for updates every 2 minutes while visible, with longer waits after errors. Shared cached information reduces API usage.</p></div>
       <PassengerJourney number={status.train_number} date={status.date} suppliedJourney={journey!} refreshing={loading} onRefresh={() => refresh.current()} />
     </>}
     {!tracked && <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-10 text-center"><h3 className="font-semibold">Your journey, on one map</h3><p className="mt-2 text-sm text-muted-foreground">Choose a train above to begin. Only your selected train will appear here.</p></div>}

@@ -21,8 +21,21 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
     return () => controller.abort();
   }, [number, date, revision, suppliedJourney]);
   useEffect(() => {
-    const timer = setInterval(() => { setNow(Date.now()); if (!suppliedJourney && autoRefresh && document.visibilityState === 'visible') refresh(n => n + 1); }, 30000);
+    // Observation age keeps advancing without another API request.
+    const timer = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    if (suppliedJourney || !autoRefresh) return;
+    let appActive = true;
+    const pause = () => { appActive = false; };
+    const resume = () => { appActive = true; };
+    const timer = setInterval(() => {
+      if (appActive && document.visibilityState === 'visible') refresh(n => n + 1);
+    }, 120000);
+    window.addEventListener('journey-pause', pause);
+    window.addEventListener('journey-resume', resume);
+    return () => { clearInterval(timer); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); };
   }, [autoRefresh, suppliedJourney]);
   const status = journey?.status, eta = journey?.eta || null;
   const predictions = eta?.remaining_stations || [];

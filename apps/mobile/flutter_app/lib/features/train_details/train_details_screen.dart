@@ -46,6 +46,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   String? _journeyDate;
   int? _arrivalIndex;
   Timer? _refreshTimer;
+  Timer? _freshnessTimer;
 
   @override
   void initState() {
@@ -53,8 +54,12 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     _journeyDate = widget.journeyDate;
     WidgetsBinding.instance.addObserver(this);
     _refresh();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _refreshTimer = Timer.periodic(const Duration(minutes: 2), (_) {
       if (_canAutoRefresh) _refresh();
+    });
+    // Keep age labels current without consuming an API request.
+    _freshnessTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_canAutoRefresh) setState(() {});
     });
   }
 
@@ -103,6 +108,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _freshnessTimer?.cancel();
     _request++;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -417,7 +423,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                         const Padding(
                           padding: EdgeInsets.only(top: 12),
                           child: Text(
-                            'Checks for updates every 30 seconds while this screen is open. Pull down to refresh now.',
+                            'Checks for updates every 2 minutes while this screen is open. Pull down to check the latest shared cached information.',
                             style: TextStyle(fontSize: 12, height: 1.5),
                           ),
                         ),

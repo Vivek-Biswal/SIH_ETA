@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Step 2 of 4'), findsOneWidget);
     expect(find.text('Understand your arrival time'), findsOneWidget);
-    expect(find.textContaining('every 30 seconds'), findsOneWidget);
+    expect(find.textContaining('every 2 minutes'), findsOneWidget);
     await tester.tap(find.text('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Step 1 of 4'), findsOneWidget);

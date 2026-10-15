@@ -27,6 +27,15 @@ class Settings(BaseSettings):
     )
 
     RAILRADAR_API_KEY: str = Field(default="", repr=False)
+    RAILRADAR_API_KEYS: list[str] = Field(default_factory=list, repr=False, max_length=32)
+    RAILRADAR_CACHE_PATH: str = "data/railradar-cache.sqlite3"
+    RAILRADAR_LIVE_CACHE_SECONDS: int = Field(default=120, ge=30, le=300)
+    RAILRADAR_QUOTA_COOLDOWN_SECONDS: int = Field(default=86400, ge=60, le=2678400)
+
+    @field_validator("RAILRADAR_API_KEYS")
+    @classmethod
+    def normalize_railradar_keys(cls, keys):
+        return list(dict.fromkeys(key.strip() for key in keys if key.strip()))
     WEATHER_API_KEY: str = Field(default="", repr=False, validation_alias=AliasChoices("WEATHER_API_KEY", "OPENWEATHER_API_KEY", "OPENWEATHERMAP_API_KEY"))
 
     # ── Application ───────────────────────────────────────────────────────────

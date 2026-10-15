@@ -53,7 +53,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _GuideTip(
           Icons.update_rounded,
           'Check how recent it is',
-          'Look at the last observation before you plan. Train details check for updates every 30 seconds while active.',
+          'Look at the last observation before you plan. Train details check for updates every 2 minutes while active.',
         ),
         _GuideTip(
           Icons.info_outline_rounded,

@@ -184,11 +184,14 @@ void main() {
       expect(repo.calls.single.date, isNull);
       await tester.pump(const Duration(seconds: 30));
       await tester.pumpAndSettle();
+      expect(repo.calls, hasLength(1));
+      await tester.pump(const Duration(seconds: 90));
+      await tester.pumpAndSettle();
       expect(repo.calls.last.date, '2026-09-20');
       expect(repo.calls, hasLength(2));
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump(const Duration(seconds: 30));
+      await tester.pump(const Duration(minutes: 2));
       expect(repo.calls, hasLength(2));
 
       final context = tester.element(find.byType(TrainDetailsScreen));
@@ -199,14 +202,14 @@ void main() {
       );
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump(const Duration(seconds: 30));
+      await tester.pump(const Duration(minutes: 2));
       expect(repo.calls, hasLength(2));
       Navigator.of(context).pop();
       await tester.pumpAndSettle();
-      await tester.pump(const Duration(seconds: 30));
+      await tester.pump(const Duration(minutes: 2));
       await tester.pumpAndSettle();
       expect(repo.calls, hasLength(3));
-      expect(find.textContaining('every 30 seconds'), findsOneWidget);
+      expect(find.textContaining('every 2 minutes'), findsOneWidget);
     },
   );
 

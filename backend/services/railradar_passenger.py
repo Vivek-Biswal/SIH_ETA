@@ -3,36 +3,24 @@
 Contract: https://railradar.in/docs/live-train-status
 The key stays on the server. Missing keys leave existing database routes intact.
 """
-from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
-from threading import Lock
-from time import monotonic
-
-import httpx
 from fastapi import HTTPException
 from config.settings import settings
-
-_cache = OrderedDict()
-_lock = Lock()
+from services import railradar_requests
 
 
 def configured():
-    return bool(settings.RAILRADAR_API_KEY)
+    return bool(railradar_requests.configured_keys())
 
 
 def resource(path, params=None):
     """Fetch a documented directory/timetable resource; no credentials reach clients."""
-    try:
-        response = httpx.get(f"https://api.railradar.in/v1/{path}",
-                            params=params or {}, timeout=10,
-                            headers={"Authorization": f"Bearer {settings.RAILRADAR_API_KEY}"})
-        response.raise_for_status()
-        payload = response.json()
-        if payload.get("success") is not True or not isinstance(payload.get("data"), (dict, list)):
-            raise ValueError("Invalid provider response")
-        return payload["data"]
-    except (httpx.HTTPError, ValueError, TypeError):
-        raise HTTPException(503, "Railway directory information is temporarily unavailable.")
+    # Only directory/timetable resources use this path. Live observations use fetch_live.
+    params = dict(params or {})
+    if 'q' in params:
+        params['q'] = params['q'].strip().casefold()
+    ttl = 86400 if path.startswith('lookup/') else 21600
+    return railradar_requests.get(path, params, ttl=ttl)
 
 
 def lookup_stations(query):
@@ -63,7 +51,8 @@ def board(code):
 def between(origin, destination, date, page, limit):
     if not origin.isalnum() or not destination.isalnum():
         raise HTTPException(422, "Enter valid station codes.")
-    data = resource(f"trains/between/{origin.upper()}/{destination.upper()}", {"date": date} if date else {})
+    day = date or datetime.now(timezone(timedelta(hours=5, minutes=30))).date().isoformat()
+    data = resource(f"trains/between/{origin.upper()}/{destination.upper()}", {"date": day})
     try:
         rows = [{"train_number": str(r["train"]["number"]), "train_name": r["train"]["name"],
                  "from_station": data["from"], "to_station": data["to"],
@@ -84,38 +73,21 @@ def fetch_live(number: str, date: str | None):
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
             raise HTTPException(422, "Use YYYY-MM-DD for the journey start date.")
-    cache_key = (number, date)
-    with _lock:
-        cached = _cache.get(cache_key)
-        if cached and monotonic() - cached[0] < 30:
-            return cached[1]
-    try:
-        response = httpx.get(
-            f"https://api.railradar.in/v1/trains/{number}/live",
-            headers={"Authorization": f"Bearer {settings.RAILRADAR_API_KEY}"},
-            params={"date": date} if date else {}, timeout=10,
-        )
-        if response.status_code == 404:
-            raise HTTPException(404, "No provider record exists for this train and date.")
-        response.raise_for_status()
-        payload = response.json()
-        data = payload.get("data")
-        if (payload.get("success") is not True or not isinstance(data, dict)
+    def validate(data):
+        if (not isinstance(data, dict)
                 or str(data.get("trainNumber")) != number
                 or not isinstance(data.get("route"), list)
                 or not data.get("trainName") or not data.get("startDate")
                 or (date is not None and data["startDate"] != date)):
             raise ValueError("Provider contract mismatch")
-    except HTTPException:
-        raise
-    except (httpx.HTTPError, ValueError, TypeError):
-        # Do not leak provider response bodies, credentials or substitute demo data.
-        raise HTTPException(503, "Live railway information is temporarily unavailable.")
-    with _lock:
-        _cache[cache_key] = (monotonic(), data)
-        _cache.move_to_end(cache_key)
-        while len(_cache) > 128:
-            _cache.popitem(last=False)
+    path = f'trains/{number}/live'
+    params = {'date': date} if date else {}
+    data = railradar_requests.get(path, params, ttl=settings.RAILRADAR_LIVE_CACHE_SECONDS,
+                                 validate=validate, stale_ttl=21600)
+    if date is None and not data.get('_railradar_stale'):
+        # The undated status response already contains the exact journey date.
+        # Reuse that observation for the following ETA/weather request.
+        railradar_requests.manager().alias(path, {}, {'date': data['startDate']})
     return data
 
 
@@ -129,7 +101,7 @@ def timestamp(value):
 
 def fresh(data, now):
     observed = timestamp(data.get("lastUpdatedAt"))
-    return bool(data.get("isLive") is True and observed
+    return bool(not data.get('_railradar_stale') and data.get("isLive") is True and observed
                 and timedelta(0) <= now - observed <= timedelta(minutes=5))
 
 

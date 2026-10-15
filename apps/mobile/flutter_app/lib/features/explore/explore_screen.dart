@@ -97,7 +97,7 @@ class ExploreScreen extends ConsumerWidget {
                   Padding(
                     padding: EdgeInsets.only(bottom: 16),
                     child: Text(
-                      'Train details checks for updates every 30 seconds while open. A recent check can still return an older railway observation. Check the last observation time. If the connection fails, previously loaded details are labelled as old; saved journeys are shortcuts and need internet for new updates.',
+                      'Train details checks for updates every 2 minutes while open. A recent check can still return an older railway observation. Check the last observation time. If the connection fails, previously loaded details are labelled as old; saved journeys are shortcuts and need internet for new updates.',
                       style: TextStyle(height: 1.5),
                     ),
                   ),
