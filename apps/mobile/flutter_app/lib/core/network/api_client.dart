@@ -43,7 +43,7 @@ class ApiResult<T> {
 class ApiClient {
   final http.Client _client;
   final Duration timeout;
-  ApiClient({http.Client? client, this.timeout = const Duration(seconds: 12)})
+  ApiClient({http.Client? client, this.timeout = const Duration(seconds: 45)})
     : _client = client ?? http.Client();
   void close() => _client.close();
 

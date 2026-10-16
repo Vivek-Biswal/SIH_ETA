@@ -12,6 +12,7 @@ import '../../core/network/api_client.dart';
 import '../../core/services/train_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/eta_display.dart';
+import '../../shared/widgets/eta_feedback.dart';
 import '../../shared/widgets/arrival_weather.dart';
 import '../../shared/widgets/station_reminder.dart';
 import '../../shared/widgets/station_timeline.dart';
@@ -89,11 +90,13 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     _loading = true;
   }
 
-  int? _uniqueStationIndex(TrainStatus? status, String? code) {
+  int? _uniqueStationIndex(TrainStatus? status, String? code, {int? sequence}) {
     if (status == null || code == null) return null;
     final matches = <int>[
       for (var i = 0; i < status.route.length; i++)
-        if (status.route[i].station?.code == code) i,
+        if (status.route[i].station?.code == code &&
+            (sequence == null || status.route[i].routeSequence == sequence))
+          i,
     ];
     return matches.length == 1 ? matches.single : null;
   }
@@ -138,12 +141,13 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
       setState(() {
         final freshStatus = result.status.data;
         final freshEta = result.eta.data;
-        final selectedCode =
+        final selectedStop =
             _arrivalIndex != null &&
                 _status != null &&
                 _arrivalIndex! < _status!.route.length
-            ? _status!.route[_arrivalIndex!].station?.code
-            : widget.stationCode;
+            ? _status!.route[_arrivalIndex!]
+            : null;
+        final selectedCode = selectedStop?.station?.code ?? widget.stationCode;
         // Never retain data from a different journey during partial refresh.
         if (freshStatus != null && _eta?.date != freshStatus.date) {
           _eta = null;
@@ -166,7 +170,11 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
         }
         _status = freshStatus ?? _status;
         if (freshStatus != null) {
-          _arrivalIndex = _uniqueStationIndex(freshStatus, selectedCode);
+          _arrivalIndex = _uniqueStationIndex(
+            freshStatus,
+            selectedCode,
+            sequence: selectedStop?.routeSequence,
+          );
           _statusFetchedAt = result.fetchedAt;
         }
         _eta = freshEta ?? _eta;
@@ -205,11 +213,40 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     final status = _status;
     final eta = _eta;
     final stops = status == null ? <JourneyStop>[] : journeyStops(status, eta);
-    final destination = stops.isEmpty
+    // Prefer the next scheduled halt that has a usable arrival estimate. Keep
+    // an explicitly selected station stable, including repeated route visits.
+    var defaultIndex = stops.length - 1;
+    for (var i = 0; i < stops.length; i++) {
+      final stop = stops[i];
+      if (stop.stage != StopStage.upcoming || isPassingEntry(stop)) continue;
+      final reason = passengerArrivalReason(
+        destination: stop.stop.station?.label ?? '',
+        scheduled: stop.stop.scheduledArrival,
+        prediction: stop.prediction,
+        evidence: eta,
+        trainStatus: status?.status,
+        runningDelay: status?.delay,
+      );
+      if (reason.predicted != null) {
+        defaultIndex = i;
+        break;
+      }
+    }
+    final selectedIndex = _arrivalIndex != null && _arrivalIndex! < stops.length
+        ? _arrivalIndex!
+        : defaultIndex;
+    final destination = stops.isEmpty ? null : stops[selectedIndex];
+    final arrival = destination == null
         ? null
-        : stops[_arrivalIndex != null && _arrivalIndex! < stops.length
-              ? _arrivalIndex!
-              : stops.length - 1];
+        : passengerArrivalReason(
+            destination: destination.stop.station?.label ?? '',
+            scheduled: destination.stop.scheduledArrival,
+            prediction: destination.prediction,
+            actual: destination.confirmedArrival,
+            evidence: eta,
+            trainStatus: status?.status,
+            runningDelay: status?.delay,
+          );
     final selectedStation = destination?.stop.station;
     final uniqueStation =
         selectedStation != null &&
@@ -491,11 +528,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                           SectionTitle('Arrival information'),
                           DropdownButtonFormField<int>(
                             key: const Key('arrival-station'),
-                            value:
-                                _arrivalIndex != null &&
-                                    _arrivalIndex! < stops.length
-                                ? _arrivalIndex!
-                                : stops.length - 1,
+                            value: selectedIndex,
                             decoration: const InputDecoration(
                               labelText: 'Arrival station',
                             ),
@@ -601,6 +634,22 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             method:
                                 eta?.methodLabel ?? 'Prediction unavailable',
                           ),
+                          if (status?.date != null && selectedStation != null)
+                            EtaFeedbackCard(
+                              key: ValueKey(
+                                '${widget.trainNumber}|${status!.date}|${selectedStation.code}|${destination.stop.routeSequence ?? selectedIndex}',
+                              ),
+                              trainNumber: widget.trainNumber,
+                              date: status.date!,
+                              stationCode: selectedStation.code,
+                              stationName: selectedStation.name.isEmpty
+                                  ? selectedStation.code
+                                  : selectedStation.name,
+                              sequence: destination.stop.routeSequence,
+                              predictedArrival: arrival?.predicted,
+                              observedAt: eta?.observationTimestamp,
+                              modelVersion: eta?.modelVersion,
+                            ),
                           if (status != null &&
                               destination.stop.station != null)
                             ArrivalWeather(
@@ -610,8 +659,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                               number: widget.trainNumber,
                               date: status.date ?? '',
                               station: destination.stop.station!.code,
-                              predicted:
-                                  destination.prediction?.predictedArrival,
+                              predicted: arrival?.predicted,
                             ),
                         ],
                         if (status != null) ...[
@@ -643,24 +691,14 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                           for (final prediction in eta.remainingStations)
                             Padding(
                               padding: EdgeInsets.only(top: 10),
-                              child: PassengerCard(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      prediction.station?.label ??
-                                          'Station unavailable',
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      'Scheduled: ${displayTime(prediction.scheduledArrival)}',
-                                    ),
-                                    if (eta.hasPredictions)
-                                      Text(
-                                        'Predicted: ${displayTime(prediction.predictedArrival)}',
-                                      ),
-                                  ],
-                                ),
+                              child: EtaDisplay(
+                                destination:
+                                    prediction.station?.label ??
+                                    'Station unavailable',
+                                scheduledTime: prediction.scheduledArrival,
+                                stationPrediction: prediction,
+                                evidence: eta,
+                                method: eta.methodLabel,
                               ),
                             ),
                         ],

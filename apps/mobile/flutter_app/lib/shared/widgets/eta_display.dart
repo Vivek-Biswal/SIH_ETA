@@ -135,7 +135,7 @@ PassengerArrivalReason passengerArrivalReason({
     };
   }
   final stale =
-      evidence?.source == 'cached' ||
+      (evidence != null && evidence.source != 'live') ||
       (observed != null &&
           clock.difference(observed) > const Duration(minutes: 5));
   final knownRunning = [
@@ -153,7 +153,8 @@ PassengerArrivalReason passengerArrivalReason({
   final expected = DateTime.tryParse(value ?? '');
   if (!knownRunning ||
       stale ||
-      (evidence != null && observed == null) ||
+      evidence?.source != 'live' ||
+      observed == null ||
       !['inference', 'delay_adjusted'].contains(method) ||
       expected == null ||
       expected.isBefore(clock)) {
@@ -488,7 +489,9 @@ class EtaDisplay extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            displayTime(reason.actual ?? reason.predicted),
+            reason.actual == null && reason.predicted == null
+                ? 'ETA unavailable'
+                : displayTime(reason.actual ?? reason.predicted),
             style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),

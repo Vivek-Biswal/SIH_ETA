@@ -70,6 +70,102 @@ Future<void> details(
 }
 
 void main() {
+  testWidgets(
+    'fresh ETA opens the next scheduled halt and includes native feedback',
+    (tester) async {
+      final repo = RefreshRepository();
+      final now = DateTime.now().toUtc();
+      final observed = now
+          .subtract(const Duration(minutes: 1))
+          .toIso8601String();
+      repo.respond = (number, date) async {
+        final status = statusJson();
+        status['data_source'] = 'live';
+        status['current_station'] = station('AAA');
+        status['last_known_location'] = {
+          'updated_at': observed,
+          'delay_minutes': 12,
+        };
+        final eta = etaJson(method: 'delay_adjusted');
+        eta['data_source'] = 'live';
+        eta['observation_timestamp'] = observed;
+        eta['remaining_stations'] = [
+          for (final code in ['BBB', 'CCC'])
+            {
+              'station': station(code),
+              'prediction_method': 'delay_adjusted',
+              'scheduled_arrival': now
+                  .add(Duration(hours: code == 'BBB' ? 1 : 2))
+                  .toIso8601String(),
+              'predicted_arrival': now
+                  .add(Duration(hours: code == 'BBB' ? 1 : 2, minutes: 12))
+                  .toIso8601String(),
+              'predicted_delay_minutes': 12,
+            },
+        ];
+        return JourneyResult(
+          ApiResult.success(TrainStatus.fromJson(status)),
+          ApiResult.success(ETAModel.fromJson(eta)),
+          now,
+        );
+      };
+      await details(tester, repo);
+      expect(
+        tester
+            .widget<DropdownButtonFormField<int>>(
+              find.byKey(const Key('arrival-station')),
+            )
+            .initialValue,
+        1,
+      );
+      expect(find.text('Help improve arrival estimates'), findsOneWidget);
+      expect(
+        find.text('ETA unavailable'),
+        findsOneWidget,
+      ); // Feedback option only; the arrival card has a time.
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('a repeated station visit stays selected after refresh', (
+    tester,
+  ) async {
+    final repo = RefreshRepository();
+    repo.respond = (number, date) async {
+      final status = statusJson();
+      final route = status['route'] as List;
+      for (var i = 0; i < route.length; i++) {
+        route[i]['route_sequence'] = i + 1;
+      }
+      route.add({
+        'station': station('BBB'),
+        'scheduled_arrival': '12:00',
+        'route_sequence': 4,
+      });
+      return JourneyResult(
+        ApiResult.success(TrainStatus.fromJson(status)),
+        ApiResult.success(ETAModel.fromJson(etaJson())),
+        DateTime.now(),
+      );
+    };
+    await details(tester, repo);
+    final dropdown = tester.widget<DropdownButtonFormField<int>>(
+      find.byKey(const Key('arrival-station')),
+    );
+    dropdown.onChanged!(3);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('refresh-journey')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<DropdownButtonFormField<int>>(
+            find.byKey(const Key('arrival-station')),
+          )
+          .initialValue,
+      3,
+    );
+  });
+
   testWidgets('train and date changes reset the journey and arrival station', (
     tester,
   ) async {

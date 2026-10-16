@@ -50,6 +50,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Native integration tests must not replace a passenger's signed app.
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
         }
