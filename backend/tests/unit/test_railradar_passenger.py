@@ -7,7 +7,7 @@ import pytest
 
 def observation():
     return {"trainNumber": "12301", "trainName": "Fixture train", "startDate": "2026-09-21",
-            "isLive": True, "lastUpdatedAt": "2026-09-21T10:00:00Z", "delayMinutes": 12,
+            "isLive": True, "status": "running", "lastUpdatedAt": "2026-09-21T10:00:00Z", "delayMinutes": 12,
             "currentLocation": {"stationCode": "AAA"},
             "route": [{"stationCode": "AAA", "stationName": "Fixture station",
                        "actualDeparture": "2026-09-21T10:00:00Z", "status": "departed"},

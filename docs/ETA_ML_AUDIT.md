@@ -153,6 +153,31 @@ This is a **three-train station-based pilot**, not nationwide or continuous GPS
 coverage. Between stations, the fallback can be used frequently until time-aligned
 production observations support an independently evaluated in-transit model.
 
+## Passenger explanations at each station
+
+Each ETA stop now includes `arrival_explanation` (`status`, `title`, `summary`,
+`details`), `route_sequence`, and a confirmed-only `actual_arrival`. Website and
+Flutter clients select the explanation for that exact route occurrence, including
+routes that visit the same station twice. These additions preserve existing API
+fields and do not make extra provider calls.
+
+The passenger message names the station, gives its dated arrival in IST, and
+states whether the train is on time, early or late. Learned forecasts can explain
+the expected change from the latest reported delay; simpler estimates explicitly
+assume that delay continues. A completed, confirmed extra stop can be described
+as an observed fact. None of these establish a signal, congestion, platform or
+weather cause: when the feed does not report a verified cause, the message says
+the delay reason was not provided.
+
+Future-filled actual timestamps, events ahead of the reported current stop,
+ambiguous skipped visits, stale updates and non-running journeys cannot become
+current arrival estimates. Confirmed past arrivals remain recorded facts.
+Model test statistics are collapsed and shown only for a selected stop that
+actually uses the model, never as the accuracy of a fallback estimate.
+
+This changes the explanation and evidence checks; it does not expand the
+three-train ML pilot or introduce new operational data sources.
+
 ## Missing factors and how to obtain them
 
 | Factor | Available now | What is needed for valid training |

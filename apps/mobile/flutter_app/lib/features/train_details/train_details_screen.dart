@@ -589,17 +589,30 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             scheduledTime: destination.stop.scheduledArrival,
                             predictedTime:
                                 destination.prediction?.predictedArrival,
-                            actualTime: destination.stop.actualArrival,
+                            actualTime: destination.confirmedArrival,
                             delayMinutes: status?.delay,
                             predictedDelayMinutes:
                                 destination.prediction?.predictedDelayMinutes,
                             evidence: eta,
-                            stationMethod: destination.prediction?.predictionMethod,
+                            stationPrediction: destination.prediction,
+                            trainStatus: status?.status,
+                            stationMethod:
+                                destination.prediction?.predictionMethod,
                             method:
                                 eta?.methodLabel ?? 'Prediction unavailable',
                           ),
-                          if (status != null && destination.stop.station != null)
-                            ArrivalWeather(key: ValueKey('${widget.trainNumber}-${status.date}-${destination.stop.station!.code}'), number: widget.trainNumber, date: status.date ?? '', station: destination.stop.station!.code, predicted: destination.prediction?.predictedArrival),
+                          if (status != null &&
+                              destination.stop.station != null)
+                            ArrivalWeather(
+                              key: ValueKey(
+                                '${widget.trainNumber}-${status.date}-${destination.stop.station!.code}',
+                              ),
+                              number: widget.trainNumber,
+                              date: status.date ?? '',
+                              station: destination.stop.station!.code,
+                              predicted:
+                                  destination.prediction?.predictedArrival,
+                            ),
                         ],
                         if (status != null) ...[
                           StationReminderButton(

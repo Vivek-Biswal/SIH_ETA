@@ -103,6 +103,8 @@ class RouteStop {
   final int? delayMinutes;
   final bool hasDeparted;
   final String? platform;
+  final int? routeSequence;
+  final bool? arrivalConfirmed;
   RouteStop.fromJson(Map<String, dynamic> json)
     : station = stationFrom(json['station']),
       scheduledArrival = json['scheduled_arrival'] as String?,
@@ -111,7 +113,10 @@ class RouteStop {
       actualDeparture = json['actual_departure'] as String?,
       delayMinutes = (json['delay_minutes'] as num?)?.toInt(),
       hasDeparted = json['has_departed'] as bool? ?? false,
-      platform = json['platform'] as String?;
+      platform = json['platform'] as String?,
+      routeSequence = ((json['route_sequence'] ?? json['sequence']) as num?)
+          ?.toInt(),
+      arrivalConfirmed = json['arrival_confirmed'] as bool?;
 }
 
 class TrainStatus {
@@ -143,17 +148,42 @@ class TrainStatus {
       route = jsonList(json['route'], RouteStop.fromJson);
 }
 
+class ArrivalExplanation {
+  final String status;
+  final String title;
+  final String summary;
+  final List<String> details;
+  ArrivalExplanation.fromJson(Map<String, dynamic> json)
+    : status = json['status'] as String? ?? 'unavailable',
+      title = json['title'] as String? ?? '',
+      summary = json['summary'] as String? ?? '',
+      details = (json['details'] as List? ?? [])
+          .whereType<String>()
+          .where((value) => value.trim().isNotEmpty)
+          .toList();
+}
+
 class StationPrediction {
   final Station? station;
   final String? scheduledArrival;
   final String? predictedArrival;
   final int? predictedDelayMinutes;
   final String? predictionMethod;
+  final String? actualArrival;
+  final bool hasConfirmedArrivalField;
+  final int? routeSequence;
+  final ArrivalExplanation? arrivalExplanation;
   StationPrediction.fromJson(Map<String, dynamic> json)
     : station = stationFrom(json['station']),
       scheduledArrival = json['scheduled_arrival'] as String?,
       predictedArrival = json['predicted_arrival'] as String?,
       predictionMethod = json['prediction_method'] as String?,
+      actualArrival = json['actual_arrival'] as String?,
+      hasConfirmedArrivalField = json.containsKey('actual_arrival'),
+      routeSequence = (json['route_sequence'] as num?)?.toInt(),
+      arrivalExplanation = json['arrival_explanation'] is Map<String, dynamic>
+          ? ArrivalExplanation.fromJson(json['arrival_explanation'])
+          : null,
       predictedDelayMinutes = (json['predicted_delay_minutes'] as num?)
           ?.toInt();
 }

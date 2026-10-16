@@ -14,14 +14,20 @@ export type StationDetail = Station & {
 export type Stop = {
   station: Station | null; scheduled_arrival?: string | null; scheduled_departure?: string | null;
   actual_arrival?: string | null; actual_departure?: string | null; platform?: string | null; has_departed?: boolean;
+  route_sequence?: number | null; arrival_confirmed?: boolean; departure_confirmed?: boolean;
 };
 export type Status = {
   train_number: string; train_name: string; date: string; data_source: string; status: string;
   current_station?: Station | null; overall_delay_minutes?: number | null; route: Stop[];
   last_known_location?: { updated_at?: string; delay_minutes?: number | null; latitude?: number; longitude?: number; position_source?: string } | null;
 };
+export type ArrivalExplanation = {
+  status: 'on_time' | 'early' | 'delayed' | 'arrived' | 'unavailable' | 'not_started' | 'cancelled' | 'skipped';
+  title: string; summary: string; details: string[];
+};
 export type Prediction = { station: Station | null; scheduled_arrival?: string | null;
-  predicted_arrival?: string | null; predicted_delay_minutes?: number | null; prediction_method?: string };
+  predicted_arrival?: string | null; predicted_delay_minutes?: number | null; prediction_method?: string;
+  actual_arrival?: string | null; route_sequence?: number | null; arrival_explanation?: ArrivalExplanation };
 export type ETAModelMetadata = {
   status: string; reason?: string; name?: string; training_cutoff?: string;
   validation?: { mae_minutes?: number; baseline_mae_minutes?: number; rmse_minutes?: number; test_journeys?: number };

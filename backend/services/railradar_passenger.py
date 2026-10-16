@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from config.settings import settings
 from services import railradar_requests
+from services import arrival_reasons
 
 
 def configured():
@@ -77,6 +78,7 @@ def fetch_live(number: str, date: str | None):
         if (not isinstance(data, dict)
                 or str(data.get("trainNumber")) != number
                 or not isinstance(data.get("route"), list)
+                or any(not isinstance(row, dict) for row in data.get('route', []))
                 or not data.get("trainName") or not data.get("startDate")
                 or (date is not None and data["startDate"] != date)):
             raise ValueError("Provider contract mismatch")
@@ -130,13 +132,26 @@ def status_response(data, now=None):
     now = now or datetime.now(timezone.utc)
     location = data.get("currentLocation") or {}
     current_code = location.get("stationCode")
-    route = [{
+    route = []
+    observed = timestamp(data.get('lastUpdatedAt'))
+    for row in data['route']:
+        actual_arrival, actual_departure = arrival_reasons.confirmed_times(row, observed, now, data)
+        skipped = arrival_reasons.skipped_kind(data, row)
+        if skipped or arrival_reasons.state(data.get('status')) in {'not-started', 'cancelled', 'canceled'}:
+            actual_arrival = actual_departure = None
+        route.append({
         "station": station(row), "scheduled_arrival": row.get("scheduledArrival"),
         "scheduled_departure": row.get("scheduledDeparture"),
-        "actual_arrival": row.get("actualArrival"), "actual_departure": row.get("actualDeparture"),
-        "delay_minutes": row.get("delayArrival"), "has_departed": bool(row.get("actualDeparture")),
+        "actual_arrival": actual_arrival.isoformat() if actual_arrival else None,
+        "actual_departure": actual_departure.isoformat() if actual_departure else None,
+        "arrival_confirmed": bool(actual_arrival), "departure_confirmed": bool(actual_departure),
+        "route_sequence": row.get('sequence') if type(row.get('sequence')) is int else None,
+        "stop_status": skipped or arrival_reasons.state(row.get('status')),
+        "delay_minutes": round((actual_arrival-timestamp(row.get('scheduledArrival'))).total_seconds()/60)
+            if actual_arrival and timestamp(row.get('scheduledArrival')) else None,
+        "has_departed": bool(actual_departure),
         "platform": str(row["platform"]) if row.get("platform") is not None else None,
-    } for row in data["route"]]
+        })
     current = next((row["station"] for row in route if row["station"] and row["station"]["code"] == current_code), None)
     
     # Calculate derived position based on sequence and segmentProgress
@@ -195,32 +210,52 @@ def eta_response(data, now=None):
     from services import eta_ml
     now = now or datetime.now(timezone.utc)
     delay = data.get("delayMinutes")
-    state = str(data.get("status", "")).lower().replace("_", "-")
+    state = arrival_reasons.state(data.get('status'))
     not_running = state in {"not-started", "cancelled", "canceled", "completed", "terminated"}
-    usable = fresh(data, now) and type(delay) is int and not not_running
-    learned, metadata = eta_ml.predict(data, now) if usable else ({}, {
+    usable = fresh(data, now) and type(delay) is int and state in arrival_reasons.RUNNING_STATES
+    observed = timestamp(data.get('lastUpdatedAt'))
+    clean_route = []
+    for row in data['route']:
+        actual_arrival, actual_departure = arrival_reasons.confirmed_times(row, observed, now, data)
+        skipped = arrival_reasons.skipped_kind(data, row)
+        if skipped or state in {'not-started', 'cancelled', 'canceled'}:
+            actual_arrival = actual_departure = None
+        clean_route.append({**row, 'actualArrival': actual_arrival.isoformat() if actual_arrival else None,
+                            'actualDeparture': actual_departure.isoformat() if actual_departure else None,
+                            'status': skipped or row.get('status')})
+    clean_data = {**data, 'route': clean_route}
+    learned, metadata = eta_ml.predict(clean_data, now) if usable else ({}, {
         'status': 'fallback', 'reason': 'A fresh running observation is required before the trained model can be used.'})
     predictions = []
     previous_estimate = None
-    for index, row in enumerate(data["route"]):
+    previous_row = None
+    for index, row in enumerate(clean_route):
         scheduled = timestamp(row.get("scheduledArrival"))
-        upcoming = row.get("status") == "upcoming" and not row.get("actualArrival")
+        upcoming = arrival_reasons.state(row.get('status')) == "upcoming" and not row.get("actualArrival")
         estimated = scheduled + timedelta(minutes=delay) if usable and scheduled and upcoming else None
         method = 'delay_adjusted' if estimated else 'schedule_only'
         if usable and upcoming and scheduled and index in learned:
             estimated = learned[index]['arrival']
             method = 'inference'
         # Preserve route order even when individually learned stop forecasts vary.
-        if estimated and previous_estimate and estimated < previous_estimate:
+        order_adjusted = bool(estimated and previous_estimate and estimated < previous_estimate)
+        if order_adjusted:
             estimated = previous_estimate
         if estimated and estimated < now:
             estimated = None
-        if estimated:
-            previous_estimate = estimated
-        predictions.append({"station": station(row), "scheduled_arrival": row.get("scheduledArrival"),
+        prediction = {"station": station(row), "scheduled_arrival": row.get("scheduledArrival"),
+                            "actual_arrival": row.get('actualArrival'),
+                            "route_sequence": row.get('sequence') if type(row.get('sequence')) is int else None,
                             "predicted_arrival": estimated.isoformat() if estimated else None,
                             "predicted_delay_minutes": round((estimated-scheduled).total_seconds()/60) if estimated else None,
-                            "prediction_method": method if estimated else 'schedule_only', "prediction_confidence": None})
+                            "prediction_method": method if estimated else 'schedule_only', "prediction_confidence": None,
+                            '_route_order_adjusted': order_adjusted}
+        prediction['arrival_explanation'] = arrival_reasons.explain_stop(clean_data, row, prediction, now, fresh(data, now), previous_row)
+        prediction.pop('_route_order_adjusted')
+        predictions.append(prediction)
+        if estimated:
+            previous_estimate = estimated
+            previous_row = row
     adjusted = any(row["predicted_arrival"] for row in predictions)
     inferred = any(row['prediction_method'] == 'inference' for row in predictions)
     return {

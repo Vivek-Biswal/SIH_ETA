@@ -118,7 +118,7 @@ void main() {
       await tester.ensureVisible(find.text('Scheduled: 10:00'));
       await tester.pumpAndSettle();
       expect(find.text('Scheduled: 10:00'), findsOneWidget);
-      expect(find.text('Arrival difference unavailable'), findsOneWidget);
+      expect(find.text('Waiting for an arrival update'), findsOneWidget);
       expect(find.text('Why this ETA?'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

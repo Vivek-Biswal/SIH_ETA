@@ -219,7 +219,7 @@ class _StopTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final current = entry.stage == StopStage.current;
     final predicted =
-        stop.actualArrival == null && entry.stage != StopStage.passed
+        entry.confirmedArrival == null && entry.stage != StopStage.passed
         ? entry.prediction?.predictedArrival
         : null;
     return Row(
@@ -233,7 +233,7 @@ class _StopTile extends StatelessWidget {
               context,
               'Arrival',
               stop.scheduledArrival,
-              stop.actualArrival ?? predicted,
+              entry.confirmedArrival ?? predicted,
               predicted: predicted != null,
             ),
           ),

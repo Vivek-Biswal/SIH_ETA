@@ -112,10 +112,10 @@ void main() {
           ),
         );
         expect(find.text('Unavailable'), findsOneWidget);
-        expect(find.text('Arrival difference unavailable'), findsOneWidget);
+        expect(find.text('Waiting for an arrival update'), findsOneWidget);
         await tester.tap(find.text('Why this ETA?'));
         await tester.pumpAndSettle();
-        expect(find.textContaining('No verified cause'), findsOneWidget);
+        expect(find.textContaining('A current arrival estimate for Destination'), findsNWidgets(2));
         expect(tester.takeException(), isNull);
       },
     );
