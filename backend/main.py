@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.settings import settings
-from api.routes import health, stations, trains, network, frontend_compat, websocket, passenger, dashboard
+from api.routes import health, stations, trains, network, frontend_compat, websocket, passenger, dashboard, feedback
 from api.exceptions import register_exception_handlers
 
 app = FastAPI(
@@ -27,6 +27,7 @@ app.add_middleware(
 # Include routers — versioned (v1) endpoints
 app.include_router(health.router)
 app.include_router(passenger.router)
+app.include_router(feedback.router)
 app.include_router(stations.router)
 app.include_router(trains.router)
 app.include_router(network.router)

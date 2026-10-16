@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     RAILRADAR_QUOTA_COOLDOWN_SECONDS: int = Field(default=86400, ge=60, le=2678400)
     ETA_MODEL_PATH: str = "data/eta_ml/model.json"
     ETA_HISTORY_PATH: str = "data/eta-observations.sqlite3"
+    ETA_FEEDBACK_PATH: str = "data/eta-feedback.sqlite3"
     ETA_ML_ENABLED: bool = True
 
     @field_validator("RAILRADAR_API_KEYS")
