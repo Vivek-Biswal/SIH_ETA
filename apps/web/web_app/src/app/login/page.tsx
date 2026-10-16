@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { BrandMark } from '@/components/layout/BrandMark';
 import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Shield } from 'lucide-react';
@@ -20,9 +20,7 @@ export default function LoginPage() {
     <div className="min-h-screen w-screen bg-[#09090B] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[#18181B] border border-white/10 rounded-sm p-8 space-y-6">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-10 h-10 rounded bg-[#3B82F6] flex items-center justify-center font-mono font-bold text-white text-base">
-            <Image src="/brand/logo.png" alt="Etaernal" width={40} height={40} className="rounded-lg" />
-          </div>
+          <BrandMark size="large" />
           <h1 className="text-xl font-bold tracking-tight text-white">
             Etaernal Operations Portal
           </h1>

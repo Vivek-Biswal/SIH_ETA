@@ -21,6 +21,11 @@ export default function StationsPage() {
   const [stationError, setStationError] = useState<string | null>(null);
 
   useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('station')?.toUpperCase();
+    if (code && /^[A-Z0-9]{2,10}$/.test(code)) setSelectedStationCode(code);
+  }, []);
+
+  useEffect(() => {
     RailwayApiService.searchStations("")
       .then(data => {
         setStations(data as Station[]);

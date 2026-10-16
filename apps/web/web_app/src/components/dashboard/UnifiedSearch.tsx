@@ -1,169 +1,74 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { RailwayApiService } from '@/services/api';
-import { Loader2, Search, MapPin, Train, TrainFront, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { ArrowRight, Loader2, MapPin, Search, TrainFront, X } from 'lucide-react';
+import { lookup, stations } from '@/services/passenger';
+import styles from './UnifiedSearch.module.css';
 
-export interface SearchResult {
-  type: 'train' | 'station';
-  id: string; // train_number or station_code
-  name: string;
-  subtitle?: string;
-  raw?: any;
-}
+export interface SearchResult { type: 'train' | 'station'; id: string; name: string; subtitle?: string }
 
 export function UnifiedSearch({ onSelect }: { onSelect: (result: SearchResult) => void }) {
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [query, setQuery] = useState(''), [items, setItems] = useState<SearchResult[]>([]);
+  const [open, setOpen] = useState(false), [loading, setLoading] = useState(false), [message, setMessage] = useState('');
+  const [selected, setSelected] = useState(-1);
+  const input = useRef<HTMLInputElement>(null);
+  const id = useId();
+  const directTrain = /^\d{5}$/.test(query.trim());
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const fetchSuggestions = useCallback(async (q: string) => {
-    if (q.trim().length < 2) {
-      setSuggestions([]);
-      setIsOpen(false);
+    const value = query.trim();
+    const controller = new AbortController();
+    setItems([]); setSelected(-1); setMessage('');
+    if (value.length < 2) { setLoading(false); return; }
+    // A complete train number can go straight to status/ETA, saving lookup calls.
+    if (/^\d{5}$/.test(value)) {
+      setLoading(false); setItems([{ type: 'train', id: value, name: `Track train ${value}`, subtitle: 'Check its latest status and arrival' }]);
       return;
     }
-    setIsLoading(true);
-    try {
-      const [trains, stations] = await Promise.allSettled([
-        RailwayApiService.lookupTrains(q),
-        RailwayApiService.searchStations(q)
-      ]);
+    setLoading(true);
+    const timer = setTimeout(async () => {
+      const numeric = /^\d+$/.test(value);
+      const [trains, stops] = await Promise.allSettled([lookup(value, controller.signal), numeric ? Promise.resolve([]) : stations(value, controller.signal)]);
+      if (controller.signal.aborted) return;
+      const next: SearchResult[] = [];
+      if (trains.status === 'fulfilled') for (const t of trains.value.slice(0, 5)) next.push({ type: 'train', id: t.train_number, name: t.train_name, subtitle: `Train ${t.train_number}` });
+      if (stops.status === 'fulfilled') for (const s of stops.value.slice(0, 3)) next.push({ type: 'station', id: s.code, name: s.name, subtitle: `Station ${s.code}` });
+      setItems(next); setLoading(false);
+      setMessage(next.length ? '' : trains.status === 'rejected' || stops.status === 'rejected' ? 'Search is unavailable right now. You can still enter a 5-digit train number.' : 'No matching trains or stations. Try a train number or station code.');
+    }, 300);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [query]);
 
-      const results: SearchResult[] = [];
-      if (trains.status === 'fulfilled' && trains.value) {
-        trains.value.slice(0, 5).forEach((t: any) => {
-          const num = t.train_number || t.number;
-          const name = t.train_name || t.name;
-          if (num) {
-            results.push({ type: 'train', id: num, name, subtitle: `Train ${num}`, raw: t });
-          }
-        });
-      }
-      if (stations.status === 'fulfilled' && stations.value) {
-        stations.value.slice(0, 3).forEach((s: any) => {
-          results.push({ type: 'station', id: s.code, name: s.name, subtitle: `Station ${s.code}`, raw: s });
-        });
-      }
-      
-      setSuggestions(results);
-      setIsOpen(results.length > 0);
-      setSelectedIndex(-1);
-    } catch {
-      setSuggestions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setQuery(val);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchSuggestions(val), 300);
-  };
-
-  const handleSelect = (result: SearchResult) => {
-    setQuery('');
-    setIsOpen(false);
-    setSuggestions([]);
-    onSelect(result);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (isOpen && selectedIndex >= 0 && suggestions[selectedIndex]) {
-        e.preventDefault();
-        handleSelect(suggestions[selectedIndex]);
-      } else if (suggestions.length > 0) {
-        e.preventDefault();
-        handleSelect(suggestions[0]);
-      }
-      return;
-    }
-    if (!isOpen || suggestions.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, 0));
-    } else if (e.key === 'Escape') {
-      setIsOpen(false);
-    }
-  };
-
-  return (
-    <div ref={wrapperRef} className="relative w-full max-w-2xl mx-auto">
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-        </div>
-        <input
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          onFocus={() => { if (suggestions.length > 0) setIsOpen(true); }}
-          onKeyDown={handleKeyDown}
-          placeholder="Train number, name, or station"
-          className="block w-full pl-12 pr-12 py-4 sm:py-5 bg-card/80 backdrop-blur-sm border border-primary/20 rounded-2xl text-foreground text-lg shadow-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 ease-in-out"
-          autoComplete="off"
-        />
-        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 text-primary animate-spin" />
-          ) : query ? (
-            <button onClick={() => { setQuery(''); setSuggestions([]); setIsOpen(false); }} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors">
-              <X className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full bg-card/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          <ul className="py-2">
-            {suggestions.map((item, i) => (
-              <li key={`${item.type}-${item.id}-${i}`}>
-                <button
-                  onClick={() => handleSelect(item)}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-4 transition-colors ${
-                    i === selectedIndex ? 'bg-primary/10' : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <div className={`p-2 rounded-xl shrink-0 ${item.type === 'train' ? 'bg-blue-500/10 text-blue-500 dark:text-blue-400' : 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400'}`}>
-                    {item.type === 'train' ? <TrainFront className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
-                  </div>
-                  {item.type === 'train' && (
-                    <div className="shrink-0 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted/30">
-                      TRAIN
-                    </div>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
+  function choose(item: SearchResult) { setOpen(false); setQuery(''); setItems([]); onSelect(item); }
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    if (directTrain) choose({ type: 'train', id: query.trim(), name: `Train ${query.trim()}` });
+    else if (!loading && items.length) choose(items[Math.max(0, selected)]);
+    else { setOpen(true); input.current?.focus(); }
+  }
+  const expanded = open && query.trim().length >= 2;
+  return <div className={styles.search} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
+    <form onSubmit={submit} role="search" aria-label="Find a train or station" className={styles.field}>
+      <Search size={19} className={styles.searchIcon} aria-hidden="true" />
+      <input ref={input} role="combobox" aria-label="Train number, name or station" aria-expanded={expanded} aria-controls={`${id}-results`} aria-autocomplete="list" aria-activedescendant={selected >= 0 ? `${id}-${selected}` : undefined}
+        value={query} placeholder="Train number, name or station" autoComplete="off" maxLength={80}
+        onChange={e => { setQuery(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)}
+        onKeyDown={e => {
+          if (e.key === 'Escape') { setOpen(false); setSelected(-1); }
+          if (e.key === 'ArrowDown' && items.length) { e.preventDefault(); setOpen(true); setSelected(v => Math.min(v + 1, items.length - 1)); }
+          if (e.key === 'ArrowUp' && items.length) { e.preventDefault(); setSelected(v => Math.max(v - 1, 0)); }
+        }} />
+      {query && !loading && <button type="button" className={styles.clear} aria-label="Clear search" onClick={() => { setQuery(''); setOpen(false); input.current?.focus(); }}><X size={15} /></button>}
+      <button className={styles.submit} type="submit" aria-label="Search railway information">{loading ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={19} />}</button>
+    </form>
+    {expanded && <div className={styles.dropdown}>
+      <ul id={`${id}-results`} role="listbox" aria-label="Matching trains and stations">
+        {items.map((item, index) => <li key={`${item.type}-${item.id}`} role="none"><button type="button" role="option" id={`${id}-${index}`} aria-selected={selected === index} className={styles.option} onMouseDown={e => e.preventDefault()} onClick={() => choose(item)}>
+          <span className={styles.resultIcon}>{item.type === 'train' ? <TrainFront size={18} /> : <MapPin size={18} />}</span>
+          <span className={styles.resultText}><strong>{item.name}</strong><span>{item.subtitle}</span></span><ArrowRight size={14} className={styles.resultArrow} />
+        </button></li>)}
+      </ul>
+      {(loading || message) && <p role="status" className={styles.message}>{loading ? 'Finding matching trains and stations…' : message}</p>}
+    </div>}
+  </div>;
 }

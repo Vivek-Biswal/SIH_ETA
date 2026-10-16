@@ -1,0 +1,17 @@
+.mark {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #6d9ee8;
+  border-radius: 12px;
+  background: #041b42;
+  box-shadow: 0 0 0 3px var(--card), 0 0 0 4px color-mix(in srgb, var(--primary) 18%, var(--border)), 0 4px 9px -5px #051b4255;
+}
+.artwork { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.46); }
+.small { width: 34px; height: 34px; border-radius: 10px; }
+.large { width: 48px; height: 48px; border-radius: 14px; }
