@@ -21,6 +21,7 @@ const { PassengerJourney } = evaluate('../src/components/eta/PassengerJourney.ts
   '@/services/passenger': passenger, '@/services/etaReason': reasons,
   'lucide-react': { Clock3: () => null, RefreshCw: () => null, TrainFront: () => null, ChevronDown: () => null },
   './ArrivalWeather': { ArrivalWeather: () => null }, './EtaFeedback': { EtaFeedback: () => null }, './IncidentReport': { IncidentReport: () => null },
+  './RouteTimeline.module.css': { default: new Proxy({}, { get: (_, name) => String(name) }) },
 });
 
 const now = Date.parse('2026-10-16T12:00:00Z');

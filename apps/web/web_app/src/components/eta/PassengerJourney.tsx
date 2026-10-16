@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrivalWeather } from './ArrivalWeather';
 import { EtaFeedback } from './EtaFeedback';
 import { IncidentReport } from './IncidentReport';
+import timeline from './RouteTimeline.module.css';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type ETA, type Journey, type Stop } from '@/services/passenger';
 import { confirmedStopTime, matchingStop, predictionKey, selectedPrediction, stationArrival } from '@/services/etaReason';
@@ -138,17 +139,17 @@ export function RouteTimeline({ route, current, observed, now }: { route: Stop[]
     const s = route[index]; const isCurrent = s.station?.code === current;
     const actualArrival = confirmedStopTime(s, 'arrival', observed, now);
     const actualDeparture = confirmedStopTime(s, 'departure', observed, now);
-    return <div key={index} className={`grid grid-cols-[minmax(70px,1fr)_28px_minmax(100px,2fr)_minmax(70px,1fr)] gap-2 px-3 sm:px-6 py-5 ${isCurrent ? 'bg-primary/5' : ''}`}>
-      <div className="text-xs sm:text-sm"><p className="text-muted-foreground">{time(s.scheduled_arrival)}</p>{actualArrival && <p className="text-primary mt-1">Actual {time(actualArrival)}</p>}</div>
-      <div className="relative flex justify-center"><span className="absolute inset-y-[-20px] w-0.5 bg-primary/20" /><span className="relative mt-1">{isCurrent ? <TrainFront size={22} className="text-primary bg-card" /> : <span className="block w-2.5 h-2.5 rounded-full bg-primary" />}</span></div>
-      <div><p className="font-semibold text-sm">{s.station?.name || 'Station unavailable'}</p><p className="text-xs text-muted-foreground mt-1">{s.station?.code}{s.platform ? ` · Platform ${s.platform}` : ''}</p>{isCurrent && <p className="text-xs text-primary mt-2">Last reported position</p>}</div>
-      <div className="text-xs sm:text-sm text-right"><p className="text-muted-foreground">{time(s.scheduled_departure)}</p>{actualDeparture && <p className="text-primary mt-1">Actual {time(actualDeparture)}</p>}</div>
+    return <div key={index} aria-current={isCurrent ? 'location' : undefined} className={`${timeline.grid} ${timeline.stop} ${isCurrent ? timeline.current : ''}`}>
+      <div className={`${timeline.time} ${timeline.arrival}`}><span className={timeline.timeLabel}>Arrival · IST</span><p>{time(s.scheduled_arrival)}</p>{actualArrival && <p className={timeline.actual}>Actual {time(actualArrival)}</p>}</div>
+      <div aria-hidden="true" className={`${timeline.rail} ${index === 0 ? timeline.first : ''} ${index === route.length - 1 ? timeline.last : ''}`}><span className={isCurrent ? timeline.train : timeline.dot}>{isCurrent && <TrainFront size={22} strokeWidth={2.2} />}</span></div>
+      <div className={timeline.station}><p className={timeline.name}>{s.station?.name || 'Station unavailable'}</p><p className={timeline.meta}>{s.station?.code}{s.platform ? ` · Platform ${s.platform}` : ''}</p>{isCurrent && <span className={timeline.position}>Last reported position</span>}</div>
+      <div className={`${timeline.time} ${timeline.departure}`}><span className={timeline.timeLabel}>Departure · IST</span><p>{time(s.scheduled_departure)}</p>{actualDeparture && <p className={timeline.actual}>Actual {time(actualDeparture)}</p>}</div>
     </div>;
   }
-  return <section className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-5 sm:p-6 border-b border-border"><h2 className="text-lg font-semibold">Stations on your route</h2><p className="text-sm text-muted-foreground mt-1">Tap a gap to see its intermediate stations. Position follows the latest reported station.</p></div><div className="flex justify-between px-6 py-3 text-xs text-muted-foreground bg-muted/40"><span>Arrival · IST</span><span>Departure · IST</span></div>
-    {!route.length && <p className="p-6 text-muted-foreground">Route unavailable.</p>}
+  return <section className={timeline.timeline} aria-label="Stations on your route"><div className={timeline.heading}><h2>Stations on your route</h2><p>Expand a stop group to see intermediate stations. The train badge marks the last reported position.</p></div><div aria-hidden="true" className={`${timeline.grid} ${timeline.columns}`}><span>Arrival · IST</span><span className={timeline.stationColumn}>Station & platform</span><span className={timeline.departureColumn}>Departure · IST</span></div>
+    {!route.length && <p className={timeline.empty}>Route unavailable.</p>}
     {anchors.map((index, j) => { const end = anchors[j + 1]; const between = end === undefined ? [] : route.slice(index + 1, end); const opened = expanded.has(index); return <div key={index}>{row(index)}{between.length > 0 && <>
-      <button aria-expanded={opened} onClick={() => setExpanded(old => { const next = new Set(old); if (next.has(index)) next.delete(index); else next.add(index); return next; })} className="w-full py-6 px-5 text-sm text-primary bg-primary/[.025] hover:bg-primary/10 flex items-center justify-center gap-2"><ChevronDown size={16} className={opened ? 'rotate-180' : ''} />{opened ? 'Hide' : 'Show'} {between.length} intermediate stations<span className="sr-only"> between {route[index].station?.name} and {route[end].station?.name}</span></button>
+      <div className={`${timeline.grid} ${timeline.gap}`}><div aria-hidden="true" className={timeline.rail} /><button aria-expanded={opened} onClick={() => setExpanded(old => { const next = new Set(old); if (next.has(index)) next.delete(index); else next.add(index); return next; })} className={timeline.toggle}><ChevronDown size={16} className={timeline.chevron} />{opened ? 'Hide' : 'Show'} {between.length} intermediate stations<span className="sr-only"> between {route[index].station?.name} and {route[end].station?.name}</span></button></div>
       {between.map((s, offset) => opened || s.station?.code === current ? row(index + 1 + offset) : null)}
     </>}</div>; })}
   </section>;
