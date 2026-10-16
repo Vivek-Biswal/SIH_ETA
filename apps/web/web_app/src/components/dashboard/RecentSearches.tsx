@@ -8,12 +8,17 @@ export function RecentSearches({ onSelect }: { onSelect: (result: SearchResult) 
   const [recent, setRecent] = useState<SearchResult[]>([]);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('sih_recent_searches');
-      if (stored) {
-        setRecent(JSON.parse(stored));
-      }
-    } catch (e) {}
+    const read = () => {
+      try {
+        const stored = localStorage.getItem('sih_recent_searches');
+        const parsed = stored ? JSON.parse(stored) : [];
+        setRecent(Array.isArray(parsed) ? parsed : []);
+      } catch { setRecent([]); }
+    };
+    read();
+    window.addEventListener('storage', read);
+    window.addEventListener('etaernal-search-history-changed', read);
+    return () => { window.removeEventListener('storage', read); window.removeEventListener('etaernal-search-history-changed', read); };
   }, []);
 
   if (recent.length === 0) return null;
@@ -61,5 +66,6 @@ export function saveRecentSearch(result: SearchResult) {
     if (recent.length > 5) recent = recent.slice(0, 5);
     
     localStorage.setItem('sih_recent_searches', JSON.stringify(recent));
+    window.dispatchEvent(new Event('etaernal-search-history-changed'));
   } catch (e) {}
 }

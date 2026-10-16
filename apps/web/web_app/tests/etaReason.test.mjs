@@ -19,6 +19,7 @@ const reasons = evaluate('../src/services/etaReason.ts');
 const passenger = evaluate('../src/services/passenger.ts');
 const { PassengerJourney } = evaluate('../src/components/eta/PassengerJourney.tsx', {
   '@/services/passenger': passenger, '@/services/etaReason': reasons,
+  '@/services/preferences': { useLiveRefresh: () => 120000 },
   'lucide-react': { Clock3: () => null, RefreshCw: () => null, TrainFront: () => null, ChevronDown: () => null },
   './ArrivalWeather': { ArrivalWeather: () => null }, './EtaFeedback': { EtaFeedback: () => null }, './IncidentReport': { IncidentReport: () => null },
   './RouteTimeline.module.css': { default: new Proxy({}, { get: (_, name) => String(name) }) },

@@ -7,6 +7,7 @@ import timeline from './RouteTimeline.module.css';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
 import { delayLabel, loadJourney, passing, time, usablePrediction, type ETA, type Journey, type Stop } from '@/services/passenger';
 import { confirmedStopTime, matchingStop, predictionKey, selectedPrediction, stationArrival } from '@/services/etaReason';
+import { useLiveRefresh } from '@/services/preferences';
 
 function PredictionEvidence({ eta, arrival }: { eta: ETA | null; arrival: ReturnType<typeof stationArrival> }) {
   const metadata = eta?.model_metadata;
@@ -43,6 +44,7 @@ function PredictionEvidence({ eta, arrival }: { eta: ETA | null; arrival: Return
 }
 
 export function PassengerJourney({ number, date = '', target = '', compact = false, autoRefresh = false, suppliedJourney, refreshing = false, onRefresh }: { number: string; date?: string; target?: string; compact?: boolean; autoRefresh?: boolean; suppliedJourney?: Journey; refreshing?: boolean; onRefresh?: () => void }) {
+  const refreshInterval = useLiveRefresh();
   const [localJourney, setJourney] = useState<Journey | null>(null), [error, setError] = useState('');
   const [localLoading, setLoading] = useState(true), [revision, refresh] = useState(0);
   const journey = suppliedJourney ?? localJourney;
@@ -61,17 +63,17 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
     return () => clearInterval(timer);
   }, []);
   useEffect(() => {
-    if (suppliedJourney || !autoRefresh) return;
+    if (suppliedJourney || !autoRefresh || refreshInterval === 0) return;
     let appActive = true;
     const pause = () => { appActive = false; };
     const resume = () => { appActive = true; };
     const timer = setInterval(() => {
       if (appActive && document.visibilityState === 'visible') refresh(n => n + 1);
-    }, 120000);
+    }, refreshInterval);
     window.addEventListener('journey-pause', pause);
     window.addEventListener('journey-resume', resume);
     return () => { clearInterval(timer); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); };
-  }, [autoRefresh, suppliedJourney]);
+  }, [autoRefresh, suppliedJourney, refreshInterval]);
   const status = journey?.status, eta = journey?.eta || null;
   const predictions = eta?.remaining_stations || [];
   const selectionJourney = `${number}|${status?.date || date}|${target}`;
