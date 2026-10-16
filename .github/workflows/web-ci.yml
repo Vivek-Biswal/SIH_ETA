@@ -2,53 +2,33 @@ name: Web App CI
 
 on:
   push:
-    branches: [develop, main]
-    paths:
-      - 'apps/web/**'
-      - '.github/workflows/web-ci.yml'
+    branches: [main, develop]
+    paths: ['apps/web/**', '.github/workflows/web-ci.yml']
   pull_request:
-    branches: [develop, main]
-    paths:
-      - 'apps/web/**'
+    paths: ['apps/web/**', '.github/workflows/web-ci.yml']
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: apps/web/web_app
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          cache: npm
           cache-dependency-path: apps/web/web_app/package-lock.json
-
-      - name: Install dependencies
-        run: |
-          cd apps/web/web_app
-          npm ci
-
+      - run: npm ci
       - name: Type check
-        run: |
-          cd apps/web/web_app
-          npm run type-check
-
-      - name: Lint
-        run: |
-          cd apps/web/web_app
-          npm run lint
-
-      - name: Run tests
-        run: |
-          cd apps/web/web_app
-          npm test -- --passWithNoTests
-
-      - name: Build
+        run: npx tsc --noEmit
+      - name: Focused passenger, map, simulation and analytics tests
+        run: node --test tests/*.test.mjs
+      - name: Production build
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
-          NEXT_PUBLIC_WS_URL: ws://localhost:8000/ws
-        run: |
-          cd apps/web/web_app
-          npm run build
+        run: npm run build

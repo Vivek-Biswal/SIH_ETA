@@ -1,0 +1,106 @@
+{
+  "captured_on": "2026-10-17",
+  "website_origin": "https://equinox01.vercel.app",
+  "website_source_revision": "6e3293e0e87ced76acbb2c31cd20faaa4c15f1c3",
+  "android_version": "1.1.9+11",
+  "android_application_id": "com.siheta.sih_eta",
+  "capture_policy": "Actual deployed website and Android release UI; no fixture interception or fabricated data. Maps show the real OpenStreetMap fallback. Native ETA captures use the explicit delay-adjusted fallback, not ML inference.",
+  "images": [
+    {
+      "path": "website/dashboard.png",
+      "source": "/dashboard",
+      "state": "Fresh-profile passenger dashboard; dated historical summary",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "0d595cba73dd225a84e94205628bbedf2bc73075780a122ae6d8ce6f8adf3c56"
+    },
+    {
+      "path": "website/train-search.png",
+      "source": "/trains",
+      "state": "Initial route/number search forms",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "bbd1d124df7fc04336c935cf1d5b72d74011d6b2dd77513439a40184bbb0d62d"
+    },
+    {
+      "path": "website/eta-prediction.png",
+      "source": "/trains/12423/eta",
+      "state": "Journey 2026-10-15, Zamania, early timing; reported-delay fallback",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "4e49909e00891124b0ad470174a3d058913c6fd4b7ed0888f3926bc617384a20"
+    },
+    {
+      "path": "website/train-route.png",
+      "source": "/network",
+      "state": "Train 12423, selected route and latest reported-station position; approximate connections",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "05d7d445d415e8d25f03469cb0747d8f48eebe88f7af3655114a6a5b2d33ef3d"
+    },
+    {
+      "path": "website/journey-analytics.png",
+      "source": "/analytics",
+      "state": "Train 12423, journey 2026-10-15, comparable completed station observations",
+      "width": 2160,
+      "height": 1650,
+      "sha256": "a58d5303b3e89a299e1de88628281de97d7b993eded0dd49114abfa773fcd8c5"
+    },
+    {
+      "path": "website/historical-insights.png",
+      "source": "/network",
+      "state": "Past delays tab, loaded September 2024 analysis",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "2ced5f66bb494555d839ac64e109dc6ec8a7c064316dee6bdcc351048e6081e9"
+    },
+    {
+      "path": "website/simulation.png",
+      "source": "/network",
+      "state": "Simulation tab, train 12423 timetable; 15-minute section wait and skip to next station; illustrative",
+      "width": 2160,
+      "height": 1500,
+      "sha256": "e48bae8894c52f95d88b4ca163e2c7dd334d3a0b7b03bb01541ef63621cade46"
+    },
+    {
+      "path": "mobile/home.png",
+      "source": "Android APK / native Flutter",
+      "state": "Home after skipping onboarding",
+      "width": 1080,
+      "height": 2400,
+      "sha256": "c0fb7f2abb5081a66e315692004964e65d82879eddac1439c41054ca749a0c6f"
+    },
+    {
+      "path": "mobile/onboarding.png",
+      "source": "Android APK / native Flutter",
+      "state": "First-run guide step 1",
+      "width": 1080,
+      "height": 2400,
+      "sha256": "f4f858540d242bf0b4486f0ba076f4a75dd71138e6e26b2eb30a48fe6efb26d5"
+    },
+    {
+      "path": "mobile/train-details.png",
+      "source": "Android APK / native Flutter",
+      "state": "Train 12423, journey 2026-10-15; running report and timestamps",
+      "width": 1080,
+      "height": 2400,
+      "sha256": "1ffac97e1f2657579a6d49db343b7dc2cb5778e1648868e354ef2dd75a4603dd"
+    },
+    {
+      "path": "mobile/eta-prediction.png",
+      "source": "Android APK / native Flutter",
+      "state": "New Delhi selected arrival and weather; explicit fallback with recovery unavailable",
+      "width": 1080,
+      "height": 2400,
+      "sha256": "2748f03cf9b1277e04144305c5f204def7620e8b05d509cc18afb685acf21db6"
+    },
+    {
+      "path": "mobile/journey-insights.png",
+      "source": "Android APK / deployed HTTPS WebView",
+      "state": "Journey insights modes and initial tracking form",
+      "width": 1080,
+      "height": 2400,
+      "sha256": "13fbc9236ce22d027a5977e6117a0c01a0a08cbd0b3838b9a108df6eb1394e69"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # Frontend Architecture — SIH ETA
 
+> Earlier frontend design. Current framework versions, routes and data boundaries
+> are documented in the [website README](../../apps/web/web_app/README.md) and
+> [runtime architecture](../architecture/system-architecture.md).
+
 ## Overview
 
 The project has two independent frontend clients that both connect to the same backend API:

@@ -1,4 +1,8 @@
 # Database Design — SIH ETA (SIH26028)
+
+> Earlier database design, not a tested deployment/bootstrap contract. The
+> current passenger path does not require these proposed migrations. See
+> [local setup](../development/setup.md) and [runtime architecture](../architecture/system-architecture.md).
 # Version: 1.0.0-draft
 # Last Updated: 2026-09-03
 

@@ -1,83 +1,29 @@
-# Intelligence — SIH ETA
+# Etaernal intelligence and research
 
-ML/AI modules for train ETA prediction and railway network intelligence.
+The current learned ETA implementation is a **three-train station-event pilot**.
+Do not infer deployed capability from older folder names, notebooks or wrappers.
 
-## Structure
+| Area | Current entry point |
+| --- | --- |
+| Historical import | [Pinned importer and provenance](train_eta/data/README.md) |
+| Real model training | [training/train.py](train_eta/training/train.py) |
+| Serving-policy evaluation | [training/audit_policy.py](train_eta/training/audit_policy.py) |
+| Source hashes and coverage | [source_manifest.json](train_eta/reports/source_manifest.json) |
+| Shipped artifact / measured results | [backend/data/eta_ml](../backend/data/eta_ml/) |
+| Runtime eligibility and JSON inference | [backend/services/eta_ml.py](../backend/services/eta_ml.py) |
+| Historical network research | `network_intelligence/`, `propagation/` and their dated artifacts |
 
-```
-intelligence/
-├── train_eta/
-│   ├── data/            ← Data loading utilities (reads from data/raw, data/processed)
-│   ├── preprocessing/   ← Cleaning, normalization, outlier handling
-│   ├── features/        ← Feature engineering pipeline
-│   ├── models/
-│   │   ├── saved/       ← Serialized model artifacts (Git-ignored except registry)
-│   │   └── checkpoints/ ← Training checkpoints (Git-ignored)
-│   ├── training/        ← Model training scripts and config
-│   ├── inference/       ← ETAPredictor class (interface for backend)
-│   └── evaluation/      ← Evaluation metrics and comparison vs baseline
-│
-├── network_intelligence/
-│   ├── graph/           ← Railway graph construction (NetworkX)
-│   ├── route_analysis/  ← Route-level features and analysis
-│   ├── congestion/      ← Congestion score computation
-│   ├── conflict_detection/ ← Scheduling conflict detection
-│   ├── inference/       ← NetworkIntelligenceService interface
-│   └── models/saved/    ← Serialized network model artifacts
-│
-├── data_processing/     ← Shared data pipeline utilities
-├── feature_engineering/ ← Shared feature utilities
-└── tests/               ← Intelligence module tests
-```
+Read the [ETA audit](../docs/ETA_ML_AUDIT.md) for features, chronological splits,
+baseline comparison, measured errors and serving limits. The legacy
+`train_eta/inference/predictor.py` interface is not the deployed passenger model;
+it declines learned prediction without the necessary dated observation inputs.
 
-## Setup
+The runtime API does not need these research dependencies. To reproduce training,
+use the separate pinned `train_eta/training/requirements.txt` in a Python 3.12
+environment and follow [setup](../docs/development/setup.md#optional-offline-training).
+Use a temporary output directory before replacing a shipped model. No new
+experiment or accuracy improvement is claimed by this documentation update.
 
-```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-```
-
-## Data
-
-- `data/raw/` — Put raw NTES historical dumps, timetable CSVs here. Git-ignored.
-- `data/processed/` — Generated feature matrices. Git-ignored.
-- `data/sample/` — Small sample datasets for development. Version controlled.
-
-## Running the Pipeline
-
-```bash
-# Build features from sample data
-python -m train_eta.features.build_features \
-  --input ../data/sample/ \
-  --output ../data/processed/
-
-# Train model
-python -m train_eta.training.train \
-  --config train_eta/training/config.yaml
-
-# Evaluate
-python -m train_eta.evaluation.evaluate \
-  --model-path train_eta/models/saved/<model_file>
-```
-
-## Inference Interface
-
-The backend uses `train_eta/inference/predictor.py`:
-
-```python
-predictor = ETAPredictor(model_version="eta-xgboost-v1")
-result = predictor.predict(
-    train_number="12301",
-    current_station_code="ALD",
-    current_delay_minutes=18,
-    date=datetime.date.today(),
-)
-```
-
-**Do not change the `ETAPredictor.predict()` signature without coordinating with the backend team.**
-
-## Tests
-
-```bash
-pytest tests/ -v
-```
+The historical source is third-party, not official NTES ground truth. Raw and
+canonical data remain ignored; preserve the publisher's attribution and declared
+licence. See [data sources](../docs/DATA_SOURCES.md).

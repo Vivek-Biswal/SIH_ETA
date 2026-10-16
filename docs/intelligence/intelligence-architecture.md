@@ -1,5 +1,9 @@
 # Intelligence Architecture — SIH ETA
 
+> Historical architecture proposal. Names, features and accuracy expectations
+> below must not be treated as deployed capabilities. See the
+> [trained ETA audit](../ETA_ML_AUDIT.md) and [feature status](../FEATURE_STATUS.md).
+
 ## 1. Overview
 
 The intelligence layer is responsible for two core capabilities:

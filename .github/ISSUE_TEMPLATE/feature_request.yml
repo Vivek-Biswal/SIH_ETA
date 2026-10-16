@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a focused improvement with clear passenger or developer value.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: "Describe who is affected and what they cannot do today."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: "Include the intended workflow and how success could be verified."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Data, integration and scope
+      description: "For ETA features, explain what reliable evidence is available. Label ideas, estimates and unverified feeds honestly. Never include credentials."

@@ -1,210 +1,100 @@
-# System Architecture — SIH ETA (SIH26028)
+# Runtime architecture
 
-## 1. Overview
+Audited on 17 October 2026. This describes implemented paths; the original
+database, authentication and operational-control proposals are not assumed live.
 
-The SIH ETA system is a **dynamic train arrival prediction platform** for Indian coaching trains. It combines real-time data ingestion, historical pattern learning, and graph-based network intelligence to produce significantly more accurate ETAs than naive schedule-offset methods.
-
----
-
-## 2. High-Level Architecture
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                              CLIENT LAYER                                  │
-│                                                                            │
-│   ┌──────────────────────────┐      ┌──────────────────────────────────┐  │
-│   │  Flutter Mobile App      │      │  Next.js Web Dashboard           │  │
-│   │  (Commuter-facing)       │      │  (Operations / Analytics view)   │  │
-│   │  - Live ETA display      │      │  - Network map                   │  │
-│   │  - Train search          │      │  - Delay analytics               │  │
-│   │  - Push notifications    │      │  - Train status overview         │  │
-│   └────────────┬─────────────┘      └────────────────┬─────────────────┘  │
-└────────────────│────────────────────────────────────────│──────────────────┘
-                 │  HTTPS REST / WebSocket                │
-                 ▼                                        ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           BACKEND API LAYER                                │
-│                     FastAPI (Python 3.11+, async)                          │
-│                                                                            │
-│  ┌──────────────┐  ┌──────────────────┐  ┌───────────────────────────┐   │
-│  │   Routes     │  │  Controllers     │  │  Middleware               │   │
-│  │  /api/v1/    │→ │  (request        │  │  - JWT Auth               │   │
-│  │  trains/     │  │   handling)      │  │  - Rate Limiting          │   │
-│  │  eta/        │  │                  │  │  - Request Logging        │   │
-│  │  network/    │  └────────┬─────────┘  └───────────────────────────┘   │
-│  │  stations/   │           │                                             │
-│  └──────────────┘           ▼                                             │
-│                    ┌──────────────────┐                                   │
-│                    │    Services      │ ← Business logic layer            │
-│                    │  - TrainService  │                                   │
-│                    │  - ETAService    │ → calls intelligence/inference    │
-│                    │  - NetworkService│                                   │
-│                    └────────┬─────────┘                                   │
-│                             │                                             │
-│                    ┌────────┴─────────┐                                   │
-│                    │  Repositories    │ ← DB access layer                 │
-│                    │  (SQLAlchemy)    │                                   │
-└────────────────────────────────────────────────────────────────────────────┘
-                             │                      │
-              ┌──────────────┘                      └─────────────────┐
-              ▼                                                        ▼
-┌──────────────────────────┐               ┌───────────────────────────────┐
-│       DATA LAYER         │               │      INTELLIGENCE LAYER       │
-│                          │               │                               │
-│  ┌────────────────────┐  │               │  ┌────────────────────────┐  │
-│  │  PostgreSQL 16     │  │               │  │  Train ETA Module      │  │
-│  │  - trains          │  │               │  │  - Preprocessing       │  │
-│  │  - stations        │  │               │  │  - Feature engineering │  │
-│  │  - routes          │  │               │  │  - XGBoost / DL model  │  │
-│  │  - schedules       │  │               │  │  - Inference API       │  │
-│  │  - running_status  │  │               │  └────────────────────────┘  │
-│  │  - eta_predictions │  │               │                               │
-│  │  - delay_history   │  │               │  ┌────────────────────────┐  │
-│  └────────────────────┘  │               │  │  Network Intelligence  │  │
-│                          │               │  │  - Railway graph       │  │
-│  ┌────────────────────┐  │               │  │  - Route analysis      │  │
-│  │  Redis 7           │  │               │  │  - Congestion score    │  │
-│  │  - live positions  │  │               │  │  - Conflict detection  │  │
-│  │  - ETA cache       │  │               │  └────────────────────────┘  │
-│  │  - pub/sub events  │  │               └───────────────────────────────┘
-│  └────────────────────┘  │
-└──────────────────────────┘
-              ▲
-              │
-┌─────────────────────────────────────────────────────────┐
-│            EXTERNAL DATA SOURCES                        │
-│   NTES API  │  Weather API  │  IRCTC  │  Historical CSV │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+  Browser[Next.js passenger website] --> API[FastAPI versioned passenger routes]
+  Native[Native Flutter search and train screens] --> API
+  Native --> WebView[Android / iOS Journey insights WebView]
+  WebView --> Browser
+  API --> Provider[RailRadar passenger adapter]
+  Provider --> Cache[SQLite shared cache and credential cooldowns]
+  Cache --> Upstream[RailRadar API]
+  Provider --> Archive[Sanitized observation archive]
+  Provider --> Scope[Freshness / journey / station / feature checks]
+  Scope --> Learned[Portable trained JSON trees]
+  Scope --> Baseline[Labelled observed-delay fallback]
+  API --> Weather[OpenWeather station forecast]
+  API --> Historic[Historical network-analysis artifacts]
+  API -. optional .-> Supabase[Supabase directory and schedule repositories]
+  Browser --> Tiles[MapTiler browser tiles or OSM fallback]
+  Offline[Pinned historical import] --> Training[Offline training / validation / policy audit]
+  Training --> Learned
 ```
 
----
+## Client responsibilities
 
-## 3. Component Descriptions
+**Website:** `apps/web/web_app/src/services/passenger.ts` normalizes status and
+ETA, checks train/journey identity and preserves source/method/freshness. Map
+components display one selected train. Coordinate resolution may use station
+locations and approximate links; it does not establish surveyed railway geometry.
+Simulation and analytics are separate from the live prediction pipeline.
 
-### 3.1 Client Layer
+**Flutter:** `core/services/train_repository.dart` adapts the same passenger
+responses for native search/details. Local preferences hold onboarding, appearance
+and saved journeys. `journey_workspace_screen.dart` embeds the deployed workspace
+and handles sanitized CSV sharing. Full Journey insights parity is shared web
+functionality, not four independent native reimplementations.
 
-| Component | Technology | Purpose |
-|---|---|---|
-| Mobile App | Flutter 3.x (Dart) | Commuter-facing ETA tracking, train search, notifications |
-| Web Dashboard | Next.js 14 (TypeScript) | Operations view, analytics, network visualization |
+## Backend responsibilities
 
-Both clients are **API-only** — they never access the database directly.
+- `api/routes/trains.py`: selected journey status, per-stop ETA and weather.
+- `services/railradar_passenger.py`: provider adaptation, timestamps, confirmed
+  events, freshness and route-order constraints.
+- `services/railradar_requests.py`: shared SQLite responses, same-request locking,
+  date aliases, ordered authorized-key failover and retry cooldowns. Default live
+  cache is 120 seconds; directory lookups cache for a day and other schedule
+  requests for six hours. Stale fallback is bounded and identified.
+- `services/eta_ml.py`: eligible inference using a versioned JSON model. CPU
+  inference runs outside the asynchronous API event loop.
+- `services/arrival_reasons.py`: per-stop passenger copy and evidence-backed
+  delay/recovery fields; no unsupported physical cause is invented.
+- `services/weather_service.py`: selected-station forecast context, separate from
+  trained delay prediction.
+- `services/eta_observations.py`: sanitized observations from successful fetches,
+  without extra upstream polling. SQLite storage is not automatically durable
+  on an ephemeral hosting filesystem.
+- `services/adapters/network_adapter.py`: dated historical analysis, not a feed
+  of live nationwide track occupancy.
 
-### 3.2 Backend API Layer
+## ETA decision boundary
 
-Built on **FastAPI** with async SQLAlchemy.
+The checked-in artifact is a trained three-train station-event pilot. For each
+target stop, inference requires a supported train/station pair, fresh running
+evidence, a recent confirmed event, consistent provider delay and in-range
+features/horizon. Exceptional, stale or unsupported journeys decline ML.
 
-**Layered responsibility:**
+The fallback is **scheduled arrival + latest reported delay**, clearly labelled.
+No fresh running evidence means timetable/unavailable behavior rather than a
+fabricated live forecast. Stops may use different methods in the same response;
+the per-stop method is authoritative. Route-order adjustments can withhold a
+future-recovery claim. See [the complete ML audit](../ETA_ML_AUDIT.md).
 
-```
-Request
-  ↓
-Route (URL dispatch)
-  ↓
-Controller (request validation, response shaping)
-  ↓
-Service (business logic, orchestration)
-  ↓
-Repository (database queries only)
-  ↓
-Model (SQLAlchemy ORM entity)
-```
+## Storage, deployment and security boundaries
 
-**Key endpoints (to be specified fully in `docs/api/api-contract.md`):**
+The current backend uses Supabase's Python client for optional directory/schedule
+repositories. It does not require the SQLAlchemy/PostgreSQL/Redis/Alembic stack
+described in early proposals. Demo Supabase defaults select an in-memory client;
+passenger-facing code must not pass sample data off as observed railway data.
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/v1/trains/search` | Search trains by source/destination |
-| GET | `/api/v1/trains/{train_no}/status` | Live running status |
-| GET | `/api/v1/trains/{train_no}/eta` | Predicted ETA for stations |
-| GET | `/api/v1/stations/{station_code}` | Station details |
-| GET | `/api/v1/network/status` | Network-wide congestion summary |
-| WS | `/ws/trains/{train_no}/live` | WebSocket live position stream |
+Private RailRadar, weather and Supabase service-role keys remain in the API
+environment. MapTiler browser keys are necessarily delivered to map clients and
+must be domain-restricted. No enforced universal JWT authentication should be
+inferred from the login UI or original YAML specification.
 
-### 3.3 Intelligence Layer
+The website is hosted on Vercel and API on Render. Native Flutter calls the API;
+its Journey insights WebView additionally depends on the hosted website. Polling
+and shared caching provide updates; the passenger dashboard does not require the
+legacy WebSocket telemetry endpoint.
 
-**Train ETA Module** (`intelligence/train_eta/`):
+## Separate research and compatibility paths
 
-```
-Data ingestion (NTES + historical)
-  ↓
-Preprocessing (missing value handling, outlier removal)
-  ↓
-Feature engineering (time-based, route-based, weather, congestion)
-  ↓
-Model training (XGBoost baseline → deep learning for complex routes)
-  ↓
-Evaluation (RMSE, MAE vs naive baseline)
-  ↓
-Inference (REST endpoint or direct Python call from backend service)
-```
+Earlier notebooks, model wrappers, `/api/*` scenario endpoints and dashboard
+sample summaries still exist. They are not evidence for the production ETA
+pipeline. The unchanged shared YAML and older design documents must be treated
+as proposals unless reconciled with runtime OpenAPI and route code.
 
-**Network Intelligence Module** (`intelligence/network_intelligence/`):
-
-- Builds a **railway graph** (stations as nodes, routes as edges)
-- Computes route-level **congestion scores**
-- Detects **scheduling conflicts** that propagate delays
-- Feeds enriched features back into the ETA model
-
-### 3.4 Data Layer
-
-| Store | Technology | What it holds |
-|---|---|---|
-| Primary DB | PostgreSQL 16 | Schedules, trains, stations, routes, delay history, ETA predictions |
-| Cache | Redis 7 | Live train positions, ETA cache (TTL-based), WebSocket pub/sub |
-
----
-
-## 4. Data Flow
-
-### ETA Prediction Flow
-
-```
-1. Client sends GET /api/v1/trains/12345/eta
-2. Controller validates request
-3. ETAService checks Redis cache (TTL: 60s)
-4. Cache miss → ETAService fetches:
-   a. Current running status from DB (or NTES API)
-   b. Historical delay features from DB
-   c. Weather data from weather API
-   d. Network congestion score from NetworkIntelligenceService
-5. ETAService calls intelligence/train_eta/inference/ with feature vector
-6. ML model returns predicted delay at each remaining station
-7. ETAService adds predicted delay to scheduled time → ETA per station
-8. Result cached in Redis
-9. Response returned to client
-```
-
-### Real-Time Update Flow
-
-```
-1. Background job polls NTES API every N seconds
-2. Updates train position in Redis
-3. Publishes event on Redis pub/sub channel: train:{train_no}:update
-4. WebSocket handler receives event
-5. Broadcasts to all connected clients subscribed to that train
-6. Client UI updates live
-```
-
----
-
-## 5. Security Architecture
-
-- All API endpoints protected by **JWT authentication**
-- Secrets stored in **environment variables only** (never committed)
-- Database credentials never exposed to clients
-- Redis not exposed publicly
-- Rate limiting on all public endpoints
-
----
-
-## 6. Scalability Considerations (Future)
-
-The current architecture is a **modular monolith** — intentionally simpler for the hackathon prototype. It is designed to split into microservices if needed:
-
-- The `intelligence/` layer can become an independent Python service
-- The `backend/` can become multiple FastAPI services by feature area
-- PostgreSQL can be sharded by region if needed
-- Redis Cluster for horizontal scaling
-
-These changes require updating `shared/api_contracts/` and `docs/architecture/` and should be agreed on by the whole team before implementation.
+[API guide](../api/api-contract.md) · [Feature status](../FEATURE_STATUS.md) ·
+[Deployment](../v1_deployment_guide.md)

@@ -1,55 +1,38 @@
-# Backend — SIH ETA
+# Etaernal passenger API
 
-FastAPI backend service for the SIH ETA project.
+FastAPI service shared by the website and Flutter application. It adapts
+RailRadar reports, serves the trained three-train ETA pilot with explicit
+fallbacks, creates station-specific explanations and supplies arrival weather
+and dated network insights.
 
-## Structure
+- [Complete setup](../docs/development/setup.md)
+- [Current architecture](../docs/architecture/system-architecture.md)
+- [API guide and compatibility boundaries](../docs/api/api-contract.md)
+- [Training and inference audit](../docs/ETA_ML_AUDIT.md)
 
-```
-backend/
-├── api/
-│   ├── routes/          ← URL route definitions (one file per resource)
-│   ├── controllers/     ← Request handling, response shaping
-│   └── validators/      ← Custom request validators
-├── services/            ← Business logic (TrainService, ETAService, etc.)
-├── repositories/        ← Database access layer (SQLAlchemy queries)
-├── models/              ← SQLAlchemy ORM models
-├── database/
-│   ├── migrations/      ← Alembic migration files
-│   ├── seed/            ← Dev/test seed data scripts
-│   ├── connection/      ← DB engine setup, session factory
-│   ├── queries/         ← Complex raw SQL queries (if needed)
-│   └── schemas/         ← SQLAlchemy schema utilities
-├── middleware/          ← Auth, logging, rate limiting
-├── config/              ← App settings (pydantic-settings)
-├── tests/
-│   ├── unit/            ← Unit tests (services, repositories)
-│   └── integration/     ← Integration tests (routes with test DB)
-├── main.py              ← FastAPI app entrypoint
-├── requirements.txt     ← Production dependencies
-├── requirements-dev.txt ← Dev/test dependencies
-└── .env.example         ← Environment variable template
-```
-
-## Setup
+Run **from this directory**:
 
 ```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env  # fill in credentials
-alembic upgrade head
-uvicorn main:app --reload
+python -m venv .venv
+# Activate .venv, then:
+python -m pip install -r requirements.txt
+cp .env.example .env
+python -m uvicorn main:app --reload --port 8000
 ```
 
-## Key Conventions
+Configure `RAILRADAR_API_KEY` for provider-backed data. OpenWeather and Supabase
+are optional; no PostgreSQL/Redis containers or Alembic migration are required
+by the current startup path. Without a real source, passenger information may
+be unavailable—sample compatibility endpoints are not live data.
 
-- Routes are in `api/routes/` — one file per resource (`trains.py`, `stations.py`, etc.)
-- Routes call controllers, never services directly
-- Services call repositories, never the DB directly
-- All DB access is async (SQLAlchemy AsyncSession)
-- Configuration via `config/settings.py` (pydantic-settings, reads from `.env`)
-
-## Running Tests
+Open `/health`, `/docs` or `/api/v1/eta/model`. The versioned model/evaluation
+under `data/eta_ml/` is checked in and does not require scikit-learn at runtime.
+Private keys remain server-side.
 
 ```bash
-pytest tests/ -v
+python -m pip install -r requirements-test.txt
+python -m pytest tests/ -q
 ```
+
+Run tests with provider credentials unset so tests cannot spend live allocations.
+The test suite uses controlled responses, not real railway requests.

@@ -1,56 +1,63 @@
-# Etaernal passenger app
+# Etaernal mobile
 
-Flutter passenger app for problem statement 26028. Version 1.1.0 adds an automatic first-launch guide, saved journeys and working Network Intelligence screens.
+Flutter passenger application, version **1.1.10+12**. Requires Flutter 3.32+
+and Dart 3.8.1+; Android application ID remains `com.siheta.sih_eta`.
 
-## Passenger experience
+## What is implemented
 
-- Four-step welcome guide on first launch, with Skip, Back and Next. Completion stays on the device. Replay from Help or the home help icon.
-- Search by number, name or stations. A selected date means the date the train leaves its first station, including overnight journeys.
-- Train details preserve the requested date and arrival station. The resolved journey date remains fixed across refreshes.
-- Foreground train details checks every 30 seconds. Background or covered screens do not poll. Failed refreshes retain explicitly stale records with separate status/arrival fetch times.
-- Save up to 20 journeys with their train, start date and arrival station. Remove and undo from Saved. These are shortcuts, not offline copies or notification subscriptions.
-- Light, dark and system themes. Help explains ETA, timetable time, observation freshness, dates and clock reminders.
+- First-run passenger guide and replayable onboarding.
+- Native train-number/name search, station-pair search, train details, route
+  timeline and selected-station ETA from the shared backend.
+- Station-specific explanations, signed early/late duration, measured recovery
+  and separately labelled possible future recovery.
+- Saved journeys (up to 20, local preferences), appearance settings and sharing.
+- Native historical station/network analysis.
+- Journey insights parity through an Android/iOS **WebView** of the deployed
+  workspace: tracking/map, analytics/CSV sharing, past delays and simulation.
+- A phone-clock handoff for user-confirmed alarms; no automatic ETA push alerts.
+- Native ETA feedback with local pending storage, retry and server receipt;
+  reports remain unverified and are not model-training labels.
 
-## Network Intelligence
+The trained ETA is the same limited three-train pilot used by the website, not
+a separate on-device model. WebView features require network access and the
+deployed website. Non-mobile platforms open the workspace externally.
 
-The Network tab consumes `GET /api/v1/network/insights?q=...&limit=50` from the same backend. It shows:
+## Run and verify
 
-- The historical observation period and explicit non-live provenance.
-- Matching station, interaction and high/critical model-score counts.
-- Station bottlenecks ranked by the existing analysis score.
-- Recorded source/following-train interactions, dates, delays and gaps.
-- Server-side search by station code or train number, station drilldown, and links to the latest train status.
-- Loading, retry, empty and stale states; refresh when foregrounded and every minute while visible.
+The Android Gradle configuration currently requires local `android/key.properties`
+and a keystore during configuration, even for debug builds. Configure them using
+the [Flutter setup guide](../../../docs/development/setup.md#flutter) first.
 
-The current repository analysis covers 1–30 September 2024: 447 stations and 60,126 interactions. It is **not current congestion, confirmed disruptions, calibrated probabilities or proof of causation**. The app does not turn these records into live alerts. Deploy the new backend endpoint before distributing the production APK; older servers show a clear unavailable state.
-
-## API and prediction limits
-
-The default API root is `https://sih-eta-backend-a819.onrender.com`. Override with `--dart-define=API_BASE_URL=...` when building. Database/provider secrets stay on the backend.
-
-Train status and ETA must match both train number and journey date. Demonstration records are rejected. Schedule-only responses remain labelled as schedules. The currently verified live provider uses an observed-delay baseline: scheduled arrival plus the latest delay. Trained ETA using congestion, weather, restrictions and measured prediction accuracy remains separate backend work.
-
-Station boards are timetables, not live platform/departure guarantees. Published running-day filtering does not certify operation. Database fallback route search supports terminal endpoints; provider coverage can differ.
-
-## Verify
-
-```powershell
+```bash
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 flutter analyze
-flutter test test
+flutter test
 ```
 
-Tests cover onboarding persistence/replay, saved journeys and undo, date/station navigation, polling lifecycle, stale partial refreshes, malformed API data, historical network provenance/search, themes and narrow screens with enlarged text.
+Use `http://localhost:8000` for an iOS simulator; on a physical phone use the
+development computer's LAN address and ensure it can reach the API. Android
+cleartext restrictions and HTTPS deployment are discussed in the
+[setup guide](../../../docs/development/setup.md).
 
-Device test, with the updated backend running on port 8091 on the same computer:
+`API_BASE_URL` is the backend **root**, without `/api/v1`. The app derives both
+the versioned and legacy prefixes in `lib/core/config/api_config.dart`.
+There is no runtime `.env` loader. Never put RailRadar, weather or service-role
+keys in Flutter defines or the APK.
 
-```powershell
-flutter test integration_test/passenger_flow_test.dart -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:8091
+```bash
+flutter build apk --release --dart-define=API_BASE_URL=https://sih-eta-backend-a819.onrender.com
 ```
 
-## Build an APK
+Output: `build/app/outputs/flutter-apk/app-release.apk`. Build/review signing
+before public distribution; there is no public release asset currently linked.
 
-```powershell
-flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=API_BASE_URL=https://sih-eta-backend-a819.onrender.com
-```
+Optional `JOURNEY_WEB_BASE_URL` changes the shared workspace origin at build
+time; it must be HTTPS. MapTiler stays configured on the website—no private map
+configuration needs to be duplicated in Flutter.
 
-Output: `build/app/outputs/flutter-apk/app-release.apk`. This includes ARM64 phones and x64 emulators. Release signing uses the existing local `android/key.properties`; never commit it or the keystore. Release networking requires HTTPS. The app launcher name is Etaernal. Journey insights includes tracking, analytics, past delays and simulation through the shared online workspace; CSV exports open the native share sheet.
+[Project overview](../../../README.md) · [Screenshots](../../../docs/screenshots/README.md) ·
+[Deployment](../../../docs/v1_deployment_guide.md) · [ETA audit](../../../docs/ETA_ML_AUDIT.md)
+
+The gallery records Android 1.1.9+11. The subsequent 1.1.10+12 arrival-selection
+and feedback change is documented in [the delivery note](../../../docs/MOBILE_ETA_FEEDBACK.md).

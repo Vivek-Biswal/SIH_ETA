@@ -1,157 +1,104 @@
-# SIH_ETA — Version 1 Deployment & Operations Guide
+# Deployment and mobile delivery
 
-This guide documents the architecture, configuration, local execution, and cloud deployment procedures for **SIH_ETA Version 1**.
+Audit date: **17 October 2026**. The legacy filename is retained to preserve
+links; this guide describes the current Etaernal implementation.
 
----
+## Verified public entry points
 
-## 1. Version 1 Architecture
+| Service | URL | Audit evidence |
+| --- | --- | --- |
+| Website | [Dashboard](https://equinox01.vercel.app/dashboard) | Public UI loaded and genuine screenshots captured |
+| API | [Health](https://sih-eta-backend-a819.onrender.com/health) | Returned `status: healthy` |
+| API schemas | [Swagger](https://sih-eta-backend-a819.onrender.com/docs) / [OpenAPI](https://sih-eta-backend-a819.onrender.com/openapi.json) | Runtime documentation endpoints |
+| Trained ETA | [Model diagnostic](https://sih-eta-backend-a819.onrender.com/api/v1/eta/model) | Enabled `eta-gbr-landmark-v1`, `validated_pilot`, trains 12303/12423/12624 |
 
-SIH_ETA V1 operates with a **unified backend architecture**: both the Next.js web application and the Flutter mobile application communicate with the same FastAPI service.
+Availability can change after the audit. Health describes the API process, not
+RailRadar quota, map authorization or nationwide model coverage.
 
-```
-                           SIH_ETA V1 ARCHITECTURE
-                           
-                 [ PUBLIC USERS & OPERATORS ]
-                              │
-             ┌────────────────┴────────────────┐
-             ▼                                 ▼
-   ┌───────────────────┐             ┌───────────────────┐
-   │  Next.js Website  │             │ Flutter Mobile App│
-   │  (Vercel / Cloud) │             │   (Android APK)   │
-   └─────────┬─────────┘             └─────────┬─────────┘
-             │                                 │
-             │ HTTPS REST & WebSockets         │
-             └────────────────┬────────────────┘
-                              ▼
-               ┌──────────────────────────────┐
-               │    FastAPI Unified Backend   │
-               │  (Render / Railway / Docker) │
-               ├──────────────────────────────┤
-               │ • /health & /api/v1/health   │
-               │ • /api/v1/stations           │
-               │ • /api/v1/trains             │
-               │ • /api/v1/network            │
-               │ • /api/* (Compat routes)     │
-               │ • /ws (Delay telemetry)      │
-               └──────────────┬───────────────┘
-                              │
-             ┌────────────────┴────────────────┐
-             ▼                                 ▼
-   ┌───────────────────┐             ┌───────────────────┐
-   │ Mock Data Client  │             │ Baseline ETA      │
-   │ (In-Memory Store) │             │ (Schedule+Delay)  │
-   │ 12 Stations       │             │ Fallback Engine   │
-   │ 6 Trains, 3 Runs  │             │ Deterministic     │
-   └───────────────────┘             └───────────────────┘
-```
+## Vercel website
 
----
+- Project application/root directory: `apps/web/web_app`.
+- Install/build: `npm ci`, then `npm run build`; framework Next.js.
+- `NEXT_PUBLIC_API_BASE_URL=https://sih-eta-backend-a819.onrender.com/api/v1`.
+- `MAPTILER_API_KEY`: browser key authorized for the actual deployment domains.
+- Passenger REST views do not require `NEXT_PUBLIC_WS_URL`.
 
-## 2. Environment Variables Reference
+Public-prefixed values are build-time client configuration. MapTiler's runtime
+configuration also delivers its browser key to clients, so use provider domain
+restrictions. Never add RailRadar, weather or database service-role secrets to
+Vercel's public client variables. A rejected key/domain uses the visibly labelled
+OpenStreetMap fallback; satellite imagery is not promised by that fallback.
 
-### Backend (`backend/.env`)
+## Render API
 
-| Variable Name | Required? | Default / Example | Purpose |
-| :--- | :---: | :--- | :--- |
-| `PORT` or `APP_PORT` | No | `8000` | Port for the HTTP server (Cloud PaaS automatically injects `PORT`) |
-| `APP_HOST` | No | `0.0.0.0` | Host binding IP address |
-| `APP_ENV` | No | `development` | Set to `production` in live deployments |
-| `DEBUG` | No | `false` in prod | Enables/disables debug mode and auto-reload |
-| `CORS_ORIGINS` | Yes (in prod) | `http://localhost:3000` | Allowed origins (supports JSON array or comma-separated string) |
-| `SUPABASE_URL` | No | `https://demo-project.supabase.co` | Supabase URL (Uses mock client if URL contains "demo") |
-| `SUPABASE_ANON_KEY` | No | `demo-anon-key` | Public anon key subject to RLS |
-| `SUPABASE_SERVICE_ROLE_KEY`| No | `demo-service-role-key` | Secret server-side key (NEVER expose to frontend) |
+- Service: `sih-eta-backend`; backend root directory `backend`.
+- Build: `pip install -r requirements.txt`.
+- Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+- Health check: `/health`.
+- Set `APP_ENV=production`, `DEBUG=false`, approved `CORS_ORIGINS` and server-side
+  provider keys in the hosting environment.
+- Optional OpenWeather aliases and all current settings are listed in
+  [local setup](development/setup.md#backend-variables).
 
-### Website (`apps/web/web_app/.env.local`)
+The versioned model and evaluation JSON are already in the repository. The API
+does not need a training job, Redis instance or Alembic migration to start.
+Retain the model eligibility checks when configuring or replacing the artifact.
 
-| Variable Name | Required? | Default / Example | Purpose |
-| :--- | :---: | :--- | :--- |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes (in prod) | `http://localhost:8000/api/v1` | Base REST endpoint for the FastAPI backend |
-| `NEXT_PUBLIC_WS_URL` | Yes (in prod) | `ws://localhost:8000/ws` | WebSocket endpoint for real-time delay telemetry |
+### Persistence and request budgets
 
-### Mobile (`apps/mobile/flutter_app/`)
+The response cache and sanitized observation archive are SQLite files. On an
+ephemeral Render filesystem they can disappear on restart/redeploy; they are
+**not a durable training-data collection system**. A reviewed durable storage
+setup is required before relying on these files for long-term observations.
+Do not provision paid storage/services merely to follow this guide.
 
-Configured at build-time using `--dart-define`:
+The adapter shares responses, suppresses duplicate fetches and backs off after
+provider errors/exhaustion. A non-empty `RAILRADAR_API_KEYS` array selects an
+ordered pool of authorized allocations. Provider terms/quotas still apply; it
+is not an unlimited-request solution.
 
-| Variable Name | Target Context | Example Command Flag |
-| :--- | :--- | :--- |
-| `API_BASE_URL` | Cloud / Production | `--dart-define=API_BASE_URL=https://sih-eta-api.onrender.com` |
-| `API_BASE_URL` | Android Emulator | `--dart-define=API_BASE_URL=http://10.0.2.2:8000` |
-| `API_BASE_URL` | Local PC / Web | `--dart-define=API_BASE_URL=http://localhost:8000` |
+## Android APK
 
----
+Source version: **1.1.10+12**. Display name: **Etaernal**. Existing application ID:
+`com.siheta.sih_eta` (renaming display text does not change package identity).
 
-## 3. Local Development Runbook
+Configure the required local signing properties before building; see
+[Flutter setup](development/setup.md#flutter). Gallery screenshots retain their
+explicit **1.1.9+11** capture version and do not imply newer feedback UI is shown.
 
-### Step 1: Start the Backend
-```powershell
-cd "c:\Users\Lenovo\OneDrive\Desktop\GitHub\SIH_ETA\backend"
-.\venv\Scripts\Activate.ps1
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-*Health Check*: Open [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) or [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health) to confirm `status: "healthy"`.
-
-### Step 2: Start the Next.js Web App
-```powershell
-cd "c:\Users\Lenovo\OneDrive\Desktop\GitHub\SIH_ETA\apps\web\web_app"
-npm run dev
-```
-*Web App URL*: Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Step 3: Run the Flutter Mobile App
-```powershell
-cd "c:\Users\Lenovo\OneDrive\Desktop\GitHub\SIH_ETA\apps\mobile\flutter_app"
-# For Chrome / Desktop:
-flutter run -d chrome
-# For Android Emulator:
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```bash
+cd apps/mobile/flutter_app
+flutter pub get
+flutter build apk --release --dart-define=API_BASE_URL=https://sih-eta-backend-a819.onrender.com
 ```
 
----
+Generated output: `build/app/outputs/flutter-apk/app-release.apk`, relative to
+the Flutter directory. It is a build artifact and stays out of Git.
 
-## 4. Generic Cloud Deployment (Free Tier Strategy)
+For an emulator or connected Android device:
 
-### A. FastAPI Backend Deployment (Render.com / Railway)
-1. Link your GitHub repository to **Render.com**.
-2. Create a new **Web Service**:
-   * **Root Directory**: `backend`
-   * **Environment**: `Python 3`
-   * **Build Command**: `pip install -r requirements.txt`
-   * **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-3. In the **Environment Variables** panel, add:
-   * `APP_ENV=production`
-   * `DEBUG=false`
-   * `CORS_ORIGINS=https://your-app-name.vercel.app,http://localhost:3000`
-4. Deploy the service. Note the assigned public URL (e.g. `https://sih-eta-api.onrender.com`).
-
-### B. Next.js Website Deployment (Vercel)
-1. Link your GitHub repository to **Vercel.com**.
-2. Select the repository and configure the project:
-   * **Root Directory**: `apps/web/web_app`
-   * **Framework Preset**: `Next.js`
-3. In the **Environment Variables** panel, set:
-   * `NEXT_PUBLIC_API_BASE_URL=https://sih-eta-api.onrender.com/api/v1`
-   * `NEXT_PUBLIC_WS_URL=wss://sih-eta-api.onrender.com/ws`
-4. Click **Deploy**. Vercel will build and host the website with global edge caching.
-
-### C. Flutter Mobile APK Build
-Ensure your local host has JDK 17 configured and Android SDK command-line tools installed:
-```powershell
-cd "c:\Users\Lenovo\OneDrive\Desktop\GitHub\SIH_ETA\apps\mobile\flutter_app"
-flutter build apk --release --dart-define=API_BASE_URL=https://sih-eta-api.onrender.com
+```bash
+adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
-The output APK is generated at:
-`apps/mobile/flutter_app/build/app/outputs/flutter-apk/app-release.apk`
-This `.apk` file can be distributed to users or attached to GitHub Releases for direct installation.
 
----
+For a phone, transfer the reviewed APK and open it with Android's package
+installer, approving installation from that source only as needed. Check the
+build's signing configuration before distribution; keep keystores/private signing
+material outside Git and never label a locally signed demonstration APK as a
+store-reviewed release.
 
-## 5. Version 1 Scope & Limitations (Honest Disclosure)
+Journey insights uses `https://equinox01.vercel.app/journey-insights` by default.
+An optional HTTPS `JOURNEY_WEB_BASE_URL` define changes the shared web origin.
 
-| Feature Area | Current V1 Implementation | Version 2 Roadmap |
-| :--- | :--- | :--- |
-| **ETA Engine** | **Deterministic Baseline**: Scheduled arrival time + uniform current delay. | Machine learning regression model (XGBoost) trained on historical delays. |
-| **Database** | **In-Memory Mock Store**: 12 stations, 6 trains, 3 journeys. | Provisioned Supabase PostgreSQL with schema migrations and full dataset import. |
-| **Telemetry** | **Simulated Event Stream**: WebSocket broadcasts periodic delay adjustments. | Live IoT / GPS hardware stream integration. |
-| **Network Hotspots** | **Simulated Hotspots**: Demonstrates operational dashboard UI. | NetworkX graph analysis for automated bottleneck & conflict detection. |
-| **Dataset Store** | **7 Real Processed CSVs**: Located in `railway_eta_data/` (11,821 trains). | Batch ingestion into cloud database. |
+No public GitHub release/APK asset was found during this audit. To publish later,
+the maintainer should review the APK, signing, version, checksum and release
+notes, authorize publication, then add the permanent download link to README.
+This documentation change does not publish a release or alter live services.
+
+## Release verification
+
+Run the scoped checks in [CONTRIBUTING.md](../CONTRIBUTING.md). Verify desktop,
+narrow-screen and Android selected-train flows after a deployment. Confirm the
+source revision, response freshness and per-stop prediction method, and check
+map attribution/fallback behavior. A local build or healthy process alone is not
+end-to-end live validation.

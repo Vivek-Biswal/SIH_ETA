@@ -1,5 +1,9 @@
 # SIH ETA — Data Flow Documentation
 
+> Historical design proposal. Some flows, authentication and integrations below
+> are not implemented. Use [current runtime architecture](system-architecture.md)
+> and [feature status](../FEATURE_STATUS.md) for the running product.
+
 ## 1. Request Data Flows
 
 ### 1.1 Train Search Flow

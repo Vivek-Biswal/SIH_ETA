@@ -2,8 +2,9 @@
 # Version: 1.0.0-draft
 # Last Updated: 2026-09-03
 #
-# This file is the SINGLE SOURCE OF TRUTH for all API contracts.
-# Any team that changes an endpoint MUST update this file and notify all teams.
+# HISTORICAL DESIGN PROPOSAL — not generated from the running application.
+# Current schemas: backend /openapi.json; guide: docs/api/api-contract.md.
+# Authentication and example model fields below are proposals, not live guarantees.
 #
 # Format: OpenAPI 3.1.0 (YAML)
 # Auto-generated interactive docs available at: http://localhost:8000/docs

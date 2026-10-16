@@ -1,40 +1,22 @@
-# Branching & Integration Guide
+# Branching and integration
 
-## Branch Strategy
-
-```
-main ──────────────────────────────────────────────────────────► (production)
-  │
-develop ───────────────────────────────────────────────────────► (integration)
-  │        │              │              │
-  │        │              │              │
-feature/   feature/       feature/       feature/
-mobile-*   backend-*      train-*        web-*
-```
-
-## Rules
-
-1. **Never commit directly to `main` or `develop`** — always use feature branches + PRs
-2. **Branch from `develop`**, not from `main`
-3. Keep feature branches short-lived (max 3-5 days for hackathon pace)
-4. Merge `develop` into your feature branch daily to stay current
-5. Delete branches after merge
-
-## Integration Points
-
-| What changes | Impact on other teams | Required action |
-|---|---|---|
-| New/changed API endpoint | Mobile + Web must update | Update `shared/api_contracts/api-contract.yaml` first |
-| New DB table/column | Backend repositories + migrations | Create Alembic migration, update `docs/database/` |
-| New ML model version | Backend ETAService must update call | Update `intelligence/train_eta/inference/` interface |
-| New Flutter dependency | Mobile builds | Update `pubspec.yaml`, notify team |
-| New npm package | Web builds | Update `package.json`, commit lock file |
-
-## Keeping Up With Develop
+The current default branch is `main`. Start focused work from its current state
+and propose it through a pull request; for example:
 
 ```bash
-# From your feature branch:
-git fetch origin
-git merge origin/develop
-# Resolve any conflicts, then continue
+git switch main
+git pull --ff-only
+git switch -c codex/clear-arrival-explanation
 ```
+
+Use `git status` before switching or pulling; preserve unrelated local work.
+This guide does not assert that GitHub branch protection, reviewer counts or a
+`develop` workflow have been configured.
+
+Coordinate API changes across the web and Flutter adapters. Update the runtime
+FastAPI schemas and tests, then [the API guide](../api/api-contract.md). The
+original shared YAML remains a historical proposal, not an enforced contract.
+
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for scoped checks and evidence
+requirements. Do not push, deploy, publish a release or alter repository settings
+without the appropriate maintainer authorization.

@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Etaernal website
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 / React 19 passenger interface: train lookup, station-level ETA,
+route visualization, journey analytics, historical delay patterns and a clearly
+separated what-if simulation. Styling uses Tailwind CSS 4 and component CSS
+modules; maps use Leaflet.
 
 ```bash
+npm ci
+cp .env.example .env.local
+# Set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1 for a local API.
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The example defaults to the shared hosted backend. Use your own backend to avoid
+spending the public demo's limited provider allowance during development.
+`MAPTILER_API_KEY` is a domain-restricted browser key, not a private provider key.
+Missing/rejected map configuration triggers an identified OpenStreetMap fallback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Purpose |
+| --- | --- |
+| `/dashboard` | Passenger search and dated historical summary |
+| `/trains`, `/trains/[id]`, `/trains/[id]/eta` | Route search, status and selected-station arrival |
+| `/network`, `/network/map` | Journey insights / selected-train geographic view |
+| `/analytics` | Confirmed-arrival analytics for one selected journey |
+| `/journey-insights` | Compact shared workspace used by the mobile WebView |
+| `/stations`, `/settings` | Station tools and local preferences |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx tsc --noEmit
+node --test tests/*.test.mjs
+npm run build
+npm start
+```
 
-## Learn More
+The older `npm run lint` script still uses `next lint`, which is not the current
+Next.js lint workflow. For direct inspection use `npx eslint .`; existing lint
+debt is separate from the focused tests/build. No `npm test` or `type-check`
+package script is currently defined.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[Project overview](../../../README.md) · [Setup](../../../docs/development/setup.md) ·
+[Feature boundaries](../../../docs/FEATURE_STATUS.md) · [API](../../../docs/api/api-contract.md)

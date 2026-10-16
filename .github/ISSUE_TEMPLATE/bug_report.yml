@@ -1,0 +1,37 @@
+name: Bug report
+description: Report a reproducible passenger, data or developer-experience problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Never attach API keys, tokens, private user data or .env files. Use SECURITY.md for sensitive reports."
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Website
+        - Android / Flutter
+        - Backend / API
+        - ETA prediction or explanation
+        - Map / Journey insights
+        - Documentation / setup
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps and result
+      description: "Include expected behavior, actual behavior, app version/browser and reproducible steps."
+    validations:
+      required: true
+  - type: textarea
+    id: journey
+    attributes:
+      label: Journey and data evidence
+      description: "If relevant: train number, origin date, selected station, observation time in IST, live/cached source and a redacted screenshot. Do not paste full provider payloads or secrets."
+  - type: textarea
+    id: validation
+    attributes:
+      label: Checks already tried
+      description: "For local setup issues, include the exact command and sanitized error."

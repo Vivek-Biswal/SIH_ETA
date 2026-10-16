@@ -1,5 +1,9 @@
 # Frontend to Backend API Mapping
 
+> Historical mapping. Compatibility endpoints can return illustrative data;
+> consult the [current passenger API guide](api/api-contract.md) before using
+> these interfaces as live evidence.
+
 This document provides a complete, end-to-end mapping of data flow from the UI screens in both the web (Next.js) and mobile (Flutter) applications down to the underlying Supabase tables and intelligence modules.
 
 ## Web Application (Next.js Dashboard)

@@ -1,128 +1,101 @@
-# API Contract Reference — SIH ETA
+# Passenger API guide
 
-This document is the human-readable companion to [`api-contract.yaml`](api-contract.yaml).
+The **running FastAPI application** generates the current endpoint schemas:
 
-The machine-readable OpenAPI spec is the **authoritative source**. This document explains rationale, integration notes, and examples.
+- [Hosted Swagger UI](https://sih-eta-backend-a819.onrender.com/docs)
+- [Hosted OpenAPI JSON](https://sih-eta-backend-a819.onrender.com/openapi.json)
+- Local equivalents: `http://localhost:8000/docs` and `/openapi.json`
 
-> **Interactive API docs** are available at `http://localhost:8000/docs` when the backend is running.
+The [original shared YAML](../../shared/api_contracts/api-contract.yaml) is an
+earlier design proposal. It is not generated from the running API and its JWT,
+prediction and payload descriptions must not be assumed implemented.
 
----
+## Base URLs and authentication
 
-## Base URL
+Website variable `NEXT_PUBLIC_API_BASE_URL` includes `/api/v1`. Flutter's
+`API_BASE_URL` is the root origin and derives `/api` and `/api/v1` internally.
 
-| Environment | URL |
-|---|---|
-| Development | `http://localhost:8000` |
-| Production | `https://api.sih-eta.example.com` (TBD) |
+Current passenger routes do not enforce universal bearer-JWT authentication.
+Private upstream keys are used by the server only; clients must never send a
+RailRadar or weather key. Prototype compatibility routes are not a secure
+administrative control plane.
 
-All API endpoints are versioned: `/api/v1/<resource>`
+## Main endpoints
 
----
+Paths below are relative to `/api/v1`, except `/health`.
 
-## Authentication
+| Method | Path | Input / purpose |
+| --- | --- | --- |
+| GET | `/health` (root) | Application process health; does not check provider quota |
+| GET | `/eta/model` | Credential-free artifact status, pilot scope and historical evaluation; no provider call |
+| GET | `/passenger/lookup` | `q`: train name/number, at least 2 characters |
+| GET | `/stations/search` | `q`: station lookup; inspect runtime schema for constraints |
+| GET | `/stations/{station_code}` | Station detail from the configured source |
+| GET | `/trains/search` | `from_station`, `to_station`, optional `date`, `page`, `limit` |
+| GET | `/trains/{train_number}/status` | Optional origin journey `date`; ordered route and reported position |
+| GET | `/trains/{train_number}/eta` | Same journey `date`; station-specific arrival predictions and explanations |
+| GET | `/trains/{train_number}/weather` | Required `station_code`, optional journey `date`; forecast context |
+| GET | `/passenger/departures/{station_code}` | Scheduled board; inspect `board_type`/`live_available`, not assumed live departures |
+| GET | `/network/insights` | Optional station/train `q`, bounded `limit`; dated historical patterns |
+| POST | `/passenger/eta-feedback` | Validated passenger report with idempotent report identifier; returns a receipt. Reports are unverified, not actual-arrival labels. See runtime schema. |
 
-All endpoints (except `/health` and `/api/v1/auth/*`) require a JWT Bearer token.
-
-```
-Authorization: Bearer <access_token>
-```
-
-Obtain a token via `POST /api/v1/auth/login`.
-
----
-
-## Endpoints Summary
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/health` | Service health check |
-| POST | `/api/v1/auth/login` | Login, get JWT tokens |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
-| GET | `/api/v1/trains/search` | Search trains by source/dest |
-| GET | `/api/v1/trains/{train_no}/status` | Live running status |
-| GET | `/api/v1/trains/{train_no}/eta` | ML-predicted ETA |
-| GET | `/api/v1/stations/{code}` | Station details |
-| GET | `/api/v1/stations/search` | Station search |
-| GET | `/api/v1/network/status` | Network congestion overview |
-| GET | `/api/v1/network/routes/{id}/congestion` | Route-specific congestion |
-| WS | `/ws/trains/{train_no}/live` | Real-time train position stream |
-
----
-
-## Key Contract Types
-
-### `ETAResponse`
-
-The core response from `GET /api/v1/trains/{train_no}/eta`:
-
-```json
-{
-  "train_number": "12301",
-  "train_name": "Howrah Rajdhani Express",
-  "date": "2026-09-05",
-  "prediction_generated_at": "2026-09-05T14:30:00Z",
-  "model_version": "eta-xgboost-v1.2",
-  "overall_delay_minutes": 22,
-  "confidence_score": 0.87,
-  "remaining_stations": [
-    {
-      "station": { "code": "CNB", "name": "Kanpur Central" },
-      "scheduled_arrival": "2026-09-05T19:30:00+05:30",
-      "predicted_arrival": "2026-09-05T19:52:00+05:30",
-      "predicted_delay_minutes": 22,
-      "prediction_confidence": 0.91
-    }
-  ],
-  "delay_factors": [
-    {
-      "factor": "network_congestion",
-      "contribution_minutes": 15,
-      "description": "High congestion on NDLS-CNB corridor"
-    },
-    {
-      "factor": "historical_delay",
-      "contribution_minutes": 7,
-      "description": "Train historically runs 7 min late on Thursdays"
-    }
-  ]
-}
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/eta/model
 ```
 
----
+Train-data calls consume provider allowance on an uncached request. Resolve and
+reuse the same origin date across status, ETA and weather. Do not attach browser
+timers to directory/timetable endpoints or retry aggressively after quota errors.
 
-## Contract Change Process
+## Response fields clients must preserve
 
-> ⚠️ **Changing the API contract affects ALL teams.**
+| Field | Interpretation |
+| --- | --- |
+| `train_number`, `date` | Identity of the origin journey; reject mismatched responses |
+| `data_source` | `live`, `cached`, `database` or other explicitly identified source; not a model name |
+| Observation/retrieval timestamps | Source freshness; a new response time does not make an old report live |
+| `route` / `remaining_stations` | Ordered stops; keep route occurrence/sequence when a station repeats |
+| Per-stop `scheduled_arrival` | Timetable timestamp |
+| Per-stop `actual_arrival` | Confirmed observed arrival, when available; never infer it from an estimate |
+| Per-stop `predicted_arrival` | ETA when supported; can be missing |
+| Per-stop `prediction_method` | `inference`, `delay_adjusted`, `schedule_only` or an explicit unavailable/actual state; use the returned value |
+| `arrival_explanation` | Selected-stop status/title/summary/details plus available timing evidence |
+| Model metadata | Artifact status and historical evaluation, not a guarantee for the selected arrival |
 
-1. Raise the change in team discussion first
-2. Update `api-contract.yaml` with the proposed changes
-3. Mark breaking changes with a `[BREAKING]` comment
-4. Open a PR with `[Shared]` prefix tagging all team leads
-5. Version bump required for any breaking change (`v1` → `v2`)
-6. Update this document with examples
+Top-level `prediction_method` can summarize a mixed-method response. It does not
+override the selected stop's method. Null confidence is unknown; do not display
+an invented probability. Display IST times consistently and retain dates for
+multi-day journeys.
 
----
+### Delay and recovery evidence
 
-## WebSocket Protocol
+The explanation timing payload can include signed `current_delay_minutes`
+(positive = late, negative = early), `recovered_minutes`, the named recovery
+station span, `expected_recovery_minutes`, `expected_additional_delay_minutes`
+and a future-recovery status. These are different quantities: minutes already
+recovered are observed comparisons, while possible future recovery is an
+estimate only when qualified prediction evidence supports it.
 
-`/ws/trains/{train_number}/live`
+An observed longer halt or slower section can explain where time was lost.
+Neither confirms a signal failure, obstruction or weather cause. Missing
+evidence must remain unavailable/unconfirmed. See
+[the explanation service](../../backend/services/arrival_reasons.py) and
+[recovery tests](../../backend/tests/unit/test_arrival_recovery.py).
 
-**Message format (server → client):**
+## Failure behavior and compatibility
 
-```json
-{
-  "type": "position_update",
-  "train_number": "12301",
-  "timestamp": "2026-09-05T14:35:10Z",
-  "current_station": {
-    "code": "ALD",
-    "name": "Prayagraj Junction"
-  },
-  "delay_minutes": 18,
-  "next_station": {
-    "code": "CNB",
-    "name": "Kanpur Central"
-  },
-  "predicted_next_arrival": "2026-09-05T19:55:00+05:30"
-}
-```
+Input validation can return 422; missing trains/stations can return 404. Provider
+quota, network, stale-data and configuration failures may return unavailable
+responses or bounded cached data. Read the actual HTTP status/body and use
+controlled retry/backoff; do not classify all failures as “train not found.”
+
+Older `/api/*` endpoints include scenario, delay-DNA, recovery and propagation
+interfaces with mock/illustrative providers. `/api/v1/dashboard/*` also retains
+older sample summaries. They must not be used as verified live evidence.
+New passenger integrations should follow the versioned routes above, source
+adapters and focused tests rather than copying legacy examples.
+
+No universal response-envelope shape is promised: adapters normalize these
+routes in [the website](../../apps/web/web_app/src/services/passenger.ts) and
+[Flutter](../../apps/mobile/flutter_app/lib/core/services/train_repository.dart).
