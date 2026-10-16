@@ -16,20 +16,11 @@ class RealETAProvider(ETAProvider, DelayDNAProvider, RecoveryProvider):
     def predict_eta(
         self, train_number: str, journey_id: Optional[str], current_delay: int, schedule: list[dict]
     ) -> Optional[list[dict]]:
-        try:
-            from intelligence.train_eta.inference.predictor import ETAPredictor
-            predictor = ETAPredictor(model_version="eta-xgboost-v1")
-            
-            # extract current station if available in the kwargs or state? 
-            # predict_eta signature has train_number, journey_id, current_delay, schedule
-            # Let's pass current_station as None and let the predictor handle it based on schedule
-            current_station = None
-            date = "today" # placeholder
-            
-            return predictor.predict(train_number, current_station, current_delay, date, schedule)
-        except Exception as e:
-            logger.warning("RealETAProvider predict_eta failed: %s", e)
-            return None
+        # This legacy signature has no timestamped running observation. It cannot
+        # construct the causal inputs required by the trained station model.
+        # RailRadar's passenger adapter integrates services.eta_ml with verified
+        # dated events; the database-only path retains its explicit fallback.
+        return None
 
     def get_delay_dna(self, train_id: str) -> dict:
         try:

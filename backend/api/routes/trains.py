@@ -66,7 +66,8 @@ async def get_train_eta(
         None, description="Date for ETA prediction. Defaults to today."
     ),
 ):
-    """Get ML-predicted ETA for remaining stations on the train's route."""
+    """Get scoped trained ETA forecasts, with an explicit observed-delay fallback."""
     if railradar_passenger.configured():
-        return railradar_passenger.eta_response(await run_in_threadpool(railradar_passenger.fetch_live, train_number, date))
+        data = await run_in_threadpool(railradar_passenger.fetch_live, train_number, date)
+        return await run_in_threadpool(railradar_passenger.eta_response, data)
     return await _controller.get_train_eta(train_number, date)

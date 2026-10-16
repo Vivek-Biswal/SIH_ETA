@@ -3,6 +3,7 @@ import httpx
 import pytest
 from services import railradar_requests as requests
 from services import railradar_passenger as rail
+from services import eta_observations
 
 @pytest.fixture
 def cache(monkeypatch, tmp_path):
@@ -17,6 +18,8 @@ def live():
 
 def test_status_then_dated_eta_uses_one_provider_request(cache,monkeypatch):
     calls=[]
+    snapshots=[]
+    monkeypatch.setattr(eta_observations,'record_observation',lambda data:snapshots.append(data))
     def get(*args,**kwargs):
         calls.append(kwargs)
         return httpx.Response(200,json={'success':True,'data':live()},request=httpx.Request('GET',args[0]))
@@ -24,6 +27,7 @@ def test_status_then_dated_eta_uses_one_provider_request(cache,monkeypatch):
     first=rail.fetch_live('12301',None)
     second=rail.fetch_live('12301',first['startDate'])
     assert first == second and len(calls) == 1
+    assert len(snapshots) == 1
 
 def test_stale_fallback_does_not_generate_live_eta(cache,monkeypatch):
     clock=[1000.0]

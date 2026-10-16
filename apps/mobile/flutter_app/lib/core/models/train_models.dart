@@ -148,10 +148,12 @@ class StationPrediction {
   final String? scheduledArrival;
   final String? predictedArrival;
   final int? predictedDelayMinutes;
+  final String? predictionMethod;
   StationPrediction.fromJson(Map<String, dynamic> json)
     : station = stationFrom(json['station']),
       scheduledArrival = json['scheduled_arrival'] as String?,
       predictedArrival = json['predicted_arrival'] as String?,
+      predictionMethod = json['prediction_method'] as String?,
       predictedDelayMinutes = (json['predicted_delay_minutes'] as num?)
           ?.toInt();
 }
@@ -167,15 +169,49 @@ class DelayFactor {
       description = json['description'] as String? ?? '';
 }
 
+class EtaValidation {
+  final double? maeMinutes;
+  final double? baselineMaeMinutes;
+  final double? rmseMinutes;
+  final int? testJourneys;
+  static double? _metric(dynamic value) =>
+      value is num && value.isFinite && value >= 0 ? value.toDouble() : null;
+  EtaValidation.fromJson(Map<String, dynamic> json)
+    : maeMinutes = _metric(json['mae_minutes']),
+      baselineMaeMinutes = _metric(json['baseline_mae_minutes']),
+      rmseMinutes = _metric(json['rmse_minutes']),
+      testJourneys = json['test_journeys'] is int && json['test_journeys'] > 0
+          ? json['test_journeys'] as int
+          : null;
+}
+
+class EtaModelMetadata {
+  final String status;
+  final String? reason;
+  final String? name;
+  final String? trainingCutoff;
+  final EtaValidation? validation;
+  EtaModelMetadata.fromJson(Map<String, dynamic> json)
+    : status = json['status'] as String? ?? 'unknown',
+      reason = json['reason'] as String?,
+      name = json['name'] as String?,
+      trainingCutoff = json['training_cutoff'] as String?,
+      validation = json['validation'] is Map<String, dynamic>
+          ? EtaValidation.fromJson(json['validation'] as Map<String, dynamic>)
+          : null;
+}
+
 class ETAModel {
   final String? explanation;
   final String trainNumber;
   final String trainName;
   final String? date;
   final String? generatedAt;
+  final String? observationTimestamp;
   final String? source;
   final String method;
   final String? modelVersion;
+  final EtaModelMetadata? modelMetadata;
   final List<StationPrediction> remainingStations;
   final List<DelayFactor> delayFactors;
   ETAModel.fromJson(Map<String, dynamic> json)
@@ -184,9 +220,15 @@ class ETAModel {
       trainName = requiredText(json, 'train_name'),
       date = json['date'] as String?,
       generatedAt = json['prediction_generated_at'] as String?,
+      observationTimestamp = json['observation_timestamp'] as String?,
       source = json['data_source'] as String?,
       method = json['prediction_method'] as String? ?? 'unknown',
       modelVersion = json['model_version'] as String?,
+      modelMetadata = json['model_metadata'] is Map<String, dynamic>
+          ? EtaModelMetadata.fromJson(
+              json['model_metadata'] as Map<String, dynamic>,
+            )
+          : null,
       remainingStations = jsonList(
         json['remaining_stations'],
         StationPrediction.fromJson,
@@ -202,7 +244,7 @@ class ETAModel {
     'schedule_only' => 'Schedule only · adjusted ETA unavailable',
     'delay_adjusted' => 'Observed-delay estimate',
     'stored' => 'Stored prediction',
-    'inference' => 'Arrival estimate',
+    'inference' => 'Trained model estimate',
     _ => 'Prediction method unverified',
   };
 }

@@ -1,0 +1,77 @@
+{
+  "repository": "yadavsaurabh/indian-railways-runs",
+  "revision": "d131017ee61b65681a1908025b93813169e8fb8f",
+  "dataset_card": "https://huggingface.co/datasets/yadavsaurabh/indian-railways-runs/blob/d131017ee61b65681a1908025b93813169e8fb8f/README.md",
+  "declared_license": "GPL-3.0",
+  "publisher": "yadavsaurabh (independent third-party collection)",
+  "publisher_described_origin": "Public live_status cache behind whereismytrain.in, one request per train per day",
+  "imported_at": "2026-10-15T18:10:18.338533+00:00",
+  "files": [
+    {
+      "train_number": "12423",
+      "url": "https://huggingface.co/datasets/yadavsaurabh/indian-railways-runs/resolve/d131017ee61b65681a1908025b93813169e8fb8f/trains/12423.csv",
+      "local_path": "data\\raw\\eta_public_history\\d131017ee61b65681a1908025b93813169e8fb8f\\12423.csv",
+      "bytes": 2039338,
+      "sha256": "a76e964d4a3be9f667ecd212055c7ded40e8f33663cd750f5b6e057903ad7eb0",
+      "counts": {
+        "raw_rows": 10764,
+        "unreported": 1470,
+        "duplicate_rows": 47,
+        "conflicting_event_keys": 0,
+        "retained_events": 9247
+      },
+      "journeys": 412,
+      "journey_date_start": "2020-02-27",
+      "journey_date_end": "2026-08-31",
+      "stations": 33
+    },
+    {
+      "train_number": "12303",
+      "url": "https://huggingface.co/datasets/yadavsaurabh/indian-railways-runs/resolve/d131017ee61b65681a1908025b93813169e8fb8f/trains/12303.csv",
+      "local_path": "data\\raw\\eta_public_history\\d131017ee61b65681a1908025b93813169e8fb8f\\12303.csv",
+      "bytes": 4394398,
+      "sha256": "0f0c5e885c4d7878f5bdab3cb9541a1dbb49ab14f06f7895c7eacac351c00649",
+      "counts": {
+        "raw_rows": 24933,
+        "unreported": 4784,
+        "missing_or_unconfirmed_arrival": 7,
+        "duplicate_rows": 71,
+        "conflicting_event_keys": 0,
+        "retained_events": 20071
+      },
+      "journeys": 956,
+      "journey_date_start": "2020-01-04",
+      "journey_date_end": "2026-09-01",
+      "stations": 32
+    },
+    {
+      "train_number": "12624",
+      "url": "https://huggingface.co/datasets/yadavsaurabh/indian-railways-runs/resolve/d131017ee61b65681a1908025b93813169e8fb8f/trains/12624.csv",
+      "local_path": "data\\raw\\eta_public_history\\d131017ee61b65681a1908025b93813169e8fb8f\\12624.csv",
+      "bytes": 7433894,
+      "sha256": "b1fe3df3bf6678d001fb34c8010d4733750089b7b7725bcbb3c615e41e209ee1",
+      "counts": {
+        "raw_rows": 40779,
+        "unreported": 6722,
+        "duplicate_rows": 124,
+        "conflicting_event_keys": 0,
+        "retained_events": 33933
+      },
+      "journeys": 1766,
+      "journey_date_start": "2020-01-01",
+      "journey_date_end": "2026-08-31",
+      "stations": 23
+    }
+  ],
+  "canonical_events": 63251,
+  "output_sha256": "67797696f0d0b8af6425d8ca54673097100a55d477603fb835fcbbb2e64f7160",
+  "limitations": [
+    "Third-party source records, not independently audited official railway ground truth.",
+    "A bounded three-train pilot by default; does not establish nationwide accuracy.",
+    "Incomplete and uneven reporting; timetable and operating conditions changed over the covered years.",
+    "Source delay fields clip early arrivals; training must derive labels from dated actual and scheduled timestamps.",
+    "Reported time may describe arrival while departure was populated later. Departure features require a later as-of landmark.",
+    "Coordinates identify stations. Continuous GPS, speed, signal waits, weather and track occupancy are unavailable.",
+    "Raw data and canonical event records are excluded from source control; this manifest preserves attribution and hashes."
+  ]
+}

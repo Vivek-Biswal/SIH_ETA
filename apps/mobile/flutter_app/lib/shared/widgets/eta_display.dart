@@ -21,6 +21,7 @@ class EtaDisplay extends StatelessWidget {
   final String? scheduledTime, predictedTime, actualTime;
   final int? delayMinutes, predictedDelayMinutes;
   final String method;
+  final String? stationMethod;
   final ETAModel? evidence;
   const EtaDisplay({
     super.key,
@@ -31,6 +32,7 @@ class EtaDisplay extends StatelessWidget {
     this.delayMinutes,
     this.predictedDelayMinutes,
     required this.method,
+    this.stationMethod,
     this.evidence,
   });
   @override
@@ -129,10 +131,20 @@ class EtaDisplay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text('Method: $method'),
+                      Text(
+                        'Method: ${switch (stationMethod) {
+                          'inference' => 'Trained model estimate',
+                          'delay_adjusted' => 'Observed-delay estimate',
+                          'schedule_only' => 'Timetable only',
+                          _ => method,
+                        }}',
+                      ),
                       const SizedBox(height: 12),
                       Text(
-                        evidence?.explanation ??
+                        (stationMethod == 'delay_adjusted' &&
+                                    evidence?.method == 'inference'
+                                ? 'This stop uses its scheduled arrival plus the latest reported delay because it is outside the trained model’s coverage. The estimate assumes that delay continues.'
+                                : evidence?.explanation) ??
                             switch (evidence?.method) {
                               'delay_adjusted' =>
                                 'Scheduled arrival plus the latest reported running delay. This estimate assumes the delay persists; it does not assume recovery, congestion or weather effects.',
@@ -147,11 +159,66 @@ class EtaDisplay extends StatelessWidget {
                             },
                         style: const TextStyle(height: 1.5),
                       ),
+                      if (evidence?.modelMetadata case final metadata?) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          'Model status: ${metadata.status.replaceAll('_', ' ')}',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        if (metadata.reason != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            metadata.reason!,
+                            style: const TextStyle(height: 1.5),
+                          ),
+                        ],
+                        if (metadata.name != null)
+                          Text('Model: ${metadata.name}'),
+                        if (metadata.trainingCutoff != null)
+                          Text(
+                            'Training data through: ${metadata.trainingCutoff}',
+                          ),
+                        if (metadata.validation case final validation?) ...[
+                          if (validation.maeMinutes != null ||
+                              validation.rmseMinutes != null) ...[
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Historical validation',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            if (validation.maeMinutes != null)
+                              Text(
+                                'Average absolute error: ${validation.maeMinutes!.toStringAsFixed(1)} min',
+                              ),
+                            if (validation.baselineMaeMinutes != null)
+                              Text(
+                                'Previous approach: ${validation.baselineMaeMinutes!.toStringAsFixed(1)} min average absolute error',
+                              ),
+                            if (validation.rmseMinutes != null)
+                              Text(
+                                'RMSE: ${validation.rmseMinutes!.toStringAsFixed(1)} min',
+                              ),
+                            if (validation.testJourneys != null)
+                              Text(
+                                'Evaluated on ${validation.testJourneys} held-out journeys.',
+                              ),
+                            const Text(
+                              'These results describe past test journeys; the error for this arrival can differ.',
+                              style: TextStyle(height: 1.5),
+                            ),
+                          ],
+                        ],
+                      ],
                       const SizedBox(height: 16),
+                      Text(
+                        'Observation: ${displayTime(evidence?.observationTimestamp)}',
+                      ),
                       Text(
                         'Prediction generated: ${displayTime(evidence?.generatedAt)}',
                       ),
                       Text('Source: ${sourceLabel(evidence?.source)}'),
+                      if (evidence?.modelVersion != null)
+                        Text('Version: ${evidence!.modelVersion}'),
                       const SizedBox(height: 16),
                       const Text(
                         'Reported evidence',

@@ -5,7 +5,36 @@ import { DelayExamples } from './DelayExamples';
 import { EtaFeedback } from './EtaFeedback';
 import { IncidentReport } from './IncidentReport';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
-import { delayLabel, loadJourney, passing, time, usablePrediction, type Journey, type Stop } from '@/services/passenger';
+import { delayLabel, loadJourney, passing, time, usablePrediction, type ETA, type Journey, type Stop } from '@/services/passenger';
+
+function PredictionEvidence({ eta, observed, stationMethod }: { eta: ETA | null; observed?: string; stationMethod?: string }) {
+  const metadata = eta?.model_metadata;
+  const validation = metadata?.validation;
+  const metric = (value?: number) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? `${value.toFixed(1)} min` : null;
+  const mae = metric(validation?.mae_minutes), baseline = metric(validation?.baseline_mae_minutes), rmse = metric(validation?.rmse_minutes);
+  const selectedMethod = stationMethod || eta?.prediction_method;
+  const method = selectedMethod === 'inference' ? 'Trained model estimate' : selectedMethod === 'delay_adjusted' ? 'Observed-delay estimate' : selectedMethod === 'stored' ? 'Stored prediction' : 'Timetable only';
+  return <div className="space-y-3 leading-6">
+    <p className="font-medium text-foreground">{method}</p>
+    <p>{selectedMethod === 'delay_adjusted' && eta?.prediction_method === 'inference' ? 'This stop uses its scheduled arrival plus the latest reported delay because it is outside the trained model’s coverage. The estimate assumes that delay continues.' : eta?.explanation || 'An arrival estimate and its supporting evidence are currently unavailable.'}</p>
+    {metadata ? <div className="rounded-xl border border-border bg-background p-4 space-y-2">
+      <p className="font-medium text-foreground">Model status: {metadata.status.replaceAll('_', ' ')}</p>
+      {metadata.reason ? <p>{metadata.reason}</p> : null}
+      {metadata.name ? <p>Model: {metadata.name}</p> : null}
+      {metadata.training_cutoff ? <p>Training data through: {metadata.training_cutoff}</p> : null}
+      {mae || rmse ? <div className="space-y-1 border-t border-border pt-3">
+        <p className="font-medium text-foreground">Historical validation</p>
+        {mae ? <p>Average absolute error: {mae}{baseline ? ` · Previous approach: ${baseline}` : ''}</p> : null}
+        {rmse ? <p>RMSE: {rmse}</p> : null}
+        {typeof validation?.test_journeys === 'number' && Number.isInteger(validation.test_journeys) && validation.test_journeys > 0 ? <p>Evaluated on {validation.test_journeys.toLocaleString('en-IN')} held-out journeys.</p> : null}
+        <p>These results describe past test journeys; the error for this arrival can differ.</p>
+      </div> : null}
+    </div> : null}
+    <p>Observation: {time(observed)}. Prediction generated: {time(eta?.prediction_generated_at)}.</p>
+    {eta?.model_version ? <p>Version: {eta.model_version}</p> : null}
+    <p>Signal holds, congestion and weather are only identified as causes when supported by verified evidence.</p>
+  </div>;
+}
 
 export function PassengerJourney({ number, date = '', target = '', compact = false, autoRefresh = false, suppliedJourney, refreshing = false, onRefresh }: { number: string; date?: string; target?: string; compact?: boolean; autoRefresh?: boolean; suppliedJourney?: Journey; refreshing?: boolean; onRefresh?: () => void }) {
   const [localJourney, setJourney] = useState<Journey | null>(null), [error, setError] = useState('');
@@ -75,7 +104,8 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
             <div className="sm:border-l border-border sm:pl-6 space-y-4"><div><p className="text-sm text-muted-foreground">Scheduled arrival</p><p className="text-xl font-medium mt-1 tabular-nums">{time(prediction?.scheduled_arrival || stop?.scheduled_arrival)}</p></div><div><p className="text-sm text-muted-foreground">Last reported running delay</p><p className="font-medium mt-1">{typeof status?.last_known_location?.delay_minutes === 'number' ? `${status.last_known_location.delay_minutes} min` : 'Unavailable'}</p></div></div>
           </div>
           <details className="mt-7 rounded-xl border border-border p-4"><summary className="cursor-pointer text-primary font-semibold">Why this ETA?</summary><div className="pt-1 text-sm text-muted-foreground space-y-2">
-            <DelayExamples delayMinutes={prediction?.predicted_delay_minutes ?? status?.last_known_location?.delay_minutes} />
+            <PredictionEvidence eta={eta} observed={observed} stationMethod={prediction?.prediction_method} />
+            <DelayExamples />
           </div></details>
           <ArrivalWeather number={number} date={status?.date || date} station={destination} predicted={hasPrediction ? prediction?.predicted_arrival : null} />
           <EtaFeedback

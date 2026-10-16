@@ -192,28 +192,44 @@ def status_response(data, now=None):
 
 
 def eta_response(data, now=None):
+    from services import eta_ml
     now = now or datetime.now(timezone.utc)
     delay = data.get("delayMinutes")
     state = str(data.get("status", "")).lower().replace("_", "-")
     not_running = state in {"not-started", "cancelled", "canceled", "completed", "terminated"}
     usable = fresh(data, now) and type(delay) is int and not not_running
+    learned, metadata = eta_ml.predict(data, now) if usable else ({}, {
+        'status': 'fallback', 'reason': 'A fresh running observation is required before the trained model can be used.'})
     predictions = []
-    for row in data["route"]:
+    previous_estimate = None
+    for index, row in enumerate(data["route"]):
         scheduled = timestamp(row.get("scheduledArrival"))
         upcoming = row.get("status") == "upcoming" and not row.get("actualArrival")
         estimated = scheduled + timedelta(minutes=delay) if usable and scheduled and upcoming else None
+        method = 'delay_adjusted' if estimated else 'schedule_only'
+        if usable and upcoming and scheduled and index in learned:
+            estimated = learned[index]['arrival']
+            method = 'inference'
+        # Preserve route order even when individually learned stop forecasts vary.
+        if estimated and previous_estimate and estimated < previous_estimate:
+            estimated = previous_estimate
         if estimated and estimated < now:
             estimated = None
+        if estimated:
+            previous_estimate = estimated
         predictions.append({"station": station(row), "scheduled_arrival": row.get("scheduledArrival"),
                             "predicted_arrival": estimated.isoformat() if estimated else None,
-                            "predicted_delay_minutes": delay if estimated else None, "prediction_confidence": None})
+                            "predicted_delay_minutes": round((estimated-scheduled).total_seconds()/60) if estimated else None,
+                            "prediction_method": method if estimated else 'schedule_only', "prediction_confidence": None})
     adjusted = any(row["predicted_arrival"] for row in predictions)
+    inferred = any(row['prediction_method'] == 'inference' for row in predictions)
     return {
         "train_number": str(data["trainNumber"]), "train_name": data["trainName"], "date": data["startDate"],
         "data_source": "live" if fresh(data, now) else "cached",
-        "prediction_method": "delay_adjusted" if adjusted else "schedule_only",
-        "model_version": "observed-delay-baseline-v1", "prediction_generated_at": now.isoformat() if adjusted else None,
+        "prediction_method": "inference" if inferred else "delay_adjusted" if adjusted else "schedule_only",
+        "model_version": metadata.get('name') if inferred else "observed-delay-baseline-v1",
+        "model_metadata": metadata, "prediction_generated_at": now.isoformat() if adjusted else None,
         "remaining_stations": predictions, "delay_factors": [], "confidence_score": None, "overall_delay_minutes": delay,
-        "explanation": "Scheduled arrival plus the latest reported running delay. Assumes the delay persists; no recovery or additional disruption is inferred." if adjusted else ("This journey has not started or is no longer running. The timetable is available, but a live arrival estimate cannot be calculated." if not_running else "No fresh running observation and upcoming dated arrival are available for an adjusted prediction."),
+        "explanation": ("A trained gradient-boosted model forecasts how delay changes between the latest confirmed station event and upcoming stops. It uses earlier delays, scheduled journey time, distance, station identity and observed stoppage duration. Stops outside its trained coverage use the reported-delay baseline. Arrival times are kept in route order. Weather, signal holds and congestion are not inferred as causes." if inferred else "Scheduled arrival plus the latest reported running delay. Assumes the delay persists; no recovery or additional disruption is inferred." if adjusted else ("This journey has not started or is no longer running. The timetable is available, but a live arrival estimate cannot be calculated." if not_running else "No fresh running observation and upcoming dated arrival are available for an adjusted prediction.")),
         "observation_timestamp": data.get("lastUpdatedAt"),
     }

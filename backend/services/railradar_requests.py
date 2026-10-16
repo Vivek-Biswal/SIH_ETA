@@ -136,6 +136,11 @@ class RequestManager:
                     raise ValueError('Invalid provider envelope')
                 if validate:
                     validate(data)
+                if path.endswith('/live') and isinstance(data, dict):
+                    # Reuse a successful fetch. No collection from cache hits,
+                    # quota fallbacks, searches or separate provider requests.
+                    from services.eta_observations import record_observation
+                    record_observation(data)
                 return data
             except HTTPException:
                 raise

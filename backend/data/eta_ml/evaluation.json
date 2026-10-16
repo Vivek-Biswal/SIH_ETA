@@ -1,0 +1,399 @@
+{
+  "dataset": {
+    "samples": 493955,
+    "journeys": 1324,
+    "since": "2025-01-01",
+    "rejections": {
+      "late_report_landmarks": 2135,
+      "implausible_target_delay": 5
+    }
+  },
+  "split_method": "complete journey dates, chronological train/validation/calibration/test, 3-day embargo and label-time purge",
+  "evaluation": {
+    "train": {
+      "model": {
+        "mae_minutes": 15.203875372719088,
+        "rmse_minutes": 30.92985208698539,
+        "p90_absolute_error_minutes": 29.833448769087163,
+        "samples": 239145
+      },
+      "delay_adjusted": {
+        "mae_minutes": 20.647661460620125,
+        "rmse_minutes": 36.234124833683246,
+        "p90_absolute_error_minutes": 43.0,
+        "samples": 239145
+      },
+      "schedule": {
+        "mae_minutes": 27.74083505822827,
+        "rmse_minutes": 51.56127045979582,
+        "p90_absolute_error_minutes": 59.0,
+        "samples": 239145
+      },
+      "journeys": 632,
+      "date_start": "2025-01-01",
+      "date_end": "2025-11-28"
+    },
+    "validation": {
+      "model": {
+        "mae_minutes": 23.380255289847966,
+        "rmse_minutes": 52.18651944266162,
+        "p90_absolute_error_minutes": 47.179241156025014,
+        "samples": 82952
+      },
+      "delay_adjusted": {
+        "mae_minutes": 27.06034815314881,
+        "rmse_minutes": 55.054159982617556,
+        "p90_absolute_error_minutes": 52.0,
+        "samples": 82952
+      },
+      "schedule": {
+        "mae_minutes": 44.71860835181792,
+        "rmse_minutes": 87.12905914912093,
+        "p90_absolute_error_minutes": 99.0,
+        "samples": 82952
+      },
+      "journeys": 219,
+      "date_start": "2025-12-02",
+      "date_end": "2026-02-27"
+    },
+    "calibration": {
+      "model": {
+        "mae_minutes": 16.182360566850065,
+        "rmse_minutes": 28.854104293773407,
+        "p90_absolute_error_minutes": 34.74038158337438,
+        "samples": 81815
+      },
+      "delay_adjusted": {
+        "mae_minutes": 20.0412882723217,
+        "rmse_minutes": 31.584335128490036,
+        "p90_absolute_error_minutes": 43.0,
+        "samples": 81815
+      },
+      "schedule": {
+        "mae_minutes": 27.838024812076025,
+        "rmse_minutes": 46.251671184198024,
+        "p90_absolute_error_minutes": 68.0,
+        "samples": 81815
+      },
+      "journeys": 220,
+      "date_start": "2026-03-03",
+      "date_end": "2026-05-29"
+    },
+    "test": {
+      "model": {
+        "mae_minutes": 15.342912808249578,
+        "rmse_minutes": 27.12942052013918,
+        "p90_absolute_error_minutes": 31.66918930848136,
+        "samples": 81624
+      },
+      "delay_adjusted": {
+        "mae_minutes": 18.95312653141233,
+        "rmse_minutes": 30.010187267026826,
+        "p90_absolute_error_minutes": 39.0,
+        "samples": 81624
+      },
+      "schedule": {
+        "mae_minutes": 41.00706899931393,
+        "rmse_minutes": 78.80196923483359,
+        "p90_absolute_error_minutes": 105.0,
+        "samples": 81624
+      },
+      "journeys": 229,
+      "date_start": "2026-06-02",
+      "date_end": "2026-09-01",
+      "interval_coverage": 0.9162011173184358
+    }
+  },
+  "horizon_metrics": {
+    "under_1h": {
+      "model": {
+        "mae_minutes": 6.302275223832182,
+        "rmse_minutes": 8.719754870418493,
+        "p90_absolute_error_minutes": 12.896106268458709,
+        "samples": 7714
+      },
+      "delay_adjusted": {
+        "mae_minutes": 6.51309307752139,
+        "rmse_minutes": 9.226642443230034,
+        "p90_absolute_error_minutes": 13.0,
+        "samples": 7714
+      }
+    },
+    "1_to_3h": {
+      "model": {
+        "mae_minutes": 9.977738648829755,
+        "rmse_minutes": 15.041742828573577,
+        "p90_absolute_error_minutes": 20.24480772659043,
+        "samples": 16731
+      },
+      "delay_adjusted": {
+        "mae_minutes": 14.35491004721774,
+        "rmse_minutes": 19.232083871148653,
+        "p90_absolute_error_minutes": 28.0,
+        "samples": 16731
+      }
+    },
+    "3_to_6h": {
+      "model": {
+        "mae_minutes": 13.616238764941453,
+        "rmse_minutes": 21.701659019474388,
+        "p90_absolute_error_minutes": 28.380249855624633,
+        "samples": 18019
+      },
+      "delay_adjusted": {
+        "mae_minutes": 17.61324157833398,
+        "rmse_minutes": 25.228060165249058,
+        "p90_absolute_error_minutes": 37.0,
+        "samples": 18019
+      }
+    },
+    "6_to_24h": {
+      "model": {
+        "mae_minutes": 20.210562112994673,
+        "rmse_minutes": 34.72401835094005,
+        "p90_absolute_error_minutes": 40.251804413487676,
+        "samples": 39160
+      },
+      "delay_adjusted": {
+        "mae_minutes": 23.984754851889683,
+        "rmse_minutes": 37.54403985319731,
+        "p90_absolute_error_minutes": 48.0,
+        "samples": 39160
+      }
+    }
+  },
+  "validation_horizon_metrics": {
+    "under_1h": {
+      "model": {
+        "mae_minutes": 6.420087464610201,
+        "rmse_minutes": 9.46147323643317,
+        "p90_absolute_error_minutes": 13.065170416429623,
+        "samples": 7356
+      },
+      "delay_adjusted": {
+        "mae_minutes": 6.724714518760195,
+        "rmse_minutes": 10.354923593724154,
+        "p90_absolute_error_minutes": 14.0,
+        "samples": 7356
+      }
+    },
+    "1_to_3h": {
+      "model": {
+        "mae_minutes": 11.150370943858743,
+        "rmse_minutes": 19.834824666294576,
+        "p90_absolute_error_minutes": 23.21043632334045,
+        "samples": 16325
+      },
+      "delay_adjusted": {
+        "mae_minutes": 15.836753445635528,
+        "rmse_minutes": 24.13513892827819,
+        "p90_absolute_error_minutes": 31.0,
+        "samples": 16325
+      }
+    },
+    "3_to_6h": {
+      "model": {
+        "mae_minutes": 15.373628221545053,
+        "rmse_minutes": 29.652919425206974,
+        "p90_absolute_error_minutes": 31.79687092230372,
+        "samples": 17744
+      },
+      "delay_adjusted": {
+        "mae_minutes": 19.913210099188458,
+        "rmse_minutes": 33.80406200081188,
+        "p90_absolute_error_minutes": 41.0,
+        "samples": 17744
+      }
+    },
+    "6_to_24h": {
+      "model": {
+        "mae_minutes": 34.61346373665823,
+        "rmse_minutes": 69.95674209288427,
+        "p90_absolute_error_minutes": 70.49737424343103,
+        "samples": 41527
+      },
+      "delay_adjusted": {
+        "mae_minutes": 38.12863919859369,
+        "rmse_minutes": 72.92613560063504,
+        "p90_absolute_error_minutes": 71.0,
+        "samples": 41527
+      }
+    }
+  },
+  "portable_max_absolute_difference": 0.0,
+  "candidates": [
+    {
+      "max_depth": 2,
+      "n_estimators": 80,
+      "validation": {
+        "mae_minutes": 24.51344856742343,
+        "rmse_minutes": 53.77254217051018,
+        "p90_absolute_error_minutes": 48.11778896152049,
+        "samples": 82952
+      },
+      "seconds": 61.75
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 120,
+      "validation": {
+        "mae_minutes": 23.583950995771737,
+        "rmse_minutes": 52.592766013316705,
+        "p90_absolute_error_minutes": 47.22243257237162,
+        "samples": 82952
+      },
+      "seconds": 182.64100000006147
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "validation": {
+        "mae_minutes": 23.380255289847966,
+        "rmse_minutes": 52.18651944266162,
+        "p90_absolute_error_minutes": 47.179241156025014,
+        "samples": 82952
+      },
+      "seconds": 215.375
+    }
+  ],
+  "promotion_passed": true,
+  "journey_mae_improvement_95pct_ci": [
+    2.8925113403176788,
+    3.8808265866049436
+  ],
+  "interval_radius_minutes": 34.7436505708914,
+  "limitations": [
+    "3-train pilot, not network-wide accuracy",
+    "Third-party reported station times, not railway-certified ground truth",
+    "Retrospective station-landmark replay, not prospective RailRadar validation",
+    "No historical weather, GPS, speed, congestion, signal or track-clearance inputs",
+    "Source routes/timetables and provider reporting practices may differ from current RailRadar"
+  ],
+  "serving_policy_evaluation": {
+    "validation": {
+      "model_with_fallback": {
+        "mae_minutes": 24.408915544015233,
+        "rmse_minutes": 52.98788403028895,
+        "p90_absolute_error_minutes": 49.0,
+        "samples": 82952
+      },
+      "delay_adjusted": {
+        "mae_minutes": 27.06034815314881,
+        "rmse_minutes": 55.054159982617556,
+        "p90_absolute_error_minutes": 52.0,
+        "samples": 82952
+      },
+      "ml_covered_samples": 53951,
+      "coverage_fraction": 0.6503881762947247,
+      "by_train": {
+        "12303": {
+          "model_with_fallback": {
+            "mae_minutes": 36.2631540825421,
+            "rmse_minutes": 66.75895953818574,
+            "p90_absolute_error_minutes": 75.0,
+            "samples": 16885
+          },
+          "delay_adjusted": {
+            "mae_minutes": 39.95350903168493,
+            "rmse_minutes": 71.98417759552605,
+            "p90_absolute_error_minutes": 83.0,
+            "samples": 16885
+          }
+        },
+        "12423": {
+          "model_with_fallback": {
+            "mae_minutes": 31.634989138532188,
+            "rmse_minutes": 65.24719633632003,
+            "p90_absolute_error_minutes": 60.0,
+            "samples": 35696
+          },
+          "delay_adjusted": {
+            "mae_minutes": 33.81574966382788,
+            "rmse_minutes": 66.14726691248124,
+            "p90_absolute_error_minutes": 62.0,
+            "samples": 35696
+          }
+        },
+        "12624": {
+          "model_with_fallback": {
+            "mae_minutes": 9.325423372111002,
+            "rmse_minutes": 13.685633961077151,
+            "p90_absolute_error_minutes": 20.02266154481122,
+            "samples": 30371
+          },
+          "delay_adjusted": {
+            "mae_minutes": 11.952454644232985,
+            "rmse_minutes": 15.968520446606691,
+            "p90_absolute_error_minutes": 25.0,
+            "samples": 30371
+          }
+        }
+      }
+    },
+    "test": {
+      "model_with_fallback": {
+        "mae_minutes": 15.390675723906517,
+        "rmse_minutes": 27.179921212148574,
+        "p90_absolute_error_minutes": 31.869124656369998,
+        "samples": 81624
+      },
+      "delay_adjusted": {
+        "mae_minutes": 18.95312653141233,
+        "rmse_minutes": 30.010187267026826,
+        "p90_absolute_error_minutes": 39.0,
+        "samples": 81624
+      },
+      "ml_covered_samples": 79088,
+      "coverage_fraction": 0.9689307066549054,
+      "by_train": {
+        "12303": {
+          "model_with_fallback": {
+            "mae_minutes": 18.82561477266896,
+            "rmse_minutes": 30.516918664367147,
+            "p90_absolute_error_minutes": 37.70577949662319,
+            "samples": 17159
+          },
+          "delay_adjusted": {
+            "mae_minutes": 24.554985721778657,
+            "rmse_minutes": 36.43615500053847,
+            "p90_absolute_error_minutes": 52.0,
+            "samples": 17159
+          }
+        },
+        "12423": {
+          "model_with_fallback": {
+            "mae_minutes": 19.61944921632237,
+            "rmse_minutes": 34.75951831936759,
+            "p90_absolute_error_minutes": 40.5863141495201,
+            "samples": 32621
+          },
+          "delay_adjusted": {
+            "mae_minutes": 22.934398087121792,
+            "rmse_minutes": 36.40622600670293,
+            "p90_absolute_error_minutes": 45.0,
+            "samples": 32621
+          }
+        },
+        "12624": {
+          "model_with_fallback": {
+            "mae_minutes": 9.207817438709545,
+            "rmse_minutes": 12.41251774466916,
+            "p90_absolute_error_minutes": 19.481546465516235,
+            "samples": 31844
+          },
+          "delay_adjusted": {
+            "mae_minutes": 11.856173847506595,
+            "rmse_minutes": 15.341666313858092,
+            "p90_absolute_error_minutes": 25.0,
+            "samples": 31844
+          }
+        }
+      }
+    }
+  },
+  "serving_policy_passed": true,
+  "serving_policy_limitations": [
+    "Station-landmark replay only; not continuous GPS or prospective RailRadar accuracy.",
+    "Route-order clamping and current-location agreement are not replayed because the historical source lacks equivalent snapshots."
+  ]
+}

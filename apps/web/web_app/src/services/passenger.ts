@@ -21,10 +21,15 @@ export type Status = {
   last_known_location?: { updated_at?: string; delay_minutes?: number | null; latitude?: number; longitude?: number; position_source?: string } | null;
 };
 export type Prediction = { station: Station | null; scheduled_arrival?: string | null;
-  predicted_arrival?: string | null; predicted_delay_minutes?: number | null };
+  predicted_arrival?: string | null; predicted_delay_minutes?: number | null; prediction_method?: string };
+export type ETAModelMetadata = {
+  status: string; reason?: string; name?: string; training_cutoff?: string;
+  validation?: { mae_minutes?: number; baseline_mae_minutes?: number; rmse_minutes?: number; test_journeys?: number };
+};
 export type ETA = {
   train_number: string; date: string; data_source: string; prediction_method: string;
   prediction_generated_at?: string | null; observation_timestamp?: string | null;
+  model_version?: string; model_metadata?: ETAModelMetadata;
   explanation?: string; remaining_stations: Prediction[];
 };
 export type SearchTrain = { train_number: string; train_name: string; departure_time?: string | null;

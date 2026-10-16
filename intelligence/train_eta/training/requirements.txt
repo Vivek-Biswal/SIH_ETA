@@ -1,0 +1,6 @@
+# Offline training only. Production inference uses the exported JSON trees.
+numpy==2.3.3
+scipy==1.16.2
+scikit-learn==1.7.2
+joblib==1.6.0
+threadpoolctl==3.7.0

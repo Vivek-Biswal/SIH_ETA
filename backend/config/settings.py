@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     RAILRADAR_CACHE_PATH: str = "data/railradar-cache.sqlite3"
     RAILRADAR_LIVE_CACHE_SECONDS: int = Field(default=120, ge=30, le=300)
     RAILRADAR_QUOTA_COOLDOWN_SECONDS: int = Field(default=86400, ge=60, le=2678400)
+    ETA_MODEL_PATH: str = "data/eta_ml/model.json"
+    ETA_HISTORY_PATH: str = "data/eta-observations.sqlite3"
+    ETA_ML_ENABLED: bool = True
 
     @field_validator("RAILRADAR_API_KEYS")
     @classmethod

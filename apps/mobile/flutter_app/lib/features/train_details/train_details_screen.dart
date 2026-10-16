@@ -594,6 +594,7 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
                             predictedDelayMinutes:
                                 destination.prediction?.predictedDelayMinutes,
                             evidence: eta,
+                            stationMethod: destination.prediction?.predictionMethod,
                             method:
                                 eta?.methodLabel ?? 'Prediction unavailable',
                           ),
