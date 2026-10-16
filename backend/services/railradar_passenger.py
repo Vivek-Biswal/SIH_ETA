@@ -224,6 +224,7 @@ def eta_response(data, now=None):
                             'actualDeparture': actual_departure.isoformat() if actual_departure else None,
                             'status': skipped or row.get('status')})
     clean_data = {**data, 'route': clean_route}
+    timing_evidence = arrival_reasons.journey_timing(clean_data, now) if usable else None
     learned, metadata = eta_ml.predict(clean_data, now) if usable else ({}, {
         'status': 'fallback', 'reason': 'A fresh running observation is required before the trained model can be used.'})
     predictions = []
@@ -250,7 +251,7 @@ def eta_response(data, now=None):
                             "predicted_delay_minutes": round((estimated-scheduled).total_seconds()/60) if estimated else None,
                             "prediction_method": method if estimated else 'schedule_only', "prediction_confidence": None,
                             '_route_order_adjusted': order_adjusted}
-        prediction['arrival_explanation'] = arrival_reasons.explain_stop(clean_data, row, prediction, now, fresh(data, now), previous_row)
+        prediction['arrival_explanation'] = arrival_reasons.explain_stop(clean_data, row, prediction, now, fresh(data, now), previous_row, timing_evidence)
         prediction.pop('_route_order_adjusted')
         predictions.append(prediction)
         if estimated:

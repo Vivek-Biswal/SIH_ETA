@@ -148,11 +148,58 @@ class TrainStatus {
       route = jsonList(json['route'], RouteStop.fromJson);
 }
 
+class ArrivalTiming {
+  final int? currentDelayMinutes;
+  final int? recoveredMinutes;
+  final String? recoveryFromStation;
+  final String? recoveryToStation;
+  final int? expectedRecoveryMinutes;
+  final int? expectedAdditionalDelayMinutes;
+  final String futureRecoveryStatus;
+
+  const ArrivalTiming({
+    this.currentDelayMinutes,
+    this.recoveredMinutes,
+    this.recoveryFromStation,
+    this.recoveryToStation,
+    this.expectedRecoveryMinutes,
+    this.expectedAdditionalDelayMinutes,
+    this.futureRecoveryStatus = 'not_estimated',
+  });
+
+  static int? _minutes(dynamic value, {bool signed = false}) =>
+      value is num && value.isFinite && (signed || value >= 0)
+      ? value.round()
+      : null;
+  static String? _station(dynamic value) =>
+      value is String && value.trim().isNotEmpty ? value.trim() : null;
+
+  ArrivalTiming.fromJson(Map<String, dynamic> json)
+    : currentDelayMinutes = _minutes(
+        json['current_delay_minutes'],
+        signed: true,
+      ),
+      recoveredMinutes = _minutes(json['recovered_minutes']),
+      recoveryFromStation = _station(json['recovery_from_station']),
+      recoveryToStation = _station(json['recovery_to_station']),
+      expectedRecoveryMinutes = _minutes(json['expected_recovery_minutes']),
+      expectedAdditionalDelayMinutes = _minutes(
+        json['expected_additional_delay_minutes'],
+      ),
+      futureRecoveryStatus = switch (json['future_recovery_status']) {
+        'estimated' => 'estimated',
+        'route_order_adjusted' => 'route_order_adjusted',
+        'not_applicable' => 'not_applicable',
+        _ => 'not_estimated',
+      };
+}
+
 class ArrivalExplanation {
   final String status;
   final String title;
   final String summary;
   final List<String> details;
+  final ArrivalTiming? timing;
   ArrivalExplanation.fromJson(Map<String, dynamic> json)
     : status = json['status'] as String? ?? 'unavailable',
       title = json['title'] as String? ?? '',
@@ -160,7 +207,10 @@ class ArrivalExplanation {
       details = (json['details'] as List? ?? [])
           .whereType<String>()
           .where((value) => value.trim().isNotEmpty)
-          .toList();
+          .toList(),
+      timing = json['timing'] is Map<String, dynamic>
+          ? ArrivalTiming.fromJson(json['timing'])
+          : null;
 }
 
 class StationPrediction {

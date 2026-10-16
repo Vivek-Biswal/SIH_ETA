@@ -21,9 +21,18 @@ export type Status = {
   current_station?: Station | null; overall_delay_minutes?: number | null; route: Stop[];
   last_known_location?: { updated_at?: string; delay_minutes?: number | null; latitude?: number; longitude?: number; position_source?: string } | null;
 };
+export type ArrivalTiming = {
+  current_delay_minutes: number | null;
+  recovered_minutes: number | null;
+  recovery_from_station: string | null;
+  recovery_to_station: string | null;
+  expected_recovery_minutes: number | null;
+  expected_additional_delay_minutes: number | null;
+  future_recovery_status: 'estimated' | 'not_estimated' | 'route_order_adjusted' | 'not_applicable';
+};
 export type ArrivalExplanation = {
   status: 'on_time' | 'early' | 'delayed' | 'arrived' | 'unavailable' | 'not_started' | 'cancelled' | 'skipped';
-  title: string; summary: string; details: string[];
+  title: string; summary: string; details: string[]; timing?: ArrivalTiming;
 };
 export type Prediction = { station: Station | null; scheduled_arrival?: string | null;
   predicted_arrival?: string | null; predicted_delay_minutes?: number | null; prediction_method?: string;

@@ -109,7 +109,148 @@ def latest_report(data, now):
     return rows[0] if len(rows) == 1 else None
 
 
-def running_details(data, prediction, target, now, previous):
+def event(row, observed, now, data):
+    arrived, departed = confirmed_times(row, observed, now, data)
+    sa, sd = stamp(row.get('scheduledArrival')), stamp(row.get('scheduledDeparture'))
+    if skipped_kind(data, row):
+        return None
+    if departed and sd:
+        return {'row': row, 'actual': departed, 'scheduled': sd, 'kind': 'departure',
+                'delay': (departed-sd).total_seconds()/60}
+    if arrived and sa:
+        return {'row': row, 'actual': arrived, 'scheduled': sa, 'kind': 'arrival',
+                'delay': (arrived-sa).total_seconds()/60}
+    return None
+
+
+def journey_timing(data, now):
+    """Measured changes from this snapshot; no timetable slack is invented.
+
+    The current reported delay is compared with an earlier confirmed station
+    event. A current confirmed event, when present, must agree to the minute.
+    Future recovery is calculated separately from the selected stop forecast.
+    """
+    current_delay = number(data.get('delayMinutes'))
+    result = {'current_delay_minutes': round(current_delay) if current_delay is not None else None,
+              'recovered_minutes': None, 'recovery_from_station': None,
+              'recovery_to_station': None, '_details': [], '_cause': None}
+    current = latest_report(data, now)
+    route = data.get('route', [])
+    sequences = [r.get('sequence') for r in route]
+    if (current is None or current_delay is None or any(type(s) is not int for s in sequences)
+            or sequences != sorted(set(sequences))):
+        return result
+    index = next(i for i,r in enumerate(route) if r is current)
+    observed = stamp(data.get('lastUpdatedAt'))
+    if not observed or observed > now or skipped_kind(data, current):
+        return result
+    current_event = event(current, observed, now, data)
+    # Check every known arrival/departure, not only each stop's final event.
+    # Otherwise A departing after B arrived could falsely explain B's halt.
+    phases = []
+    for position,r in enumerate(route[:index+1]):
+        if skipped_kind(data,r):
+            continue
+        a,d = confirmed_times(r,observed,now,data)
+        for actual,scheduled in [(a,stamp(r.get('scheduledArrival'))),(d,stamp(r.get('scheduledDeparture')))]:
+            if actual:
+                phases.append((position,actual,scheduled))
+    coherent = all(a[1] <= b[1] and (a[0] == b[0] or a[1] < b[1])
+                   and (a[2] is None or b[2] is None or a[2] <= b[2])
+                   for a,b in zip(phases,phases[1:]))
+    if not coherent:
+        return result
+    earlier = [event(r, observed, now, data) for r in route[:index]]
+    earlier = [e for e in earlier if e]
+    anchor = earlier[-1] if earlier else None
+    arrived, departed = confirmed_times(current, observed, now, data)
+    sa, sd = stamp(current.get('scheduledArrival')), stamp(current.get('scheduledDeparture'))
+    # With no earlier station, a completed halt can still measure recovery.
+    if anchor is None and current.get('isHalt') is True and arrived and departed and sa and sd:
+        anchor = {'row': current, 'actual': arrived, 'scheduled': sa,
+                  'kind': 'arrival', 'delay': (arrived-sa).total_seconds()/60}
+    comparison_time = current_event['actual'] if current_event else observed
+    comparison_schedule = current_event['scheduled'] if current_event else None
+    comparable = (anchor is not None and anchor['actual'] < comparison_time
+                  and (comparison_schedule is None or anchor['scheduled'] < comparison_schedule)
+                  and all(a['actual'] < b['actual'] and a['scheduled'] < b['scheduled']
+                          for a,b in zip(earlier,earlier[1:]))
+                  and (current_event is None or round(current_event['delay']) == round(current_delay)))
+    if comparable:
+        before, after = max(0, round(anchor['delay'])), max(0, round(current_delay))
+        recovered = max(0, before-after)
+        result.update(recovered_minutes=recovered, recovery_from_station=name(anchor['row']),
+                      recovery_to_station=name(current))
+        if recovered:
+            where = f'during the stop at {name(current)}' if anchor['row'] is current else f'since {name(anchor["row"])}'
+            result['_details'].append(f'The train has already recovered {duration(recovered)} {where}; its reported delay changed from {relative(anchor["delay"])} to {relative(current_delay)}.')
+        elif after > before:
+            result['_details'].append(f'The train has lost {duration(after-before)} since {name(anchor["row"])}; it is now {relative(current_delay)}.')
+
+    if current_delay <= 0 or (departed and current_event and round(current_event['delay']) != round(current_delay)):
+        return result
+    # Longer stops explain added lateness, not the underlying operational cause.
+    if current.get('isHalt') is True and arrived and sa and sd and sd >= sa:
+        planned = (sd-sa).total_seconds()/60
+        if departed:
+            actual = (departed-arrived).total_seconds()/60
+            added = max(0,(departed-sd).total_seconds()/60)-max(0,(arrived-sa).total_seconds()/60)
+            if round(added) > 0 and round(actual-planned) > 0:
+                result['_cause'] = f'At {name(current)}, the train stopped for {duration(actual)} instead of the planned {duration(planned)}, adding {duration(added)} to its delay.'
+        elif state((data.get('currentLocation') or {}).get('status')) in {'arrived','at-station','halted','stopped'}:
+            elapsed = (observed-arrived).total_seconds()/60
+            added = max(0,(observed-sd).total_seconds()/60)-max(0,(arrived-sa).total_seconds()/60)
+            if round(added) > 0 and round(elapsed-planned) > 0:
+                result['_cause'] = f'At the latest update, the train had been at {name(current)} for at least {duration(elapsed)} (planned {duration(planned)}). This longer stop may be adding to the delay.'
+    # A reported location may be a passing point after the last halting station.
+    # Use only the latest completed halt, and only while its added lateness has
+    # not been fully recovered in any later known timing.
+    if result['_cause'] is None:
+        for position in range(index-1,-1,-1):
+            row = route[position]
+            if row.get('isHalt') is not True or skipped_kind(data,row):
+                continue
+            a,d = confirmed_times(row,observed,now,data)
+            if not a or not d:
+                continue
+            planned_a,planned_d = stamp(row.get('scheduledArrival')),stamp(row.get('scheduledDeparture'))
+            if not planned_a or not planned_d or planned_d < planned_a:
+                break
+            start_late,end_late = max(0,(a-planned_a).total_seconds()/60),max(0,(d-planned_d).total_seconds()/60)
+            added = end_late-start_late
+            later = [max(0,(phase[1]-phase[2]).total_seconds()/60) for phase in phases
+                     if phase[0] > position and phase[2] is not None]
+            if (round(added) > 0 and current_delay >= end_late
+                    and all(value > start_late for value in later)):
+                result['_cause'] = f'The last confirmed stop at {name(row)} took {duration((d-a).total_seconds()/60)} instead of {duration((planned_d-planned_a).total_seconds()/60)}, adding {duration(added)} to the delay. Some of this delay may still be carrying forward.'
+            break
+    if result['_cause'] is None and index > 0 and arrived and sa:
+        before = route[index-1]
+        _, left = confirmed_times(before, observed, now, data)
+        planned_left = stamp(before.get('scheduledDeparture'))
+        if left and planned_left and not skipped_kind(data,before) and left < arrived and planned_left < sa:
+            extra = ((arrived-left)-(sa-planned_left)).total_seconds()/60
+            added = max(0,(arrived-sa).total_seconds()/60)-max(0,(left-planned_left).total_seconds()/60)
+            if round(extra) > 0 and round(added) > 0:
+                result['_cause'] = f'The journey from {name(before)} to {name(current)} took {duration(extra)} longer than scheduled. The cause of the slower journey was not reported.'
+    return result
+
+
+def stop_timing(evidence, prediction):
+    result = {k:v for k,v in evidence.items() if not k.startswith('_')}
+    result.update(expected_recovery_minutes=None, expected_additional_delay_minutes=None,
+                  future_recovery_status='not_estimated')
+    current, expected = number(result['current_delay_minutes']), number(prediction.get('predicted_delay_minutes'))
+    if prediction.get('_route_order_adjusted'):
+        result['future_recovery_status'] = 'route_order_adjusted'
+    elif prediction.get('prediction_method') == 'inference' and current is not None and expected is not None:
+        change = round(max(0,current)-max(0,expected))
+        result.update(expected_recovery_minutes=max(0,change), expected_additional_delay_minutes=max(0,-change),
+                      future_recovery_status='estimated')
+    return result
+
+
+def running_details(data, prediction, target, now, previous, evidence):
     details = []
     current_delay = number(data.get('delayMinutes'))
     expected_delay = number(prediction.get('predicted_delay_minutes'))
@@ -119,35 +260,31 @@ def running_details(data, prediction, target, now, previous):
     elif current_delay is not None:
         details.append(f'The latest running update reports the train {relative(current_delay)}.')
 
+    details.extend(evidence['_details'])
+    if evidence['_cause']:
+        details.append(evidence['_cause'])
+
     if previous and prediction.get('_route_order_adjusted'):
         details.append(f'This arrival also allows for the train to reach {name(previous)} first.')
     elif prediction.get('prediction_method') == 'inference' and current_delay is not None and expected_delay is not None:
-        change = round(expected_delay - current_delay)
+        change = round(max(0,expected_delay) - max(0,current_delay))
         if change < 0:
             details.append(f'The train may make up about {duration(change)} before reaching {target}.')
         elif change > 0:
             details.append(f'The train may take about {duration(change)} longer than planned before reaching {target}.')
+        elif current_delay < 0 or expected_delay < 0:
+            details.append(f'Past journeys help estimate the arrival at {target}. The train may still arrive early; the time can change with new updates.')
         else:
             details.append(f'Recent running updates and past journeys suggest the delay may stay about the same before {target}.')
     elif current_delay is not None:
-        details.append(f'The arrival at {target} assumes the train continues with its latest reported delay.')
-
-    # Confirmed extra dwell is an observation, not evidence of a signal/platform cause.
-    if current is not None and current.get('isHalt') is True and expected_delay is not None and expected_delay > 0:
-        observed = stamp(data.get('lastUpdatedAt'))
-        arrived, departed = confirmed_times(current, observed, now, data)
-        scheduled_arrival, scheduled_departure = stamp(current.get('scheduledArrival')), stamp(current.get('scheduledDeparture'))
-        if arrived and departed and scheduled_arrival and scheduled_departure and scheduled_departure >= scheduled_arrival:
-            planned = (scheduled_departure-scheduled_arrival).total_seconds()/60
-            actual = (departed-arrived).total_seconds()/60
-            if round(actual-planned) > 0:
-                details.append(f'At {name(current)}, the train stopped for {duration(actual)} instead of the planned {duration(planned)}.')
+        details.append(f'Future recovery before {target} cannot yet be estimated. This arrival keeps the latest reported delay.')
     if expected_delay is not None and expected_delay > 0:
-        details.append('The railway update has not given a reason for the delay.')
+        details.append('The railway update has not confirmed the underlying reason for the delay.' if evidence['_cause']
+                       else 'The railway update has not given a reason for the delay.')
     return details
 
 
-def explain_stop(data, row, prediction, now, fresh, previous=None):
+def explain_stop(data, row, prediction, now, fresh, previous=None, evidence=None):
     target = name(row)
     scheduled = stamp(prediction.get('scheduled_arrival'))
     estimated = stamp(prediction.get('predicted_arrival'))
@@ -179,9 +316,11 @@ def explain_stop(data, row, prediction, now, fresh, previous=None):
         delay = (estimated-scheduled).total_seconds()/60 if scheduled else None
         category = 'on_time' if delay is not None and round(delay) == 0 else 'early' if delay is not None and delay < 0 else 'delayed' if delay is not None else 'unavailable'
         if delay is not None:
+            evidence = evidence if evidence is not None else journey_timing(data, now)
             result.update(status=category, title=f'Expected {relative(delay)} at {target}',
                           summary=f'Your train is expected at {target} on {time_text(estimated, now)}, {relative(delay)}.',
-                          details=running_details(data, prediction, target, now, previous))
+                          details=running_details(data, prediction, target, now, previous, evidence),
+                          timing=stop_timing(evidence, prediction))
             return result
         result['summary'] = f'An arrival estimate for {target} could not be checked against a dated schedule.'
     elif not fresh:

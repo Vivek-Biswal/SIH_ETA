@@ -21,6 +21,7 @@ class PassengerArrivalReason {
   final List<String> details;
   final String? predicted, actual;
   final int? difference;
+  final ArrivalTiming? timing;
   const PassengerArrivalReason(
     this.status,
     this.title,
@@ -29,6 +30,7 @@ class PassengerArrivalReason {
     this.predicted,
     this.actual,
     this.difference,
+    this.timing,
   });
 }
 
@@ -188,6 +190,7 @@ PassengerArrivalReason passengerArrivalReason({
       details: reason.details,
       predicted: value,
       difference: delta,
+      timing: _passengerTiming(reason.timing, runningDelay, method),
     );
   }
   if (delta == null) {
@@ -223,7 +226,170 @@ PassengerArrivalReason passengerArrivalReason({
     details: details,
     predicted: value,
     difference: delta,
+    timing: _passengerTiming(null, runningDelay, method),
   );
+}
+
+ArrivalTiming _passengerTiming(
+  ArrivalTiming? timing,
+  int? runningDelay,
+  String? method,
+) {
+  final hasObservedPair =
+      timing?.recoveryFromStation != null && timing?.recoveryToStation != null;
+  final current = timing?.currentDelayMinutes ?? runningDelay;
+  final possible = timing?.expectedRecoveryMinutes;
+  final extra = timing?.expectedAdditionalDelayMinutes;
+  // Recovery in the future is a selected-stop forecast, never an inference
+  // from a repeated running delay or a journey-wide ML label.
+  final futureEstimated =
+      method == 'inference' &&
+      timing?.futureRecoveryStatus == 'estimated' &&
+      current != null &&
+      possible != null &&
+      extra != null &&
+      possible >= 0 &&
+      extra >= 0 &&
+      possible <= (current > 0 ? current : 0) &&
+      !(possible > 0 && extra > 0);
+  return ArrivalTiming(
+    currentDelayMinutes: current,
+    recoveredMinutes: hasObservedPair ? timing?.recoveredMinutes : null,
+    recoveryFromStation: hasObservedPair ? timing?.recoveryFromStation : null,
+    recoveryToStation: hasObservedPair ? timing?.recoveryToStation : null,
+    expectedRecoveryMinutes: futureEstimated
+        ? timing?.expectedRecoveryMinutes
+        : null,
+    expectedAdditionalDelayMinutes: futureEstimated
+        ? timing?.expectedAdditionalDelayMinutes
+        : null,
+    futureRecoveryStatus: futureEstimated
+        ? 'estimated'
+        : timing?.futureRecoveryStatus == 'route_order_adjusted'
+        ? 'route_order_adjusted'
+        : 'not_estimated',
+  );
+}
+
+class _ArrivalTimingPanel extends StatelessWidget {
+  final ArrivalTiming timing;
+  final String destination;
+  const _ArrivalTimingPanel({required this.timing, required this.destination});
+
+  @override
+  Widget build(BuildContext context) {
+    final delay = timing.currentDelayMinutes;
+    final recovered = timing.recoveredMinutes;
+    final futureRecovery = timing.expectedRecoveryMinutes;
+    final futureDelay = timing.expectedAdditionalDelayMinutes;
+    final futureIsEstimate = timing.futureRecoveryStatus == 'estimated';
+    final noDelayToRecover =
+        futureIsEstimate &&
+        delay != null &&
+        delay <= 0 &&
+        futureRecovery == 0 &&
+        (futureDelay ?? 0) == 0;
+    final rows = <({String label, String value, String? note})>[
+      (
+        label: 'Current timing',
+        value: delay == null
+            ? 'Not reported'
+            : delay == 0
+            ? 'On schedule'
+            : '${delay.abs()} min ${delay > 0 ? 'late' : 'early'}',
+        note: 'At the latest train update',
+      ),
+      (
+        label: 'Already recovered',
+        value: recovered == null ? 'Not enough timings' : '$recovered min',
+        note: recovered == null
+            ? null
+            : timing.recoveryFromStation == timing.recoveryToStation
+            ? 'During the stop at ${timing.recoveryToStation}'
+            : 'Between ${timing.recoveryFromStation} and ${timing.recoveryToStation}',
+      ),
+      (
+        label: futureIsEstimate && (futureDelay ?? 0) > 0
+            ? 'Possible extra delay by $destination'
+            : 'Possible recovery by $destination',
+        value: !futureIsEstimate
+            ? 'Not estimated'
+            : (futureDelay ?? 0) > 0
+            ? 'About $futureDelay min more'
+            : noDelayToRecover
+            ? 'No delay to recover'
+            : futureRecovery != null
+            ? 'About $futureRecovery min'
+            : 'Not estimated',
+        note:
+            futureIsEstimate && (futureRecovery != null || futureDelay != null)
+            ? (futureDelay ?? 0) > 0
+                  ? 'Estimate only; the delay may change'
+                  : noDelayToRecover
+                  ? 'Arrival timing can still change as the train continues'
+                  : 'Estimate only; this time has not been recovered yet'
+            : null,
+      ),
+    ];
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(top: 16, bottom: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: .6),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0)
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+            Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      rows[i].label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      rows[i].value,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (rows[i].note case final note?) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        note,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class EtaDisplay extends StatelessWidget {
@@ -337,6 +503,8 @@ class EtaDisplay extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(reason.summary, style: const TextStyle(height: 1.5)),
+          if (reason.timing case final timing?)
+            _ArrivalTimingPanel(timing: timing, destination: destination),
           TextButton.icon(
             onPressed: () => showModalBottomSheet<void>(
               context: context,
@@ -367,6 +535,11 @@ class EtaDisplay extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(reason.summary, style: const TextStyle(height: 1.5)),
+                      if (reason.timing case final timing?)
+                        _ArrivalTimingPanel(
+                          timing: timing,
+                          destination: destination,
+                        ),
                       for (final detail in reason.details)
                         Padding(
                           padding: const EdgeInsets.only(top: 12),

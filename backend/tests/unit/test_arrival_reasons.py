@@ -67,7 +67,7 @@ def test_confirmed_extra_dwell_is_reported_as_fact_without_guessing_its_cause():
     data = journey()
     data['route'][0]['actualArrival'] = '2026-10-16T09:40:00Z'
     details = eta_response(data, NOW)['remaining_stations'][1]['arrival_explanation']['details']
-    assert 'At Tatanagar, the train stopped for 20 minutes instead of the planned 5 minutes.' in details
+    assert 'At Tatanagar, the train stopped for 20 minutes instead of the planned 5 minutes, adding 12 minutes to its delay.' in details
     assert 'signal' not in ' '.join(details).lower()
     assert 'reason for the delay' in details[-1]
 

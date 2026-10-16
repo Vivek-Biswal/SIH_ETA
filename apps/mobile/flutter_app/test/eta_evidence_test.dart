@@ -91,6 +91,29 @@ Widget arrivalWidget(StationPrediction prediction, ETAModel eta) => MaterialApp(
   ),
 );
 
+Map<String, dynamic> recoveryReason({
+  String status = 'delayed',
+  int current = 14,
+  int? recovered = 4,
+  int? futureRecovery = 5,
+  int? futureDelay = 0,
+  String futureStatus = 'estimated',
+}) => {
+  'status': status,
+  'title': 'Arrival at Kandra',
+  'summary': 'Expected arrival at Kandra from the latest train update.',
+  'details': ['The cause of the delay could not be confirmed.'],
+  'timing': {
+    'current_delay_minutes': current,
+    'recovered_minutes': recovered,
+    'recovery_from_station': 'Dhul Kot',
+    'recovery_to_station': 'Lalru',
+    'expected_recovery_minutes': futureRecovery,
+    'expected_additional_delay_minutes': futureDelay,
+    'future_recovery_status': futureStatus,
+  },
+};
+
 void main() {
   test('older ETA responses remain valid without new station fields', () {
     final eta = ETAModel.fromJson({
@@ -120,6 +143,96 @@ void main() {
     expect(validation.baselineMaeMinutes, isNull);
     expect(validation.rmseMinutes, isNull);
     expect(validation.testJourneys, isNull);
+  });
+
+  test('recovery fields stay optional and reject invalid timing values', () {
+    final old = ArrivalExplanation.fromJson({'status': 'delayed'});
+    expect(old.timing, isNull);
+    final timing = ArrivalTiming.fromJson({
+      'current_delay_minutes': -5,
+      'recovered_minutes': -2,
+      'expected_recovery_minutes': double.nan,
+      'expected_additional_delay_minutes': double.infinity,
+      'recovery_from_station': '',
+      'future_recovery_status': 'made_up',
+    });
+    expect(timing.currentDelayMinutes, -5);
+    expect(timing.recoveredMinutes, isNull);
+    expect(timing.expectedRecoveryMinutes, isNull);
+    expect(timing.expectedAdditionalDelayMinutes, isNull);
+    expect(timing.recoveryFromStation, isNull);
+    expect(timing.futureRecoveryStatus, 'not_estimated');
+  });
+
+  test('observed recovery and selected ML recovery remain separate', () {
+    final result = explanation(
+      stop(delay: 9, method: 'inference', reason: recoveryReason()),
+    );
+    expect(result.timing?.currentDelayMinutes, 14);
+    expect(result.timing?.recoveredMinutes, 4);
+    expect(result.timing?.recoveryFromStation, 'Dhul Kot');
+    expect(result.timing?.recoveryToStation, 'Lalru');
+    expect(result.timing?.expectedRecoveryMinutes, 5);
+    expect(result.timing?.futureRecoveryStatus, 'estimated');
+  });
+
+  test('impossible or incomplete recovery forecasts are withheld', () {
+    for (final reason in [
+      recoveryReason(futureRecovery: 20),
+      recoveryReason(futureRecovery: 5, futureDelay: 3),
+      recoveryReason(futureRecovery: null, futureDelay: 3),
+    ]) {
+      final result = explanation(stop(method: 'inference', reason: reason));
+      expect(result.timing?.expectedRecoveryMinutes, isNull);
+      expect(result.timing?.expectedAdditionalDelayMinutes, isNull);
+      expect(result.timing?.futureRecoveryStatus, 'not_estimated');
+    }
+  });
+
+  test('fallback and route order adjustment cannot claim future recovery', () {
+    final fallback = explanation(stop(reason: recoveryReason()));
+    expect(fallback.timing?.recoveredMinutes, 4);
+    expect(fallback.timing?.expectedRecoveryMinutes, isNull);
+    expect(fallback.timing?.futureRecoveryStatus, 'not_estimated');
+    final ordered = explanation(
+      stop(
+        method: 'inference',
+        reason: recoveryReason(futureStatus: 'route_order_adjusted'),
+      ),
+    );
+    expect(ordered.timing?.expectedRecoveryMinutes, isNull);
+    expect(ordered.timing?.futureRecoveryStatus, 'route_order_adjusted');
+    final unknownPair = recoveryReason();
+    (unknownPair['timing'] as Map).remove('recovery_from_station');
+    expect(
+      explanation(stop(reason: unknownPair)).timing?.recoveredMinutes,
+      isNull,
+    );
+  });
+
+  test('only a current running future arrival can show timing metrics', () {
+    final prediction = stop(reason: recoveryReason());
+    for (final state in ['not-started', 'cancelled', 'unknown', 'completed']) {
+      expect(explanation(prediction, state: state).timing, isNull);
+    }
+    expect(
+      explanation(
+        prediction,
+        eta: evidence(observed: '2026-10-16T09:00:00Z'),
+      ).timing,
+      isNull,
+    );
+    expect(
+      explanation(
+        stop(actual: '2026-10-16T09:00:00Z', reason: recoveryReason()),
+      ).timing,
+      isNull,
+    );
+    final mismatched = explanation(
+      stop(reason: recoveryReason(status: 'on_time')),
+    );
+    expect(mismatched.timing?.recoveredMinutes, isNull);
+    expect(mismatched.timing?.expectedRecoveryMinutes, isNull);
   });
 
   test(
@@ -416,4 +529,145 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('recovery explanation fits a narrow screen with large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final now = DateTime.now().toUtc();
+    final prediction = stop(
+      now: now,
+      delay: 9,
+      method: 'inference',
+      reason: recoveryReason(),
+    );
+    final eta = evidence(
+      observed: now.subtract(const Duration(seconds: 30)).toIso8601String(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: EtaDisplay(
+              destination: prediction.station!.label,
+              scheduledTime: prediction.scheduledArrival,
+              stationPrediction: prediction,
+              evidence: eta,
+              trainStatus: 'running',
+              method: eta.methodLabel,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Current timing'), findsOneWidget);
+    expect(find.text('14 min late'), findsOneWidget);
+    expect(find.text('Already recovered'), findsOneWidget);
+    expect(find.text('4 min'), findsOneWidget);
+    expect(find.text('Between Dhul Kot and Lalru'), findsOneWidget);
+    expect(find.text('Possible recovery by Kandra (KND)'), findsOneWidget);
+    expect(find.text('About 5 min'), findsOneWidget);
+    expect(find.textContaining('has not been recovered yet'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.text('Why this ETA?'));
+    await tester.tap(find.text('Why this ETA?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Current timing'), findsNWidgets(2));
+    expect(find.textContaining('could not be confirmed'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'unknown recovery stays unavailable and early timing stays signed',
+    (tester) async {
+      final now = DateTime.now().toUtc();
+      final eta = evidence(
+        observed: now.subtract(const Duration(seconds: 30)).toIso8601String(),
+      );
+      await tester.pumpWidget(
+        arrivalWidget(
+          stop(
+            now: now,
+            delay: -5,
+            reason: recoveryReason(
+              status: 'early',
+              current: -5,
+              recovered: null,
+              futureRecovery: null,
+              futureStatus: 'not_estimated',
+            ),
+          ),
+          eta,
+        ),
+      );
+      expect(find.text('5 min early'), findsOneWidget);
+      expect(find.text('Not enough timings'), findsOneWidget);
+      expect(find.text('Not estimated'), findsOneWidget);
+      expect(find.textContaining('About'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('extra forecast delay is never labelled as recovered time', (
+    tester,
+  ) async {
+    final now = DateTime.now().toUtc();
+    await tester.pumpWidget(
+      arrivalWidget(
+        stop(
+          now: now,
+          method: 'inference',
+          reason: recoveryReason(futureRecovery: 0, futureDelay: 6),
+        ),
+        evidence(
+          observed: now.subtract(const Duration(seconds: 30)).toIso8601String(),
+        ),
+      ),
+    );
+    expect(find.text('Possible extra delay by Kandra (KND)'), findsOneWidget);
+    expect(find.text('About 6 min more'), findsOneWidget);
+    expect(find.text('Estimate only; the delay may change'), findsOneWidget);
+    expect(find.textContaining('has not been recovered yet'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('early trains and same-stop recovery use clear timing labels', (
+    tester,
+  ) async {
+    final now = DateTime.now().toUtc();
+    final reason = recoveryReason(
+      status: 'early',
+      current: -5,
+      recovered: 2,
+      futureRecovery: 0,
+      futureDelay: 0,
+    );
+    (reason['timing'] as Map)['recovery_from_station'] = 'Lalru';
+    await tester.pumpWidget(
+      arrivalWidget(
+        stop(now: now, delay: -3, method: 'inference', reason: reason),
+        evidence(
+          observed: now.subtract(const Duration(seconds: 30)).toIso8601String(),
+        ),
+      ),
+    );
+    expect(find.text('5 min early'), findsOneWidget);
+    expect(find.text('During the stop at Lalru'), findsOneWidget);
+    expect(find.text('No delay to recover'), findsOneWidget);
+    expect(find.text('About 0 min'), findsNothing);
+    expect(
+      find.textContaining('Arrival timing can still change'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

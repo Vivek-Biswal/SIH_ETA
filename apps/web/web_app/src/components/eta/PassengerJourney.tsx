@@ -5,11 +5,37 @@ import { EtaFeedback } from './EtaFeedback';
 import { IncidentReport } from './IncidentReport';
 import timeline from './RouteTimeline.module.css';
 import { Clock3, RefreshCw, TrainFront, ChevronDown } from 'lucide-react';
-import { delayLabel, loadJourney, passing, time, usablePrediction, type ETA, type Journey, type Stop } from '@/services/passenger';
+import { delayLabel, loadJourney, passing, time, usablePrediction, type ArrivalTiming, type ETA, type Journey, type Stop } from '@/services/passenger';
 import { confirmedStopTime, matchingStop, predictionKey, selectedPrediction, stationArrival } from '@/services/etaReason';
 import { useLiveRefresh } from '@/services/preferences';
 
-function PredictionEvidence({ eta, arrival }: { eta: ETA | null; arrival: ReturnType<typeof stationArrival> }) {
+function TimingSummary({ timing, station }: { timing: ArrivalTiming; station: string }) {
+  const current = timing.current_delay_minutes;
+  const extraDelay = (timing.expected_additional_delay_minutes ?? 0) > 0;
+  const possible = extraDelay ? timing.expected_additional_delay_minutes : timing.expected_recovery_minutes;
+  const hasEstimate = timing.future_recovery_status === 'estimated' && possible !== null;
+  const noDelayToRecover = hasEstimate && !extraDelay && current !== null && current <= 0 && possible === 0;
+  const recoveredAtOneStop = timing.recovery_from_station === timing.recovery_to_station;
+  return <dl aria-label="Delay and recovery" className="grid gap-4 rounded-xl border border-border bg-card/50 p-4 text-sm sm:grid-cols-3">
+    <div className="min-w-0">
+      <dt className="text-xs font-medium text-muted-foreground">Current timing</dt>
+      <dd className="mt-1.5 font-semibold tabular-nums text-foreground">{current === null ? 'Not reported' : current > 0 ? `${current} min late` : current < 0 ? `${Math.abs(current)} min early` : 'On time'}</dd>
+      <dd className="mt-1 text-xs leading-5 text-muted-foreground">Latest running update</dd>
+    </div>
+    <div className="min-w-0 sm:border-l sm:border-border sm:pl-4">
+      <dt className="text-xs font-medium text-muted-foreground">Already recovered</dt>
+      <dd className="mt-1.5 font-semibold tabular-nums text-foreground">{timing.recovered_minutes === null ? 'Not enough timings' : `${timing.recovered_minutes} min`}</dd>
+      <dd className="mt-1 text-xs leading-5 text-muted-foreground">{timing.recovered_minutes === null ? 'Needs confirmed station timings' : recoveredAtOneStop ? `During the stop at ${timing.recovery_to_station}` : `Between ${timing.recovery_from_station} and ${timing.recovery_to_station}`}</dd>
+    </div>
+    <div className="min-w-0 sm:border-l sm:border-border sm:pl-4">
+      <dt className="text-xs font-medium text-muted-foreground">{extraDelay ? 'Possible extra delay' : 'Possible recovery'} by {station}</dt>
+      <dd className="mt-1.5 font-semibold tabular-nums text-foreground">{noDelayToRecover ? 'No delay to recover' : hasEstimate ? possible > 0 ? `About ${possible} min` : '0 min expected' : 'Not estimated'}</dd>
+      <dd className="mt-1 text-xs leading-5 text-muted-foreground">{hasEstimate ? 'Estimate only; this may change' : 'No reliable recovery estimate yet'}</dd>
+    </div>
+  </dl>;
+}
+
+function PredictionEvidence({ eta, arrival, station }: { eta: ETA | null; arrival: ReturnType<typeof stationArrival>; station: string }) {
   const metadata = eta?.model_metadata;
   const validation = metadata?.validation;
   const metric = (value?: number) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? `${value.toFixed(1)} min` : null;
@@ -20,6 +46,7 @@ function PredictionEvidence({ eta, arrival }: { eta: ETA | null; arrival: Return
     <div aria-live="polite" className="mt-3 space-y-3">
       <p className="font-semibold text-foreground">{arrival.title}</p>
       <p className="text-sm leading-6 text-foreground">{arrival.summary}</p>
+      {arrival.timing ? <TimingSummary timing={arrival.timing} station={station} /> : null}
       {arrival.details.length ? <ul className="space-y-2 text-sm leading-6 text-muted-foreground list-disc pl-4">{arrival.details.map((detail, index) => <li key={index}>{detail}</li>)}</ul> : null}
       <p className="text-xs text-muted-foreground">{arrival.basis}</p>
     </div>
@@ -113,7 +140,7 @@ export function PassengerJourney({ number, date = '', target = '', compact = fal
             </div>
             <div className="sm:border-l border-border sm:pl-6 space-y-4"><div><p className="text-sm text-muted-foreground">Scheduled arrival</p><p className="text-xl font-medium mt-1 tabular-nums">{time(prediction?.scheduled_arrival || stop?.scheduled_arrival)}</p></div><div><p className="text-sm text-muted-foreground">Latest reported timing</p><p className="font-medium mt-1">{delayLabel(status?.last_known_location?.delay_minutes)}</p></div></div>
           </div>
-          <PredictionEvidence eta={eta} arrival={arrival} />
+          <PredictionEvidence eta={eta} arrival={arrival} station={prediction?.station?.name || destination || 'this station'} />
           <ArrivalWeather number={number} date={status?.date || date} station={destination} predicted={arrival.predictedArrival} />
           <EtaFeedback
             trainNumber={number}

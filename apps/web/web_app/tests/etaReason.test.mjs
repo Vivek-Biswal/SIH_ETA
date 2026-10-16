@@ -37,6 +37,18 @@ function journey(overrides = {}) {
   return { eta, status, prediction };
 }
 
+function timing(overrides = {}) {
+  return { current_delay_minutes: 25, recovered_minutes: 4,
+    recovery_from_station: 'Rewari', recovery_to_station: 'Alwar',
+    expected_recovery_minutes: 5, expected_additional_delay_minutes: 0,
+    future_recovery_status: 'estimated', ...overrides };
+}
+
+function explain(prediction, timingData) {
+  prediction.arrival_explanation = { status: 'delayed', title: 'Expected late at Jaipur',
+    summary: 'The train is expected 20 minutes late at Jaipur.', details: ['The delay cause could not be confirmed.'], timing: timingData };
+}
+
 test('late explanation names selected station, revised arrival and observed delay without inventing a cause', () => {
   const { eta, status, prediction } = journey();
   const view = reasons.stationArrival(eta, status, prediction, now);
@@ -203,4 +215,114 @@ test('rendering a selected model stop uses its own explanation and optional mode
   assert.match(html, /Station-specific arrival for Ajmer/); assert.match(html, /A verified station-specific detail/);
   assert.match(html, /past journeys/); assert.match(html, /15\.4/);
   assert.doesNotMatch(html, /20 min late at Jaipur/);
+});
+
+test('observed recovery and possible future recovery remain distinct station-specific values', () => {
+  const { eta, status, prediction } = journey({ prediction_method: 'inference' });
+  status.last_known_location.delay_minutes = 25;
+  explain(prediction, timing());
+  const view = reasons.stationArrival(eta, status, prediction, now);
+  assert.equal(view.timing.current_delay_minutes, 25);
+  assert.equal(view.timing.recovered_minutes, 4);
+  assert.equal(view.timing.recovery_from_station, 'Rewari');
+  assert.equal(view.timing.recovery_to_station, 'Alwar');
+  assert.equal(view.timing.expected_recovery_minutes, 5);
+  assert.equal(view.timing.future_recovery_status, 'estimated');
+  const next = { ...prediction, station: { code: 'AII', name: 'Ajmer' }, route_sequence: 8,
+    arrival_explanation: { ...prediction.arrival_explanation, timing: timing({ expected_recovery_minutes: 9 }) } };
+  eta.remaining_stations.push(next);
+  assert.equal(reasons.stationArrival(eta, status, reasons.selectedPrediction(eta.remaining_stations, 'route:8'), now).timing.expected_recovery_minutes, 9);
+});
+
+test('legacy and fallback payloads never turn timetable slack into future recovery', () => {
+  const { eta, status, prediction } = journey();
+  const legacy = reasons.stationArrival(eta, status, prediction, now).timing;
+  assert.equal(legacy.current_delay_minutes, 20);
+  assert.equal(legacy.recovered_minutes, null);
+  assert.equal(legacy.expected_recovery_minutes, null);
+  explain(prediction, timing());
+  const fallback = reasons.stationArrival(eta, status, prediction, now).timing;
+  assert.equal(fallback.recovered_minutes, 4);
+  assert.equal(fallback.expected_recovery_minutes, null);
+  assert.equal(fallback.expected_additional_delay_minutes, null);
+  assert.equal(fallback.future_recovery_status, 'not_estimated');
+});
+
+test('route-order adjustments and invalid future values never claim recoverable minutes', () => {
+  for (const overrides of [
+    { future_recovery_status: 'route_order_adjusted' },
+    { expected_recovery_minutes: 99 },
+    { expected_recovery_minutes: -2 },
+    { expected_recovery_minutes: NaN },
+    { expected_additional_delay_minutes: 8 },
+    { expected_recovery_minutes: '5' },
+    { current_delay_minutes: -5 },
+  ]) {
+    const { eta, status, prediction } = journey({ prediction_method: 'inference' });
+    explain(prediction, timing(overrides));
+    const result = reasons.stationArrival(eta, status, prediction, now).timing;
+    assert.equal(result.expected_recovery_minutes, null);
+    assert.equal(result.expected_additional_delay_minutes, null);
+    assert.notEqual(result.future_recovery_status, 'estimated');
+  }
+});
+
+test('missing observed station pair is unknown recovery, while confirmed zero is retained', () => {
+  for (const overrides of [{ recovery_from_station: null }, { recovery_to_station: ' ' }, { recovered_minutes: -1 }, { recovered_minutes: Infinity }]) {
+    const { eta, status, prediction } = journey(); explain(prediction, timing(overrides));
+    assert.equal(reasons.stationArrival(eta, status, prediction, now).timing.recovered_minutes, null);
+  }
+  const { eta, status, prediction } = journey(); explain(prediction, timing({ recovered_minutes: 0 }));
+  assert.equal(reasons.stationArrival(eta, status, prediction, now).timing.recovered_minutes, 0);
+});
+
+test('stale, cancelled, passed and confirmed-arrived stops do not replay recovery forecasts', () => {
+  for (const situation of ['stale', 'cancelled', 'passed', 'arrived']) {
+    const { eta, status, prediction } = journey({ prediction_method: 'inference' });
+    explain(prediction, timing());
+    if (situation === 'stale') eta.observation_timestamp = timestamp(-6);
+    if (situation === 'cancelled') status.status = 'cancelled';
+    if (situation === 'passed') prediction.predicted_arrival = timestamp(-1);
+    if (situation === 'arrived') { prediction.actual_arrival = timestamp(-3); prediction.scheduled_arrival = timestamp(-8); }
+    assert.equal(reasons.stationArrival(eta, status, prediction, now).timing, undefined);
+  }
+});
+
+function renderTiming(timingData, overrides = {}) {
+  const liveNow = Date.now(); const { eta, status, prediction } = journey({ prediction_method: 'inference', ...overrides });
+  const shift = value => new Date(Date.parse(value) + liveNow - now).toISOString();
+  eta.observation_timestamp = status.last_known_location.updated_at = shift(timestamp(-1));
+  prediction.scheduled_arrival = shift(prediction.scheduled_arrival); prediction.predicted_arrival = shift(prediction.predicted_arrival);
+  explain(prediction, timingData);
+  return renderToStaticMarkup(React.createElement(PassengerJourney, { number: '12345', suppliedJourney: { eta, status } }));
+}
+
+test('timing row clearly labels confirmed recovery separately from a possible estimate', () => {
+  const html = renderTiming(timing());
+  assert.match(html, /aria-label="Delay and recovery"/);
+  assert.match(html, /Current timing<\/dt>.*25 min late/);
+  assert.match(html, /Already recovered<\/dt>.*4 min/);
+  assert.match(html, /Between Rewari and Alwar/);
+  assert.match(html, /Possible recovery.*by .*Jaipur<\/dt>.*About 5 min/);
+  assert.match(html, /Estimate only; this may change/);
+  assert.match(html, /delay cause could not be confirmed/);
+});
+
+test('timing row uses early and additional-delay wording without calling it recovered time', () => {
+  const early = renderTiming(timing({ current_delay_minutes: -5, recovered_minutes: null, expected_recovery_minutes: null,
+    expected_additional_delay_minutes: null, future_recovery_status: 'not_estimated' }));
+  assert.match(early, /5 min early/); assert.match(early, /Not enough timings/); assert.match(early, /Not estimated/);
+  const extra = renderTiming(timing({ expected_recovery_minutes: 0, expected_additional_delay_minutes: 7 }));
+  assert.match(extra, /Possible extra delay.*by .*Jaipur<\/dt>.*About 7 min/);
+  assert.doesNotMatch(extra, /Possible recovery.*by .*Jaipur/);
+});
+
+test('early timing never promises recovered lateness and recovery during one halt names that halt', () => {
+  const early = renderTiming(timing({ current_delay_minutes: -5, expected_recovery_minutes: 0, expected_additional_delay_minutes: 0 }));
+  assert.match(early, /5 min early/);
+  assert.match(early, /No delay to recover/);
+  assert.doesNotMatch(early, /0 min expected/);
+  const halt = renderTiming(timing({ recovery_from_station: 'Alwar', recovery_to_station: 'Alwar' }));
+  assert.match(halt, /During the stop at Alwar/);
+  assert.doesNotMatch(halt, /Between Alwar and Alwar/);
 });

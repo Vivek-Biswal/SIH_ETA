@@ -1,4 +1,4 @@
-import type { ArrivalExplanation, ETA, Prediction, Status, Stop } from './passenger';
+import type { ArrivalExplanation, ArrivalTiming, ETA, Prediction, Status, Stop } from './passenger';
 
 type ArrivalView = ArrivalExplanation & {
   actualArrival: string | null; predictedArrival: string | null; delayMinutes: number | null;
@@ -18,6 +18,34 @@ function supportedExplanation(explanation: ArrivalExplanation | undefined, state
   return Boolean(explanation?.status === state && typeof explanation.title === 'string' && explanation.title.trim()
     && typeof explanation.summary === 'string' && explanation.summary.trim()
     && Array.isArray(explanation.details) && explanation.details.every(detail => typeof detail === 'string'));
+}
+
+function arrivalTiming(timing: ArrivalTiming | undefined, reportedDelay: number | null | undefined, method: string): ArrivalTiming {
+  const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
+  const minutes = (value: unknown) => finite(value) && value >= 0 ? Math.round(value) : null;
+  const station = (value: unknown) => typeof value === 'string' && value.trim() ? value.trim() : null;
+  const current = finite(timing?.current_delay_minutes) ? Math.round(timing.current_delay_minutes)
+    : finite(reportedDelay) ? Math.round(reportedDelay) : null;
+  const from = station(timing?.recovery_from_station), to = station(timing?.recovery_to_station);
+  const recovered = from && to ? minutes(timing?.recovered_minutes) : null;
+  const state = timing?.future_recovery_status;
+  const estimated = method === 'inference' && state === 'estimated';
+  const possible = estimated ? minutes(timing?.expected_recovery_minutes) : null;
+  const additional = estimated ? minutes(timing?.expected_additional_delay_minutes) : null;
+  // Early running is not recovered lateness, and a fallback never supplies a
+  // learned recovery forecast. Reject conflicting or impossible timing fields.
+  const validFuture = estimated && current !== null && possible !== null && additional !== null
+    && possible <= Math.max(current, 0) && !(possible > 0 && additional > 0);
+  return {
+    current_delay_minutes: current,
+    recovered_minutes: recovered,
+    recovery_from_station: recovered === null ? null : from,
+    recovery_to_station: recovered === null ? null : to,
+    expected_recovery_minutes: validFuture ? possible : null,
+    expected_additional_delay_minutes: validFuture ? additional : null,
+    future_recovery_status: validFuture ? 'estimated' : state === 'route_order_adjusted' ? 'route_order_adjusted'
+      : state === 'not_applicable' ? 'not_applicable' : 'not_estimated',
+  };
 }
 
 export function arrivalTime(value?: string | null) {
@@ -132,5 +160,6 @@ export function stationArrival(eta: ETA | null, status: Status | null | undefine
   const supported = supportedExplanation(explanation, arrivalStatus);
   return { ...base, status: arrivalStatus, title: supported ? explanation.title : title,
     summary: supported ? explanation.summary : summary, details: supported ? explanation.details : details,
-    predictedArrival: prediction.predicted_arrival!, delayMinutes: delay, basis };
+    predictedArrival: prediction.predicted_arrival!, delayMinutes: delay, basis,
+    timing: arrivalTiming(supported ? explanation.timing : undefined, latestDelay, method) };
 }

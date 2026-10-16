@@ -178,6 +178,27 @@ actually uses the model, never as the accuracy of a fallback estimate.
 This changes the explanation and evidence checks; it does not expand the
 three-train ML pilot or introduce new operational data sources.
 
+The optional `arrival_explanation.timing` separates reported signed delay,
+observed recovered lateness between named stops, and possible future recovery
+or added delay. Recovery already achieved compares an earlier confirmed dated
+event with the latest report. Available current-event timestamps must agree
+with that report; all confirmed arrivals/departures must be chronological.
+When no earlier stop is known, a confirmed shorter halt can establish recovery
+within that stop. Moving further ahead of schedule is not recovered lateness.
+
+Completed longer halts and slower completed sections can explain measured added
+lateness, but do not establish a signal, platform or weather cause. Ongoing
+halts are durations **as of the observation**, labelled as possible contributors.
+An earlier extra halt is not reused as a current explanation if later confirmed
+timings show its added delay was fully recovered.
+
+Possible future recovery comes only from the selected stop's qualified model
+forecast and is capped at current positive lateness. Route-order clamps suppress
+this claim. Other arrivals explicitly say future recovery is not estimated;
+a scheduled halt is not assumed to be disposable recovery time. No reliable
+section recovery-buffer or minimum-running-time feed is currently available.
+These timing calculations reuse the fetched journey and make no provider calls.
+
 ## Missing factors and how to obtain them
 
 | Factor | Available now | What is needed for valid training |
