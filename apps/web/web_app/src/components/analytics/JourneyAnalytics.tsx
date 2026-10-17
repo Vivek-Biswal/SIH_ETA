@@ -7,13 +7,13 @@ import { observations, summarize, exportCSV } from '@/services/journeyAnalytics'
 const button = 'rounded-xl border border-border px-4 py-3 text-sm font-semibold disabled:opacity-40';
 const field = 'mt-2 block w-full rounded-xl border border-border bg-background p-3';
 const panel = 'rounded-2xl border border-border bg-card p-5';
-export default function JourneyAnalytics({ embedded = false }: { embedded?: boolean }) {
+export default function JourneyAnalytics({ embedded = false, compact = false }: { embedded?: boolean; compact?: boolean }) {
   const [number,setNumber] = useState(''), [date,setDate] = useState('');
   const [status,setStatus] = useState<Status|null>(null);
   const [busy,setBusy] = useState(false), [error,setError] = useState(''), [received,setReceived] = useState('');
   const [tolerance,setTolerance] = useState(5), [filter,setFilter] = useState('all');
   const controller = useRef<AbortController|null>(null);
-  useEffect(()=>()=>controller.current?.abort(),[]);
+  useEffect(()=>{ if (compact) setBusy(false); return ()=>controller.current?.abort(); },[compact]);
   async function load(refresh = false) {
     controller.current?.abort(); const request = new AbortController(); controller.current = request;
     const train = refresh && status ? status.train_number : number;
@@ -41,8 +41,8 @@ export default function JourneyAnalytics({ embedded = false }: { embedded?: bool
     const url = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
     const link = document.createElement('a'); link.href=url; link.download=filename; link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
-  return <div className="mx-auto max-w-7xl space-y-6 pb-6">
-    {embedded ? <header><p className="text-xs font-semibold uppercase tracking-widest text-primary">Your journey in numbers</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">Understand the delays.</h2><p className="mt-2 text-sm text-muted-foreground">Compare reported arrivals with the timetable for one train journey.</p></header> : (<header className="rounded-3xl bg-[#071c40] p-6 text-white sm:p-9"><p className="text-xs font-semibold uppercase tracking-widest text-blue-300">Journey analytics</p><h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Understand your train’s delays.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">See how arrival times changed along one journey, using reported completed-stop observations. Every number below comes from the selected train.</p></header>)}
+  return <div className="mx-auto max-w-7xl space-y-6 pb-6" aria-busy={busy}>
+    {!compact && (embedded ? <header><p className="text-xs font-semibold uppercase tracking-widest text-primary">Your journey in numbers</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">Understand the delays.</h2><p className="mt-2 text-sm text-muted-foreground">Compare reported arrivals with the timetable for one train journey.</p></header> : (<header className="rounded-3xl bg-[#071c40] p-6 text-white sm:p-9"><p className="text-xs font-semibold uppercase tracking-widest text-blue-300">Journey analytics</p><h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Understand your train’s delays.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">See how arrival times changed along one journey, using reported completed-stop observations. Every number below comes from the selected train.</p></header>))}
     <form onSubmit={e=>{e.preventDefault(); void load();}} className={`${panel} flex flex-wrap items-end gap-4`}>
       <label className="min-w-40 flex-1 text-sm">Train number<input required pattern="[0-9]{5}" maxLength={5} inputMode="numeric" value={number} onChange={e=>setNumber(e.target.value)} placeholder="e.g. 12423" className={field}/></label>
       <label className="min-w-40 flex-1 text-sm">Journey start date · optional<input type="date" value={date} onChange={e=>setDate(e.target.value)} className={field}/></label>

@@ -51,3 +51,43 @@ test('shared mobile workspace retains all four existing journey tools', () => {
   }
   assert.match(html, /Journey insights sections/);
 });
+
+test('app presentation has one compact mode selector and a clear heading for each tool', () => {
+  const headings = { live: 'Find your train', history: 'Understand past delays', simulation: 'Explore a what-if journey', analytics: 'Your journey in numbers' };
+  for (const [activeMode, heading] of Object.entries(headings)) {
+    const html = render({ embedded: true, activeMode });
+    assert.match(html, /class="[^"]*embedded/);
+    assert.equal((html.match(/<nav /g) || []).length, 1);
+    assert.equal((html.match(/aria-pressed="true"/g) || []).length, 1);
+    assert.ok(html.includes(`<h1>${heading}</h1>`));
+    assert.doesNotMatch(html, /class="hero"|Your journey, made clearer/);
+    for (const title of ['Track my train', 'Analytics', 'Past delays', 'Simulation']) assert.ok(html.includes(title));
+    for (const id of ['live', 'history', 'simulation', 'analytics']) assert.ok(html.includes(`data-journey-mode="${id}"`));
+  }
+  assert.match(render({ embedded: true, activeMode: 'simulation' }), /Simulation · not live/);
+});
+
+test('embedded Back reuses visited Activity boundaries while hidden maps and effects stay inactive', () => {
+  let saved;
+  const activityModule = { exports: {} };
+  const panelImports = { ...imports, react: { ...React, useState: initial => { saved ??= initial; return [saved, next => { saved = next; }]; } } };
+  new Function('require', 'module', 'exports', code)(name => panelImports[name] ?? require(name), activityModule, activityModule.exports);
+  const panels = mode => activityModule.exports.EmbeddedJourneyPanels({ mode });
+  const toolProps = boundary => boundary.props.children.props.children.props;
+  const first = panels('live');
+  assert.deepEqual(first.map(item => item.key), ['live'], 'unvisited tools must not mount or request data');
+  assert.equal(first[0].type, React.Activity);
+  assert.equal(first[0].props.mode, 'visible');
+  const next = panels('simulation');
+  assert.deepEqual(next.map(item => item.key), ['live', 'simulation']);
+  assert.equal(next[0].key, first[0].key, 'a stable boundary retains tracking form and train state');
+  assert.equal(next[0].props.mode, 'hidden');
+  assert.equal(toolProps(next[0]).active, false, 'a hidden Leaflet subtree must not remain active');
+  assert.equal(toolProps(next[1]).mapRevision, 1);
+  const back = panels('live');
+  assert.deepEqual(back.map(item => item.key), ['live', 'simulation']);
+  assert.equal(back[0].props.mode, 'visible');
+  assert.equal(back[1].props.mode, 'hidden');
+  assert.equal(toolProps(back[0]).mapRevision, 2, 'returning maps recreate removed Leaflet instances');
+  assert.equal(toolProps(back[1]).active, false, 'simulation playback remains inactive when hidden');
+});

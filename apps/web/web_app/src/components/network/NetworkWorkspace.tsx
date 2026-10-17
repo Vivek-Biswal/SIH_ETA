@@ -1,15 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Activity, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { ArrowUpRight, Network, Radio, FlaskConical, RefreshCw, Search, ArrowRight, ChartNoAxesCombined } from 'lucide-react';
 import styles from './JourneyWorkspace.module.css';
 import { loadInsights, type Insights } from '@/services/networkInsights';
+import type { JourneyMode } from '@/services/journeyWorkspace';
 import { LiveNetwork } from './LiveNetwork';
 import { RouteSimulation } from './RouteSimulation';
 
 const JourneyAnalytics = dynamic(() => import('../analytics/JourneyAnalytics'), { loading: () => <p role="status" className="p-6 text-muted-foreground">Loading analytics…</p> });
-type Mode = 'history' | 'live' | 'simulation' | 'analytics';
 type Section = 'all' | 'tracking' | 'history';
 const modes = [
   { id: 'live', title: 'Track my train', subtitle: 'Position & arrival times', icon: Radio },
@@ -18,26 +18,51 @@ const modes = [
   { id: 'simulation', title: 'Simulation', subtitle: 'Explore a what-if journey', icon: FlaskConical },
 ] as const;
 
-export function NetworkWorkspace({ initialMode = 'live', brand = 'Etaernal', section = 'all' }: { initialMode?: Mode; brand?: string; section?: Section }) {
-  const [selectedMode, setMode] = useState<Mode>(initialMode);
+const mobileModeCopy = {
+  live: { title: 'Find your train', description: 'See its route, latest reported position and arrival estimates.', label: 'Train tracking' },
+  history: { title: 'Understand past delays', description: 'Explore recorded station patterns. These are past observations, not live alerts.', label: 'Historical records' },
+  simulation: { title: 'Explore a what-if journey', description: 'Choose a train and see how an extra wait changes later arrivals.', label: 'Simulation · not live' },
+  analytics: { title: 'Your journey in numbers', description: 'Compare reported arrivals with the timetable for one selected train.', label: 'Journey analysis' },
+};
+
+export function NetworkWorkspace({ initialMode = 'live', brand = 'Etaernal', section = 'all', embedded = false, activeMode, onModeChange }: { initialMode?: JourneyMode; brand?: string; section?: Section; embedded?: boolean; activeMode?: JourneyMode; onModeChange?: (mode: JourneyMode) => void }) {
+  const [localMode, setMode] = useState<JourneyMode>(initialMode);
+  const selectedMode = activeMode ?? localMode;
   const mode = section === 'history' ? 'history' : section === 'tracking' && selectedMode !== 'simulation' ? 'live' : selectedMode;
   const tabs = section === 'history' ? [] : section === 'tracking' ? modes.filter(item => item.id === 'live' || item.id === 'simulation') : modes;
   const title = section === 'history' ? 'Learn from past delays.' : section === 'tracking' ? 'Your train. Your route. In view.' : 'Your journey, made clearer.';
   const label = section === 'history' ? 'Past Delay Insights' : section === 'tracking' ? 'Train Tracking' : 'Journey insights';
   const intro = section === 'history' ? 'Explore historical station delays and recorded train interactions. These patterns describe past journeys, not current running conditions.' : section === 'tracking' ? 'Follow your train’s latest reported position and arrival times, or explore a clearly labelled what-if simulation.' : 'Follow your train, understand its delays, and explore what could change your arrival.';
-  return <div className={`${styles.workspace} max-w-7xl mx-auto space-y-6 pb-10`}>
-    <header className={styles.hero}>
+  const selectedCopy = mobileModeCopy[mode];
+  const visibleTabs = embedded ? ['live', 'history', 'simulation', 'analytics'].map(id => tabs.find(item => item.id === id)).filter((item): item is typeof modes[number] => Boolean(item)) : tabs;
+  function selectMode(next: JourneyMode) { setMode(next); onModeChange?.(next); }
+  return <div className={`${styles.workspace} ${embedded ? styles.embedded : ''} max-w-7xl mx-auto space-y-6 pb-10`}>
+    {embedded ? <header className={styles.mobileIntro}><p>Make sense of your journey.</p><span>Track a train or explore the information behind its arrival.</span></header> : <header className={styles.hero}>
       <p className={styles.eyebrow}>{brand} / {label}</p>
       <h1>{title}</h1>
       <p className={styles.intro}>{intro}</p>
-    </header>
+    </header>}
     {tabs.length > 0 && <nav aria-label={`${label} sections`} className={`${styles.navigation} ${section === 'tracking' ? styles.trackingNavigation : ''}`}>
-      {tabs.map(item => <button key={item.id} aria-pressed={mode === item.id} aria-controls="journey-content" onClick={() => setMode(item.id)} className={styles.tab}><span className={styles.tabIcon}><item.icon size={20} /></span><span className={styles.tabText}><span className={styles.tabTitle}>{item.title}</span><span className={styles.tabSubtitle}>{item.subtitle}</span></span></button>)}
+      {visibleTabs.map(item => <button key={item.id} data-journey-mode={item.id} aria-pressed={mode === item.id} aria-controls="journey-content" onClick={() => selectMode(item.id)} className={styles.tab}><span className={styles.tabIcon}><item.icon size={20} aria-hidden="true" /></span><span className={styles.tabText}><span className={styles.tabTitle}>{item.title}</span>{!embedded && <span className={styles.tabSubtitle}>{item.subtitle}</span>}</span></button>)}
     </nav>}
-    <div id="journey-content" className={styles.content}>{mode === 'history' ? <HistoricalInsights /> : mode === 'live' ? <LiveNetwork /> : mode === 'analytics' ? <JourneyAnalytics embedded /> : <Simulation />}</div>
+    {embedded && <header className={styles.modeHeading}><p className={mode === 'simulation' ? styles.simulationLabel : ''}>{selectedCopy.label}</p><h1>{selectedCopy.title}</h1><span>{selectedCopy.description}</span></header>}
+    <div id="journey-content" className={styles.content}>{embedded ? <EmbeddedJourneyPanels mode={mode} /> : <JourneyTool mode={mode} />}</div>
   </div>;
 }
-function HistoricalInsights() {
+function JourneyTool({ mode, compact = false, active = true, mapRevision = 0 }: { mode: JourneyMode; compact?: boolean; active?: boolean; mapRevision?: number }) {
+  return mode === 'history' ? <HistoricalInsights compact={compact} /> : mode === 'live' ? <LiveNetwork compact={compact} active={active} mapRevision={mapRevision} /> : mode === 'analytics' ? <JourneyAnalytics embedded compact={compact} /> : <RouteSimulation compact={compact} active={active} mapRevision={mapRevision} />;
+}
+export function EmbeddedJourneyPanels({ mode }: { mode: JourneyMode }) {
+  const [saved, setSaved] = useState<{ selected: JourneyMode; visited: JourneyMode[]; revision: number }>({ selected: mode, visited: [mode], revision: 0 });
+  // Mount a tool only after it is selected. Stable Activity keys retain its state;
+  // hidden boundaries disconnect effects, including provider polling and playback.
+  const current = saved.selected === mode ? saved : { selected: mode, visited: saved.visited.includes(mode) ? saved.visited : [...saved.visited, mode], revision: saved.revision + 1 };
+  if (current !== saved) setSaved(current);
+  // Leaflet removes its external map during Activity cleanup. Recreate only
+  // that subtree on reactivation, even after a very quick mode switch.
+  return current.visited.map(item => <Activity key={item} name={`journey-${item}`} mode={mode === item ? 'visible' : 'hidden'}><div data-journey-panel={item}><JourneyTool mode={item} compact active={mode === item} mapRevision={current.revision} /></div></Activity>);
+}
+function HistoricalInsights({ compact = false }: { compact?: boolean }) {
   const [query, setQuery] = useState(''), [search, setSearch] = useState(''), [revision, refresh] = useState(0);
   const [data, setData] = useState<Insights | null>(null), [error, setError] = useState(''), [loading, setLoading] = useState(true);
   const [received, setReceived] = useState('');
@@ -48,8 +73,8 @@ function HistoricalInsights() {
   }, [search, revision]);
   function apply(value: string) { setData(null); setQuery(value); setSearch(value.trim()); refresh(n => n + 1); }
   return <section className="space-y-5" aria-busy={loading}>
-    <div className="flex flex-wrap justify-between gap-3 items-end"><div><h2 className="text-xl font-semibold">Where delays tend to build</h2><p className="text-sm text-muted-foreground mt-1">Historical analysis{data ? ` · ${data.period_start} to ${data.period_end}` : ''}. These are past observations.</p></div><button disabled={loading} onClick={() => refresh(n => n + 1)} className="flex items-center gap-2 border border-border rounded-xl p-3 text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />Refresh</button></div>
-    <form onSubmit={e => { e.preventDefault(); apply(query); }} className="flex gap-2"><div className="relative flex-1"><Search size={18} className="absolute left-4 top-4 text-muted-foreground" /><input aria-label="Station code or train number" maxLength={20} pattern="[A-Za-z0-9 ]*" value={query} onChange={e => setQuery(e.target.value.toUpperCase())} placeholder="Search a station code or train number · e.g. NDLS" className="w-full rounded-xl border border-border bg-card pl-11 pr-4 py-3" /></div><button className="px-5 rounded-xl bg-primary text-primary-foreground font-medium">Search</button>{search && <button type="button" onClick={() => apply('')} className="text-sm px-2">Clear</button>}</form>
+    <div className="flex flex-wrap justify-between gap-3 items-end"><div>{!compact && <h2 className="text-xl font-semibold">Where delays tend to build</h2>}<p className="text-sm text-muted-foreground mt-1">Historical analysis{data ? ` · ${data.period_start} to ${data.period_end}` : ''}. These are past observations.</p></div><button disabled={loading} onClick={() => refresh(n => n + 1)} className="flex items-center gap-2 border border-border rounded-xl p-3 text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />Refresh</button></div>
+    <form onSubmit={e => { e.preventDefault(); apply(query); }} className="flex gap-2"><div className="relative flex-1"><Search size={18} aria-hidden="true" className="absolute left-4 top-4 text-muted-foreground" /><input aria-label="Station code or train number" maxLength={20} pattern="[A-Za-z0-9 ]*" value={query} onChange={e => setQuery(e.target.value.toUpperCase())} placeholder={compact ? 'Station code or train number' : 'Search a station code or train number · e.g. NDLS'} className="w-full rounded-xl border border-border bg-card pl-11 pr-4 py-3" /></div><button className="px-5 rounded-xl bg-primary text-primary-foreground font-medium">Search</button>{search && <button type="button" onClick={() => apply('')} className="text-sm px-2">Clear</button>}</form>
     {error && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">{error}{data && ' Showing the previously loaded analysis.'}</p>}
     {loading && !data && <p role="status" className="p-8 text-muted-foreground">Loading station patterns and recorded interactions…</p>}
     {data && <>
@@ -61,7 +86,4 @@ function HistoricalInsights() {
       <p className="text-xs text-muted-foreground leading-5">Showing up to 50 stations and 50 interactions, ranked by score. Scores are comparison indicators, not percentages or calibrated probabilities. Retrieved {received}; refreshing does not change the historical observation period.</p>
     </>}
   </section>;
-}
-function Simulation() {
-  return <RouteSimulation />;
 }

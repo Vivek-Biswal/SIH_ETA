@@ -7,7 +7,7 @@ import { PassengerJourney } from '@/components/eta/PassengerJourney';
 import type { TrainStatus } from '@/types/api';
 import { refreshDescription, useLiveRefresh } from '@/services/preferences';
 
-export function LiveNetwork() {
+export function LiveNetwork({ compact = false, active = true, mapRevision = 0 }: { compact?: boolean; active?: boolean; mapRevision?: number } = {}) {
   const refreshInterval = useLiveRefresh();
   const intervalRef = useRef(refreshInterval);
   useEffect(() => { intervalRef.current = refreshInterval; }, [refreshInterval]);
@@ -18,7 +18,7 @@ export function LiveNetwork() {
   const [route, setRoute] = useState<RoutePoint[]>([]), [routeLoading, setRouteLoading] = useState(false);
   const refresh = useRef<() => void>(() => {});
   useEffect(() => {
-    if (!tracked) return;
+    if (!tracked || !active) return;
     const controller = new AbortController();
     let busy = false, failures = 0, nextAttempt = 0, lastAttempt = 0, pinnedDate = tracked.date, appActive = true;
     const pause = () => { appActive = false; };
@@ -55,7 +55,7 @@ export function LiveNetwork() {
     window.addEventListener('journey-pause', pause);
     window.addEventListener('journey-resume', resume);
     return () => { controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', autoLoad); window.removeEventListener('journey-pause', pause); window.removeEventListener('journey-resume', resume); refresh.current = () => {}; };
-  }, [tracked]);
+  }, [tracked, active]);
   const status = journey?.status;
   useEffect(() => {
     if (!status) return;
@@ -66,8 +66,8 @@ export function LiveNetwork() {
   }, [status]);
   const location = status?.last_known_location;
   const trains: TrainStatus[] = status ? [{ train_number: status.train_number, train_name: status.train_name, data_source: status.data_source, current_station: status.current_station || { code: '', name: 'Unavailable' }, next_station: { code: '', name: 'Unavailable' }, predicted_next_arrival: '', scheduled_departure: '', zone: '', delay_minutes: status.overall_delay_minutes ?? 0, status: status.overall_delay_minutes ? 'DELAYED' : 'ON_TIME', last_known_location: location ? { ...location, delay_minutes: location.delay_minutes ?? undefined } : undefined }] : [];
-  return <section className="space-y-5">
-    <div><h2 className="text-2xl font-semibold">Where is my train?</h2><p className="text-sm text-muted-foreground mt-2">Enter a train number to see its route, latest reported position and arrival times.</p></div>
+  return <section className="space-y-5" aria-busy={loading}>
+    {!compact && <div><h2 className="text-2xl font-semibold">Where is my train?</h2><p className="text-sm text-muted-foreground mt-2">Enter a train number to see its route, latest reported position and arrival times.</p></div>}
     <form onSubmit={event => { event.preventDefault(); if (!/^\d{5}$/.test(number) || (date && !validDate(date))) { setError('Enter a five-digit train number and a valid start date.'); return; } setJourney(null); setRoute([]); setRouteLoading(false); setError(''); track({ number, date }); }} className="rounded-2xl border border-border bg-card p-5 flex flex-wrap gap-4 items-end">
       <label className="text-sm flex-1 min-w-40">Train number<input required pattern="[0-9]{5}" inputMode="numeric" maxLength={5} value={number} onChange={event => setNumber(event.target.value)} placeholder="e.g. 12423" className="block mt-2 rounded-xl border border-border bg-background p-3 w-full" /></label>
       <label className="text-sm flex-1 min-w-40">Journey start date · optional<input type="date" value={date} onChange={event => setDate(event.target.value)} className="block mt-2 rounded-xl border border-border bg-background p-3 w-full" /></label>
@@ -77,7 +77,7 @@ export function LiveNetwork() {
     {loading && !status && <p role="status">Finding your train…</p>}
     {status && <>
       <div className="rounded-2xl border border-border bg-card p-5"><p className="text-xs text-primary font-semibold">{status.train_number} · {status.date}</p><h3 className="text-xl font-semibold mt-1">{status.train_name}</h3><p className="mt-2 text-sm">{status.route[0]?.station?.name || 'Origin unavailable'} → {status.route.at(-1)?.station?.name || 'Destination unavailable'}</p><div className="flex flex-wrap gap-5 mt-4 text-sm"><span>Last reported: <strong>{status.current_station?.name || 'Unavailable'}</strong></span><span>{delayLabel(status.overall_delay_minutes)}</span><span>Updated: {time(location?.updated_at)}</span></div></div>
-      <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-4 flex justify-between gap-3"><strong>Your train’s route</strong><button disabled={loading} onClick={() => refresh.current()} className="text-primary disabled:opacity-50">{loading ? 'Refreshing…' : 'Refresh'}</button></div><div className="h-[520px]"><MapWrapper key={status.train_number + status.date} trains={trains} route={route} routeLoading={routeLoading} selectedTrainId={status.train_number} onSelectTrain={() => {}} /></div><p className="p-4 text-xs text-muted-foreground">{route.length} of {status.route.length} stops mapped. Dashed lines connect station locations approximately; exact railway track geometry is unavailable. {refreshDescription(refreshInterval)} Shared cached information reduces API usage.</p></div>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden"><div className="p-4 flex justify-between gap-3"><strong>Your train’s route</strong><button disabled={loading} onClick={() => refresh.current()} className="text-primary disabled:opacity-50">{loading ? 'Refreshing…' : 'Refresh'}</button></div><div data-journey-map className="h-[520px]">{active && <MapWrapper key={status.train_number + status.date + ':' + mapRevision} trains={trains} route={route} routeLoading={routeLoading} selectedTrainId={status.train_number} onSelectTrain={() => {}} />}</div><p className="p-4 text-xs text-muted-foreground">{route.length} of {status.route.length} stops mapped. Dashed lines connect station locations approximately; exact railway track geometry is unavailable. {refreshDescription(refreshInterval)} Shared cached information reduces API usage.</p></div>
       <PassengerJourney number={status.train_number} date={status.date} suppliedJourney={journey!} refreshing={loading} onRefresh={() => refresh.current()} />
     </>}
     {!tracked && <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-10 text-center"><h3 className="font-semibold">Your journey, on one map</h3><p className="mt-2 text-sm text-muted-foreground">Choose a train above to begin. Only your selected train will appear here.</p></div>}
