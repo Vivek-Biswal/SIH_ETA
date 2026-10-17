@@ -20,6 +20,7 @@ different things; the documentation keeps those distinctions explicit.
 | Finish the GitHub About panel | [Repository settings](REPOSITORY_SETTINGS.md) |
 | Review this documentation overhaul | [Presentation audit](PRESENTATION_AUDIT.md) |
 | Understand the native arrival/feedback update | [Mobile delivery note](MOBILE_ETA_FEEDBACK.md) |
+| Use passenger journey alerts | [Alert behavior and evidence](JOURNEY_ALERTS.md) |
 
 ## Evidence, not just descriptions
 

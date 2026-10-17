@@ -18,6 +18,7 @@ that exists; it does not guarantee external-provider availability or accuracy.
 | Flutter Journey insights parity | Implemented through shared web workspace | Android/iOS WebView hosts tracking, analytics, history and simulation; native Flutter also has historical network views. Requires the deployed website. [Workspace](../apps/mobile/flutter_app/lib/features/network/journey_workspace_screen.dart). |
 | Onboarding, saved journeys, appearance settings | Implemented in Flutter | Local preferences; up to 20 saved journeys. No cloud synchronization implied. |
 | Station reminder | Device-clock handoff | Opens the phone clock for a user-confirmed alarm. It does not follow later train delays and is not a push notification service. |
+| Website journey alerts | Implemented, in-page only | Three explicitly watched journeys, stop-specific delay thresholds, arrival changes, read filters, freshness checks and bounded manual/optional foreground refresh. No network-wide incident or background-push claim. [Alert guide](JOURNEY_ALERTS.md). |
 | Native ETA feedback | Implemented in 1.1.10+12 | Local pending queue, retry and idempotent server receipt; unverified reports, not model-training labels. [Delivery note](MOBILE_ETA_FEEDBACK.md). Gallery captures are the preceding 1.1.9+11 release. |
 | Offline live tracking | Not implemented | Previously cached information may be available; no new position is produced offline. |
 | Nationwide trained ETA coverage | Not implemented | Requires broader representative, dated historical outcomes and prospective evaluation. |

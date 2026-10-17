@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = [
     'README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'backend/README.md',
     'apps/web/web_app/README.md', 'apps/mobile/flutter_app/README.md', 'intelligence/README.md',
-    'docs/README.md', 'docs/FEATURE_STATUS.md', 'docs/DATA_SOURCES.md',
+    'docs/README.md', 'docs/FEATURE_STATUS.md', 'docs/DATA_SOURCES.md', 'docs/JOURNEY_ALERTS.md',
     'docs/REPOSITORY_SETTINGS.md', 'docs/PRESENTATION_AUDIT.md',
     'docs/development/setup.md', 'docs/development/branching.md',
     'docs/architecture/system-architecture.md', 'docs/api/api-contract.md',
