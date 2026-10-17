@@ -158,7 +158,7 @@ void main() {
             .stationCode,
         'CCC',
       );
-      await tester.tap(find.byTooltip('Back to search'));
+      await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       await revealTap(tester, find.byKey(Key('remove-saved-${journey.id}')));
       expect(find.text('Keep your train handy'), findsOneWidget);

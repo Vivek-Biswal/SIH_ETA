@@ -91,3 +91,73 @@ test('embedded Back reuses visited Activity boundaries while hidden maps and eff
   assert.equal(toolProps(back[0]).mapRevision, 2, 'returning maps recreate removed Leaflet instances');
   assert.equal(toolProps(back[1]).active, false, 'simulation playback remains inactive when hidden');
 });
+
+test('compact past delays reveal five cached rows at a time, reset on search and leave website lists complete', async () => {
+  const fixture = {
+    period_start: '2026-09-01', period_end: '2026-09-30', station_count: 50, interaction_count: 50, high_risk_count: 2,
+    stations: Array.from({ length: 50 }, (_, i) => ({ station: `ST${i}`, interactions: 4, mean_source_delay_minutes: 12, mean_gap_minutes: 8, bottleneck_score: .3 })),
+    interactions: Array.from({ length: 50 }, (_, i) => ({ station: `ST${i}`, service_date: '2026-09-01', source_train: '12423', target_train: '12424', source_delay_minutes: 10, target_delay_minutes: 12, gap_minutes: 8, risk_score: .3, risk: 'moderate' })),
+  };
+  const slots = [], requests = [];
+  let cursor = 0, effects = [];
+  const historyModule = { exports: {} };
+  const historyImports = { ...imports,
+    react: { ...React,
+      useState(initial) {
+        const index = cursor++;
+        slots[index] ??= { value: initial };
+        return [slots[index].value, next => { slots[index].value = typeof next === 'function' ? next(slots[index].value) : next; }];
+      },
+      useEffect(effect, deps) {
+        const index = cursor++, previous = slots[index]?.deps;
+        if (!previous || deps.some((value, i) => !Object.is(value, previous[i]))) {
+          slots[index] = { deps };
+          effects.push(effect);
+        }
+      },
+    },
+    '@/services/networkInsights': { loadInsights: query => { requests.push(query); return Promise.resolve(fixture); } },
+  };
+  new Function('require', 'module', 'exports', code)(name => historyImports[name] ?? require(name), historyModule, historyModule.exports);
+  function renderHistory(compact = true) {
+    cursor = 0; effects = [];
+    const tree = historyModule.exports.HistoricalInsights({ compact });
+    effects.forEach(effect => effect());
+    return tree;
+  }
+  const settle = async () => { for (let i = 0; i < 4; i++) await Promise.resolve(); };
+  function descendants(tree) {
+    const result = [];
+    function visit(node) {
+      if (Array.isArray(node)) { node.forEach(visit); return; }
+      if (!React.isValidElement(node)) return;
+      result.push(node); visit(node.props.children);
+    }
+    visit(tree); return result;
+  }
+  const label = node => Array.isArray(node) ? node.map(label).join('') : React.isValidElement(node) ? label(node.props.children) : node ?? '';
+  const count = (tree, attr) => descendants(tree).filter(node => Object.hasOwn(node.props, attr)).length;
+  const more = (tree, kind) => descendants(tree).find(node => node.type === 'button' && label(node).includes(`more ${kind}`));
+  renderHistory(); await settle();
+  let tree = renderHistory();
+  assert.equal(count(tree, 'data-history-station'), 5);
+  assert.equal(count(tree, 'data-history-interaction'), 5);
+  more(tree, 'stations').props.onClick(); tree = renderHistory();
+  more(tree, 'stations').props.onClick(); tree = renderHistory();
+  more(tree, 'interactions').props.onClick(); tree = renderHistory();
+  assert.equal(count(tree, 'data-history-station'), 15);
+  assert.equal(count(tree, 'data-history-interaction'), 10);
+  assert.deepEqual(requests, [''], 'revealing loaded records must not request more data');
+  const website = renderHistory(false);
+  assert.equal(count(website, 'data-history-station'), 50);
+  assert.equal(count(website, 'data-history-interaction'), 50);
+  assert.equal(more(website, 'stations'), undefined);
+  tree = renderHistory();
+  descendants(tree).find(node => node.type === 'input').props.onChange({ target: { value: 'NDLS' } });
+  tree = renderHistory();
+  descendants(tree).find(node => node.type === 'form').props.onSubmit({ preventDefault() {} });
+  renderHistory(); await settle(); tree = renderHistory();
+  assert.equal(count(tree, 'data-history-station'), 5);
+  assert.equal(count(tree, 'data-history-interaction'), 5);
+  assert.deepEqual(requests, ['', 'NDLS']);
+});

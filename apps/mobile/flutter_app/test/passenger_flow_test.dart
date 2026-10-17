@@ -152,7 +152,7 @@ void main() {
     final repo = TestRepository()..noTrain = true;
     await pumpApp(tester, repo, location: '/trains/99999');
     expect(find.textContaining('Train not found'), findsOneWidget);
-    await tester.tap(find.byTooltip('Back to search'));
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Find your train'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -193,7 +193,7 @@ void main() {
       expect(find.text('Train search results'), findsOneWidget);
       expect(find.text('Have a train number?'), findsNothing);
       expect(find.textContaining('No matching services'), findsOneWidget);
-      await tester.tap(find.byTooltip('Back to search'));
+      await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       expect(find.text('Find your train'), findsOneWidget);
       expect(find.text('AAA station (AAA)'), findsOneWidget);
@@ -216,7 +216,7 @@ void main() {
     );
     expect(repo.searchedDate, DateTime(2026, 9, 23));
     expect(find.text('Train search results'), findsOneWidget);
-    await tester.tap(find.byTooltip('Back to search'));
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Find your train'), findsOneWidget);
   });

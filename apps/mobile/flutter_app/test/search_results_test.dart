@@ -50,6 +50,6 @@ void main() {
     await pumpApp(tester, repo, location: '/search');
     expect(repo.requests, isEmpty);
     expect(find.textContaining('Choose different origin'), findsOneWidget);
-    expect(find.byTooltip('Back to search'), findsOneWidget);
+    expect(find.byTooltip('Back'), findsOneWidget);
   });
 }

@@ -86,9 +86,9 @@ void main() {
       await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.byType(JourneyWorkspaceScreen), findsOneWidget);
-      expect(find.text('Open journey workspace'), findsOneWidget);
+      expect(find.text('Open journey tools'), findsOneWidget);
       expect(find.text('Journey insights'), findsOneWidget);
-      await tester.tap(find.byTooltip('Open native past delay analysis'));
+      await tester.tap(find.text('View past delays without the map'));
       await tester.pumpAndSettle();
       expect(find.text('Could delays affect my journey?'), findsOneWidget);
       expect(tester.takeException(), isNull);

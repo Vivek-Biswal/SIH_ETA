@@ -14,6 +14,7 @@ import 'features/onboarding/onboarding_screen.dart';
 import 'features/saved/saved_journeys_screen.dart';
 import 'features/network/network_screen.dart';
 import 'features/network/journey_workspace_screen.dart';
+import 'core/navigation/app_navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,62 +31,68 @@ final _router = createAppRouter();
 
 GoRouter createAppRouter({String initialLocation = '/'}) => GoRouter(
   initialLocation: initialLocation,
+  observers: [appRouteObserver],
   routes: [
     GoRoute(
-      path: '/journey-workspace',
-      builder: (context, state) => const JourneyWorkspaceScreen(),
-    ),
-    GoRoute(
-      path: '/guide',
-      builder: (context, state) => OnboardingScreen(
-        replay: true,
-        onFinished: () => context.canPop() ? context.pop() : context.go('/'),
-      ),
-    ),
-    GoRoute(
-      path: '/saved',
-      builder: (context, state) => const SavedJourneysScreen(),
-    ),
-    GoRoute(
-      path: '/directory',
-      builder: (context, state) => const DirectoryScreen(),
-    ),
-    GoRoute(
-      path: '/board',
-      builder: (context, state) => const DirectoryScreen(board: true),
-    ),
-    GoRoute(
-      path: '/explore',
-      builder: (context, state) => const ExploreScreen(),
-    ),
-    GoRoute(
-      path: '/network',
-      builder: (context, state) => const NetworkScreen(),
-    ),
-    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
-    GoRoute(
-      path: '/search',
-      builder: (context, state) {
-        final query = state.uri.queryParameters;
-        return TrainSearchResultsScreen(
-          from: query['from'] ?? '',
-          to: query['to'] ?? '',
-          fromName: query['fromName'] ?? '',
-          toName: query['toName'] ?? '',
-          date: DateTime.tryParse(query['date'] ?? ''),
-        );
-      },
-    ),
-    GoRoute(
-      path: '/trains/:id',
-      builder: (context, state) {
-        final id = state.pathParameters['id'] ?? '';
-        return TrainDetailsScreen(
-          trainNumber: id,
-          stationCode: state.uri.queryParameters['station'],
-          journeyDate: state.uri.queryParameters['date'],
-        );
-      },
+      path: '/',
+      builder: (context, state) => const HomeScreen(),
+      routes: [
+        GoRoute(
+          path: 'journey-workspace',
+          builder: (context, state) => const JourneyWorkspaceScreen(),
+        ),
+        GoRoute(
+          path: 'guide',
+          builder: (context, state) => OnboardingScreen(
+            replay: true,
+            onFinished: () => backToPreviousScreen(context),
+          ),
+        ),
+        GoRoute(
+          path: 'saved',
+          builder: (context, state) => const SavedJourneysScreen(),
+        ),
+        GoRoute(
+          path: 'directory',
+          builder: (context, state) => const DirectoryScreen(),
+        ),
+        GoRoute(
+          path: 'board',
+          builder: (context, state) => const DirectoryScreen(board: true),
+        ),
+        GoRoute(
+          path: 'explore',
+          builder: (context, state) => const ExploreScreen(),
+        ),
+        GoRoute(
+          path: 'network',
+          builder: (context, state) => const NetworkScreen(),
+        ),
+        GoRoute(
+          path: 'search',
+          builder: (context, state) {
+            final query = state.uri.queryParameters;
+            return TrainSearchResultsScreen(
+              from: query['from'] ?? '',
+              to: query['to'] ?? '',
+              fromName: query['fromName'] ?? '',
+              toName: query['toName'] ?? '',
+              date: DateTime.tryParse(query['date'] ?? ''),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'trains/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return TrainDetailsScreen(
+              trainNumber: id,
+              stationCode: state.uri.queryParameters['station'],
+              journeyDate: state.uri.queryParameters['date'],
+            );
+          },
+        ),
+      ],
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

@@ -10,8 +10,11 @@ class AppNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) => NavigationBar(
     selectedIndex: selected,
-    onDestinationSelected: (i) =>
-        context.go(['/', '/saved', '/journey-workspace', '/explore'][i]),
+    onDestinationSelected: (i) {
+      final destination = ['/', '/saved', '/journey-workspace', '/explore'][i];
+      if (GoRouterState.of(context).uri.path == destination) return;
+      context.push(destination);
+    },
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.train_outlined),

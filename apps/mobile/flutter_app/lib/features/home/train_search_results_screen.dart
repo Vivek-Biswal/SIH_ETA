@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/navigation/app_navigation.dart';
 import '../../core/models/train_models.dart';
 import '../../core/services/train_repository.dart';
 import '../../shared/widgets/passenger_components.dart';
@@ -120,9 +121,9 @@ class _TrainSearchResultsState extends ConsumerState<TrainSearchResultsScreen> {
       appBar: AppBar(
         title: const Text('Train search results'),
         leading: IconButton(
-          tooltip: 'Back to search',
+          tooltip: 'Back',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+          onPressed: () => backToPreviousScreen(context),
         ),
       ),
       body: RefreshIndicator(

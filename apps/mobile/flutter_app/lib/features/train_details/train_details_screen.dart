@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import '../../core/services/preferences.dart';
 import '../../core/services/saved_journeys.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/models/train_models.dart';
 import '../../core/models/journey_view.dart';
 import '../../core/network/api_client.dart';
+import '../../core/navigation/app_navigation.dart';
 import '../../core/services/train_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/eta_display.dart';
@@ -270,8 +270,8 @@ class _TrainDetailsScreenState extends ConsumerState<TrainDetailsScreen>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back to search',
-          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+          tooltip: 'Back',
+          onPressed: () => backToPreviousScreen(context),
           icon: Icon(Icons.arrow_back),
         ),
         title: Text(
