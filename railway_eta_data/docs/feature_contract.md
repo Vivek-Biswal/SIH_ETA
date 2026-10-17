@@ -1,5 +1,11 @@
 # Feature Contract
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document formally defines every feature extractable in the current framework, its source, availability, and leakage status.
 
 ## 1. Static Features
@@ -110,7 +116,7 @@ This document formally defines every feature extractable in the current framewor
 - **Calculation**: Direct extraction for a matching station code.
 - **Availability**: HISTORICAL_CONTEXT
 - **Temporal Validity**: TEMPORALLY_UNSAFE_OR_UNKNOWN. The exact time bounding of DA323 is unknown. It cannot be mathematically proven that it does not contain future information relative to a simulated past prediction.
-- **Leakage Risk**: UNSAFE for direct ML training targets or individual dynamic state. Usable ONLY as broad geographical context.
+- **Leakage Risk**: UNSAFE for direct model-training targets or individual dynamic state. Usable ONLY as broad geographical context.
 
 ## 6. Live Features
 

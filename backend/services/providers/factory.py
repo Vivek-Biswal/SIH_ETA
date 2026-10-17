@@ -15,7 +15,7 @@ from .interfaces import (
 
 logger = logging.getLogger(__name__)
 
-# Switch these to True when the ML modules are ready to be used
+# Select providers while preserving explicit fallbacks for unavailable inputs.
 USE_REAL_ETA = True
 USE_REAL_NETWORK = True
 

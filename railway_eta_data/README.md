@@ -1,6 +1,9 @@
 # railway_eta_data
 
-Project for predicting Indian Train ETAs.
+Offline dataset preparation and deterministic baseline workspace for Indian train
+arrival estimates. This workspace documents the original preparation datasets;
+it is separate from the backend's limited trained-model pilot described in the
+[ETA model audit](../docs/ETA_MODEL_AUDIT.md).
 
 ## Data Pipeline
 
@@ -34,9 +37,9 @@ The data pipeline validates, cleans, and standardises real-world raw datasets fr
 
 ## Actual Limitations
 
-Please note the following constraints when working with this repository:
-1. **No Historical Actual Arrivals:** We do not possess historical actual arrival timestamps. DA323 provides *aggregated* historical data (averages, percentages), not individual journeys.
-2. **Not Suitable for Supervised ML:** Because DA323 is purely aggregated, attempting to use it as both a feature and target for delay risk prediction will result in 100% data leakage.
+Please note the following constraints of these preparation datasets and baseline:
+1. **No Historical Actual Arrivals in These Datasets:** The original preparation datasets lack historical actual arrival timestamps. DA323 provides *aggregated* historical data (averages, percentages), not individual journeys.
+2. **Not Suitable for Supervised Model Training:** Because DA323 is purely aggregated, using its same summary as both an input and target leaks the target into the inputs and cannot establish journey-level arrival accuracy.
 3. **Live Data:** Railpull delays are snapshots. The RailRadar API integration is implemented (`src/live_api/railradar_client.py`), but live telemetry (like current speed or position) has not yet been collected.
 4. **Conclusion:** The current data does not support training a scientifically valid dynamic supervised ETA model at this stage. It is, however, fully ready for Exploratory Data Analysis (EDA) and network analysis.
 

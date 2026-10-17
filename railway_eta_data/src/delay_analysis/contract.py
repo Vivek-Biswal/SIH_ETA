@@ -45,7 +45,7 @@ class DelayDNAProfile:
 
     Explicitly tracks the category and completeness of every field.
 
-    NOT usable for ML training without verified time-aligned historical labels.
+    Not usable for model training without verified time-aligned historical labels.
     """
     train_number: str
 
@@ -78,12 +78,12 @@ class DelayDNAProfile:
 
     # --- Profile Metadata ---
     data_completeness_note: str = (
-        "This profile does not support ML training. "
+        "This profile does not support model training. "
         "Actual arrival labels and time-aligned trajectory observations are missing."
     )
     limitations: List[str] = field(default_factory=lambda: [
         "current_delay is a single snapshot, not a time series",
         "historical_avg_delay has unknown temporal provenance (DA323)",
-        "actual_arrival_time is unavailable — blocks ML target creation",
+        "actual_arrival_time is unavailable — blocks model target creation",
         "historical_trajectory is unavailable — blocks recovery measurement"
     ])

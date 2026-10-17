@@ -1,7 +1,13 @@
 # Current Project Data Status
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 > [!WARNING]
-> **CORRECTION NOTICE:** For the final, audited assessment of dataset suitability (especially regarding DA323 and supervised ML), please refer to [`final_data_verification.md`](file:///c:/Users/Lenovo/OneDrive/Desktop/GitHub/SIH_ETA/railway_eta_data/docs/final_data_verification.md).
+> **CORRECTION NOTICE:** For the final, audited assessment of dataset suitability (especially regarding DA323 and supervised training), please refer to [`final_data_verification.md`](final_data_verification.md).
 
 This document answers core questions about the state of our data and summarizes our readiness for ETA modeling.
 
@@ -26,10 +32,10 @@ This document answers core questions about the state of our data and summarizes 
    We can perform Exploratory Data Analysis on historical average delays, route topologies, scheduling distributions, and station bottlenecks.
 8. **What can currently be used for feature engineering?**
    We can engineer baseline scheduled features (distance, planned duration) and historical prior features (average historical delay per station).
-9. **What can currently be used for machine learning?**
+9. **What can currently be used for model training?**
    Without actual arrival data (the ground truth target variable), we cannot train a supervised regression model for ETA. 
 10. **What cannot yet be done because historical actual arrival data is missing?**
-    We cannot calculate true remaining journey times for past observations, which means we cannot train or validate a scientifically sound machine-learning predictive model.
+    We cannot calculate true remaining journey times for past observations, which means we cannot train or validate a scientifically sound trained predictive model.
 
 ## Final Classification
 

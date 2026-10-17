@@ -68,7 +68,7 @@ def analyze_repo():
             rel_path = os.path.relpath(filepath, base)
             files_list.append(rel_path)
             
-            # Check ML
+            # Check for model-training libraries and fitting calls
             if file.endswith(".py") or file.endswith(".ipynb"):
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:

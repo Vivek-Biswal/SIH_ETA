@@ -1,9 +1,15 @@
 # Feature Candidates
 
-> [!WARNING]
-> **CORRECTION NOTICE:** Earlier feature lists incorrectly assumed "Current Speed" was available. Please refer to [`final_data_verification.md`](file:///c:/Users/Lenovo/OneDrive/Desktop/GitHub/SIH_ETA/railway_eta_data/docs/final_data_verification.md) for the verified status of live features and the determination that the DA323 dataset is unsuitable for supervised ML.
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
 
-This document outlines the machine-learning feature candidates that can be safely derived from our *available real data*.
+> [!WARNING]
+> **CORRECTION NOTICE:** Earlier feature lists incorrectly assumed "Current Speed" was available. Please refer to [`final_data_verification.md`](final_data_verification.md) for the verified status of live features and the determination that the DA323 dataset is unsuitable for supervised training.
+
+This document outlines the predictive feature candidates that can be safely derived from our *available real data*.
 
 ## 1. Static Features
 
@@ -40,4 +46,4 @@ This document outlines the machine-learning feature candidates that can be safel
 | Segment Progress | RailRadar API | Extracted from `segment_progress`. | YES (via API) | Sometimes telemetry degrades. |
 
 > [!WARNING]
-> While we can derive many features to feed an ML model, **we still cannot derive the target variable** (`actual_arrival_time`) from historical data, because DA323 only provides aggregated stats, and Datameet only provides static schedules.
+> While we can derive many features to feed a predictive model, **we still cannot derive the target variable** (`actual_arrival_time`) from historical data, because DA323 only provides aggregated stats, and Datameet only provides static schedules.

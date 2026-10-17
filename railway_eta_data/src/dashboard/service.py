@@ -8,7 +8,7 @@ DESIGN PRINCIPLES:
 - Datasets are loaded ONCE on first access (lazy singleton pattern).
 - All access is read-only — no dataset is ever modified.
 - Missing or unreadable files raise descriptive errors rather than returning synthetic data.
-- The ETA system is a deterministic baseline, NOT an ML model. This is stated explicitly
+- This inspection ETA is a deterministic baseline, not a trained prediction model. This is stated explicitly
   in every dataset summary response.
 """
 import os
@@ -148,7 +148,7 @@ def get_data_summary() -> Dict[str, Any]:
 
     return {
         "disclaimer": (
-            "The current ETA system uses deterministic baselines and is NOT a supervised ML model. "
+            "This local inspection tool uses deterministic baselines, not a trained prediction model. "
             "Predictions are computed from static scheduled data and optionally provided current delay. "
             "No historical training data is used for ETA generation."
         ),

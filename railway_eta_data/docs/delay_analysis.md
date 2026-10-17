@@ -1,12 +1,18 @@
 # Delay Analysis
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Objective
 To build an honest analytical framework characterizing the delay patterns observable in the current SIH Indian Train ETA dataset, while explicitly bounding what can and cannot be claimed scientifically.
 
 ## 2. Definition of Delay-DNA
 See [`delay_dna_definition.md`](delay_dna_definition.md).
 
-In brief: **Delay-DNA** is a structured analytical profile combining observed snapshot delays, historical aggregated station context, and static route characteristics. It is descriptive — not a predictive ML feature set.
+In brief: **Delay-DNA** is a structured analytical profile combining observed snapshot delays, historical aggregated station context, and static route characteristics. It is descriptive — not a validated predictive feature set.
 
 ## 3. Available Delay Data
 
@@ -47,7 +53,7 @@ In brief: **Delay-DNA** is a structured analytical profile combining observed sn
 ## 5. Historical Aggregated Delay Context (DA323)
 
 > [!CAUTION]
-> DA323 has UNKNOWN temporal provenance. It cannot be used as a leakage-safe ML feature.
+> DA323 has UNKNOWN temporal provenance. It cannot be used as a leakage-safe model feature.
 
 | Metric | Value |
 |---|---|
@@ -90,7 +96,7 @@ Each profile contains four sections:
 
 See `reports/delay_analysis/delay_feature_registry.csv` for the full registry.
 
-| Field | Category | Available | ML Safe |
+| Field | Category | Available | Safe for Training |
 |---|---|---|---|
 | `current_delay_minutes` | OBSERVED_CURRENT | YES | NO (single snapshot) |
 | `historical_avg_delay` | HISTORICAL_AGGREGATED | YES | NO (temporal unknown) |
@@ -121,9 +127,9 @@ See [`recovery_analysis_plan.md`](recovery_analysis_plan.md) for the future requ
 - No GPS position, speed, or segment progress data is available.
 - No individual historical trajectories exist — recovery measurement is impossible now.
 
-## 13. ML Readiness
+## 13. Model Training Readiness
 
-**NOT READY for supervised ML training.**
+**NOT READY for supervised model training.**
 
 Blockers:
 - `actual_arrival_time`: MISSING (no ground truth labels)

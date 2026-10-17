@@ -1,11 +1,17 @@
 # Leakage-Safe Feature Engineering Framework
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Objective
 To construct a modular, reproducible, and mathematically safe feature engineering pipeline for the SIH Indian Train ETA Project, strictly adhering to temporal causality rules.
 
 ## 2. Current Data Constraints
 - **No Historical Individual Observations**: We do not possess time-series records of individual train movements linked to their actual future arrival times.
-- **Consequence**: ML targets (labels) cannot be legally constructed. Any attempt to build an ML model on this data would require fabricating actual arrivals (fraud) or using scheduled arrivals as targets (scientifically invalid).
+- **Consequence**: Model targets (labels) cannot be legally constructed. Any attempt to train a predictive model on this data would require fabricating actual arrivals (fraud) or using scheduled arrivals as targets (scientifically invalid).
 - **Goal**: Build the feature extraction logic so that when legal telemetry data is acquired, the pipeline is ready.
 
 ## 3. Feature Categories
@@ -78,7 +84,7 @@ When a live NTES/RailRadar feed is acquired alongside an archiving system, the f
 - We cannot extract segment-level congestion metrics without live telemetry.
 - DA323 data cannot be used dynamically.
 
-## 17. ML Readiness
+## 17. Model Training Readiness
 **WHAT IS READY:**
 - Feature extraction architecture
 - Static, schedule, and route feature definitions
@@ -86,4 +92,4 @@ When a live NTES/RailRadar feed is acquired alongside an archiving system, the f
 - Join validation and lookup mechanisms
 
 **WHAT IS NOT READY:**
-- Supervised ML Model Training. We lack actual arrival labels and time-aligned observations.
+- Supervised Predictive Model Training. We lack actual arrival labels and time-aligned observations.

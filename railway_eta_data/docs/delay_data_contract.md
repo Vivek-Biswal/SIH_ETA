@@ -1,5 +1,11 @@
 # Delay Data Contract
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document formalizes every delay-related data field currently available in the SIH Indian Train ETA Project, distinguishing clearly between live snapshots and historical aggregations.
 
 ## 1. Current Observed Delay
@@ -48,7 +54,7 @@ This document formalizes every delay-related data field currently available in t
 - **Description**: The exact timestamp a train physically arrived at a station.
 - **Observation Level**: Individual train event.
 - **Available Now?**: NO.
-- **Limitations**: Blocks all ML training.
+- **Limitations**: Blocks supervised arrival-model training from these data.
 
 ### `historical_train_trajectory`
 - **Description**: A time-series array of delay measurements for a single train journey.

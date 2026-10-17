@@ -13,7 +13,7 @@ workflow configuration. It does not replace the ETA model or redesign the app.
 | Finding | Resolution |
 | --- | --- |
 | README linked a missing banner and used older branding/framework versions | Etaernal header, existing train logo, restrained technology badges and source-verified stack |
-| Old text claimed NTES training, broad high-precision AI and weather/congestion features | Real three-train model, pinned third-party provenance, measured MAE/RMSE and explicit serving/validation limits |
+| Old text claimed NTES training, broad high-precision prediction and weather/congestion features | Real three-train model, pinned third-party provenance, measured MAE/RMSE and explicit serving/validation limits |
 | No dependable actual application gallery | Genuine deployed Chrome and Android release screenshots, descriptive captions, capture record and hash/dimension manifest |
 | Setup required nonexistent Alembic/seed/test commands and assumed Redis/PostgreSQL | Directory-specific setup for the actual FastAPI, Next.js and Flutter paths; optional database boundary and valid checks |
 | Fresh Android clones require signing properties even for debug configuration | Explicit local-keystore/key.properties instructions, private-file boundaries and debug package identity |

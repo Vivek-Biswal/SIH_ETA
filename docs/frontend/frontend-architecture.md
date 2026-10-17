@@ -55,7 +55,7 @@ Route definitions in `lib/core/routing/app_router.dart`
 | `home/` | Home screen with quick search |
 | `train_search/` | Search trains by source/destination |
 | `train_status/` | Live running status |
-| `eta/` | AI ETA predictions per station |
+| `eta/` | ETA predictions per station |
 | `train_details/` | Full route and timetable |
 | `notifications/` | Push notification settings |
 | `profile/` | User account settings |

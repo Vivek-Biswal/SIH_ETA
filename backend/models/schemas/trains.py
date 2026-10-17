@@ -102,7 +102,7 @@ class TrainStatusResponse(BaseModel):
 
 
 class StationETA(BaseModel):
-    """ML-predicted ETA at a specific station."""
+    """Predicted ETA at a specific station."""
 
     station: Optional[StationRef] = None
     scheduled_arrival: Optional[str] = None
@@ -120,7 +120,7 @@ class DelayFactor(BaseModel):
 
 
 class ETAResponse(BaseModel):
-    """ML-predicted ETA for all remaining stations on a train's route."""
+    """Predicted ETA for all remaining stations on a train's route."""
 
     train_number: str
     train_name: str

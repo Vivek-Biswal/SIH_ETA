@@ -13,7 +13,7 @@ Do not infer deployed capability from older folder names, notebooks or wrappers.
 | Runtime eligibility and JSON inference | [backend/services/eta_ml.py](../backend/services/eta_ml.py) |
 | Historical network research | `network_intelligence/`, `propagation/` and their dated artifacts |
 
-Read the [ETA audit](../docs/ETA_ML_AUDIT.md) for features, chronological splits,
+Read the [ETA audit](../docs/ETA_MODEL_AUDIT.md) for features, chronological splits,
 baseline comparison, measured errors and serving limits. The legacy
 `train_eta/inference/predictor.py` interface is not the deployed passenger model;
 it declines learned prediction without the necessary dated observation inputs.

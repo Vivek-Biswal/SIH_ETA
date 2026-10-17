@@ -33,7 +33,7 @@ class StaticFeatureRecord:
 @dataclass
 class DynamicPredictionFeatureRecord:
     """
-    Features required for a dynamic ML ETA prediction.
+    Features required for a dynamic trained-model arrival prediction.
     Many of these are currently unavailable in the real world.
     """
     train_number: str

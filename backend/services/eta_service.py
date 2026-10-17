@@ -1,5 +1,5 @@
 """
-ETA service — business logic for ML-predicted arrival times.
+ETA service — business logic for predicted arrival times.
 
 Orchestrates stored predictions, intelligence adapter calls, schedule-based
 fallbacks, and delay factor assembly.
@@ -36,10 +36,10 @@ class ETAService:
         self, train_number: str, date: Optional[str]
     ) -> Optional[ETAResponse]:
         """
-        Get ML-predicted ETA for remaining stations on a train's route.
+        Get Predicted ETA for remaining stations on a train's route.
 
         Priority:
-        1. Live ML inference via the intelligence adapter
+        1. Live model inference via the intelligence adapter
         2. Stored predictions from the eta_predictions table
         3. Schedule-based baseline (current delay applied uniformly)
 
@@ -52,7 +52,7 @@ class ETAService:
         journey = self._train_repo.get_latest_journey(train_number, date)
         current_delay = self._extract_delay(journey)
 
-        # Attempt live ML prediction
+        # Attempt live model prediction
         schedule = self._train_repo.get_schedule(train_number)
         ml_predictions = self._adapter.predict_eta(
             train_number,
@@ -103,7 +103,7 @@ class ETAService:
 
     @staticmethod
     def _parse_ml_predictions(predictions: list[dict]) -> list[StationETA]:
-        """Convert raw ML adapter output to StationETA schemas."""
+        """Convert raw prediction adapter output to StationETA schemas."""
         return [
             StationETA(
                 station={"code": p.get("station_code", ""), "name": ""},

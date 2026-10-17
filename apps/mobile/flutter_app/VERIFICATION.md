@@ -39,7 +39,7 @@ The emulator used `http://10.0.2.2:8090`. Native visual captures are in `build/v
 
 - Flutter parsed the compact compatibility ETA response as the versioned station-level response. It now consumes the verified v1 contracts and fetches status and ETA for the same journey.
 - Search used fixed endpoints and read nonexistent live/ETA fields. The home screen now selects real backend stations, paginates scheduled services and opens actual train details.
-- Hardcoded arrival times, current-station highlighting and ML/high-confidence claims were removed.
+- Hardcoded arrival times, current-station highlighting and unsupported prediction/confidence claims were removed.
 - Nullable/malformed payloads, retry, partial failure, stale content, foreground refresh and safe navigation are handled explicitly. HTTP clients are injectable and disposed.
 - Backend metadata identifies source and actual prediction branch without changing legacy fields.
 - The mock database null filter crashed ETA requests; its tuple shape is fixed. Demo train search also now supplies the same station-reference joins as the database-backed query.

@@ -1,6 +1,12 @@
 # Final Data Consistency and Verification Audit
 
-This document serves as the final audit of the SIH Indian Train ETA Prediction Project's data preparation phase. It verifies record counts, live feature availability, the DA323 dataset schema, and ML suitability.
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
+This document serves as the final audit of the SIH Indian Train ETA Prediction Project's data preparation phase. It verifies record counts, live feature availability, the DA323 dataset schema, and model-training suitability.
 
 ## 1. Verify Record Count Inconsistencies
 
@@ -61,16 +67,16 @@ This document serves as the final audit of the SIH Indian Train ETA Prediction P
 13. Significant-delay percentage -> **AVAILABLE**
 14. Cancellation information -> **AVAILABLE**
 
-## 4. DA323 ML Suitability & Data Leakage Analysis
+## 4. DA323 Model Training Suitability & Data Leakage Analysis
 
 Can DA323 support a limited/honest prototype model (e.g., classifying "Delay Risk Category" from features)?
 
 **Data Leakage Analysis:**
-To train a supervised ML model predicting "Delay Risk Category" (e.g. Significant Delay), the target label must come from the DA323 dataset (e.g., `Significant Delay (>1 Hour)`). 
+To train a supervised model predicting "Delay Risk Category" (e.g. Significant Delay), the target label must come from the DA323 dataset (e.g., `Significant Delay (>1 Hour)`).
 If we use DA323's `Average_Delay(min)` as an input feature to predict `Significant Delay (>1 Hour)`, the model is simply learning the dataset's own internal correlation between two aggregated summary statistics of the *same missing underlying data*. 
 - **Independence:** The train-level/station-level features are NOT independent of the target. Both are identical summaries of the exact same missing historical observations. 
 - **Honest Evaluation:** There is no independent variation or holdout set of *actual journeys* to test if the model actually predicts real-world delay. 
-- **Conclusion:** **NOT SUITABLE FOR SUPERVISED ML.** Any model trained to predict DA323 aggregated percentages using DA323 aggregated delays would suffer from 100% data leakage and yield meaningless results.
+- **Conclusion:** **NOT SUITABLE FOR SUPERVISED TRAINING.** Any model trained to predict DA323 aggregated percentages using DA323 aggregated delays would suffer from 100% data leakage and yield meaningless results.
 
 ## Final Verdict
 

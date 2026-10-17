@@ -97,7 +97,7 @@ class TrainStateBuilder:
                  state.historical_availability = DataAvailability(
                      "TEMPORALLY_UNSAFE",
                      source="public_historical_delay_clean.csv",
-                     limitations=["Temporal provenance unknown. May cause leakage if used for ML."]
+                     limitations=["Temporal provenance unknown. May cause leakage if used for model training."]
                  )
         
         return state

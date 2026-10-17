@@ -207,10 +207,10 @@ paths:
   /api/v1/trains/{train_number}/eta:
     get:
       tags: [trains]
-      summary: Get ML-predicted ETA for remaining stations
+      summary: Get predicted ETA for remaining stations
       operationId: trains_get_eta
       description: |
-        Returns AI/ML-predicted Expected Time of Arrival for all remaining stations
+        Returns predicted Expected Time of Arrival for all remaining stations
         on the train's route. Predictions account for historical delay patterns,
         current running status, weather, and network congestion.
       parameters:
@@ -228,7 +228,7 @@ paths:
             format: date
       responses:
         '200':
-          description: ML-predicted ETA for remaining stations
+          description: Predicted ETA for remaining stations
           content:
             application/json:
               schema:
@@ -541,7 +541,7 @@ components:
           format: date-time
         model_version:
           type: string
-          description: Version identifier of the ML model used
+          description: Version identifier of the prediction model used
         overall_delay_minutes:
           type: integer
           description: Predicted total delay at final destination

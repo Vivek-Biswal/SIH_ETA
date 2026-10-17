@@ -1,6 +1,6 @@
 # Etaernal mobile
 
-Flutter passenger application, version **1.1.10+12**. Requires Flutter 3.32+
+Flutter passenger application, version **1.1.11+13**. Requires Flutter 3.32+
 and Dart 3.8.1+; Android application ID remains `com.siheta.sih_eta`.
 
 ## What is implemented
@@ -14,6 +14,8 @@ and Dart 3.8.1+; Android application ID remains `com.siheta.sih_eta`.
 - Native historical station/network analysis.
 - Journey insights parity through an Android/iOS **WebView** of the deployed
   workspace: tracking/map, analytics/CSV sharing, past delays and simulation.
+- Back navigation follows previously opened screens and workspace tools while
+  preserving entered train numbers, selected tools and scroll position.
 - A phone-clock handoff for user-confirmed alarms; no automatic ETA push alerts.
 - Native ETA feedback with local pending storage, retry and server receipt;
   reports remain unverified and are not model-training labels.
@@ -57,7 +59,7 @@ time; it must be HTTPS. MapTiler stays configured on the website—no private ma
 configuration needs to be duplicated in Flutter.
 
 [Project overview](../../../README.md) · [Screenshots](../../../docs/screenshots/README.md) ·
-[Deployment](../../../docs/v1_deployment_guide.md) · [ETA audit](../../../docs/ETA_ML_AUDIT.md)
+[Deployment](../../../docs/v1_deployment_guide.md) · [ETA audit](../../../docs/ETA_MODEL_AUDIT.md)
 
 The gallery records Android 1.1.9+11. The subsequent 1.1.10+12 arrival-selection
 and feedback change is documented in [the delivery note](../../../docs/MOBILE_ETA_FEEDBACK.md).

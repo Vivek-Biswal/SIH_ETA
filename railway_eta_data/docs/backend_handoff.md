@@ -1,5 +1,11 @@
 # Backend Handoff Contract (For VARUN)
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document outlines how the core ETA computational system (Group A) integrates with the backend infrastructure.
 
 ## 1. Core System Architecture
@@ -47,6 +53,6 @@ To run the orchestrator, the backend must provide:
 
 ## 6. Current Limitations
 
-- **No ML Model:** The system currently provides deterministic baselines. Do not expose "AI Prediction" in the API schema.
+- **No trained model:** This preparation module provides deterministic baselines. Do not label their output as a trained prediction in the API schema.
 - **No DA323 Usage:** Historical aggregated DA323 data is temporally unsafe and is intentionally ignored during ETA calculation. Do not force it into the prediction logic.
 - **Stateless:** The orchestrator does not remember past requests.

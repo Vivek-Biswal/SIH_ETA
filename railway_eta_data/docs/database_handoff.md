@@ -1,6 +1,12 @@
 # Database Handoff Contract (For VARUN)
 
-This document describes the recommended database architecture for integrating the Group A pipeline into the production backend, as well as the future schema required to support true ML ETA prediction.
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
+This document describes the recommended database architecture for integrating the Group A pipeline into the production backend, as well as the future schema required to support trained ETA prediction.
 
 ## 1. Recommended Conceptual Entities (Current Needs)
 
@@ -35,9 +41,9 @@ To support the current deterministic ETA baselines, the backend database should 
 - `predicted_arrival` (Timestamp)
 - `prediction_method` (String)
 
-## 2. Future Live Observation Schema (For ML Readiness)
+## 2. Future Live Observation Schema (For Model Training)
 
-**CRITICAL:** The current system lacks historical time-aligned telemetry. To train an ML model in the future, the backend MUST begin collecting continuous train movement histories.
+**CRITICAL:** The current system lacks historical time-aligned telemetry. To train a predictive model in the future, the backend MUST begin collecting continuous train movement histories.
 
 ### `LIVE_OBSERVATIONS` (Dynamic / Time-Series)
 - `id` (UUID, Primary Key)
@@ -51,4 +57,4 @@ To support the current deterministic ETA baselines, the backend database should 
 - `next_station` (String, Optional)
 - `source` (String)
 
-*Note: This table will form the dataset required to build the `actual_arrival_time` and `historical_trajectory` features required for ML training and delay recovery analysis.*
+*Note: This table will form the dataset required to build the `actual_arrival_time` and `historical_trajectory` features required for model training and delay recovery analysis.*

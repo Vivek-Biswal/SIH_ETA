@@ -1,7 +1,7 @@
 # Etaernal ETA: audit, training and deployment scope
 
-This document records the real ETA implementation and its limits. Machine
-learning training and runtime artifacts are separate from the website's
+This document records the real ETA implementation and its limits. Model training
+and runtime artifacts are separate from the website's
 illustrative delay scenarios and railway simulation.
 
 ## What the audit found
@@ -10,7 +10,7 @@ The configured RailRadar path used scheduled arrival plus the latest reported
 delay. It did not learn recovery or additional delay. The alternative database
 provider attempted to call an old baseline wrapper named `eta-xgboost-v1`;
 that name was misleading, and the wrapper's output contract was broken. That
-legacy interface now declines ML inference because it has no dated running
+legacy interface now declines model inference because it has no dated running
 observation. It retains the existing explicit database/schedule fallback.
 
 Repository timetables contain schedules, not arrival outcomes. A single delay
@@ -51,7 +51,7 @@ actual minus scheduled timestamps instead.
 `intelligence/train_eta/training/train.py` fits a scikit-learn gradient-boosted
 regressor with Huber loss. Its target is **future arrival delay minus delay at
 the observed station event**. Adding the learned residual to the current delay
-is residual ML forecasting: the correction comes from fitted trees and historical
+is residual forecasting: the correction comes from fitted trees and historical
 outcomes, rather than a hand-authored recovery formula.
 
 Inputs shared between training and serving:
@@ -115,8 +115,8 @@ Its metrics are the ones sent to passenger clients.
 Promotion requires at least 5% lower validation and test MAE, no material RMSE
 regression, a positive lower bound on the journey-bootstrap improvement interval,
 and a passing serving-policy audit. A failed artifact is retained for inspection
-but never used to claim ML forecasts. An empirical calibration range is recorded
-for research; it is not presented as a guaranteed per-arrival confidence.
+but never used to claim trained-model forecasts. An empirical calibration range
+is recorded for research; it is not presented as a guaranteed per-arrival confidence.
 
 **Retrospective station-event replay is not prospective RailRadar validation.**
 The source's reporting conventions, missingness and timetable can differ from
@@ -145,8 +145,8 @@ forecasts because these exceptions were not represented as training features.
 
 For other observations, the reported-delay estimate remains clearly identified.
 Each stop has its own `prediction_method`; selecting a fallback stop does not
-label that arrival as ML. Predicted arrivals remain in route order. Unsupported
-inputs, a missing/corrupt model or disabled inference do not break the existing
+label that arrival as a model prediction. Predicted arrivals remain in route
+order. Unsupported inputs, a missing/corrupt model or disabled inference do not break the existing
 passenger API. Set `ETA_ML_ENABLED=false` to disable learned serving.
 
 This is a **three-train station-based pilot**, not nationwide or continuous GPS
@@ -176,7 +176,7 @@ Model test statistics are collapsed and shown only for a selected stop that
 actually uses the model, never as the accuracy of a fallback estimate.
 
 This changes the explanation and evidence checks; it does not expand the
-three-train ML pilot or introduce new operational data sources.
+three-train prediction pilot or introduce new operational data sources.
 
 The optional `arrival_explanation.timing` separates reported signed delay,
 observed recovered lateness between named stops, and possible future recovery
@@ -219,8 +219,8 @@ The simulation's congestion and mitigation values are never training labels.
 
 `services/eta_observations.py` saves whitelisted, compressed provider observations
 only after an already-required successful live fetch. Cache hits are not fetched
-again for ML. No API keys, authorization headers or arbitrary payload fields are
-stored. Provider timestamps deduplicate observations. The archive is bounded to
+again for model training. No API keys, authorization headers or arbitrary payload
+fields are stored. Provider timestamps deduplicate observations. The archive is bounded to
 20,000 snapshots and 180 days; storage errors do not block ETA responses.
 
 Default: `ETA_HISTORY_PATH=data/eta-observations.sqlite3`. The current Render

@@ -1,5 +1,11 @@
 # Data Feasibility Analysis for Train ETA Prediction
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Analysis of `delays.json`
 
 Based on the actual schema of `data/raw/railpull/data/out/delays.json`:
@@ -46,7 +52,7 @@ Based on the actual schema of `data/raw/railpull/data/out/delays.json`:
 **C. NO — another historical source is required.**
 
 ### Explanation
-To train a supervised machine learning model for ETA prediction, we absolutely require two things:
+To train a supervised predictive model for ETA, we absolutely require two things:
 1. **Contextual Features:** The model needs to know *where* the train is (current station) and *when* the observation was made. `delays.json` completely lacks location data, making it impossible to map a delay to a specific segment of the journey.
 2. **Ground Truth (Target Variable):** We need the `actual_arrival_time` for historical journeys to calculate the true remaining time and train the model. None of our current datasets (Datameet or Railpull) provide historical actual arrival logs. They only provide static planned timetables.
 

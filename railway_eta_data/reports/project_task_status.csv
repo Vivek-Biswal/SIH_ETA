@@ -11,5 +11,5 @@ Vivek,Group A,Delay-DNA Analysis,PARTIAL,80,src/delay_analysis/ works but recove
 Vivek,Group A,System Integration,COMPLETE,100,src/system/orchestrator.py unifying states,None,None
 Varun,Backend,API & Database,NOT_STARTED,0,Missing API server & DB schema deployment,None,Build FastAPI/Django wrapper & DB schema
 Sneha,Frontend,UI/UX App,NOT_STARTED,0,Missing frontend implementation,Missing backend API,Build frontend connecting to mock/local orchestrator
-Ashwin,Intelligence,ML ETA Model,BLOCKED,0,No ML artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database
-Ashwin,Intelligence,Delay Propagation Model,BLOCKED,0,No ML artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database
+Ashwin,Intelligence,Trained ETA Model,BLOCKED,0,No trained-model artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database
+Ashwin,Intelligence,Delay Propagation Model,BLOCKED,0,No trained-model artifacts found,Missing historical telemetry data,Wait for Varun to build live tracker database

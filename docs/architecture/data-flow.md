@@ -90,7 +90,7 @@ Client
 
 ---
 
-## 2. ML Training Data Flow
+## 2. Prediction Model Training Data Flow
 
 ```
 External Sources (NTES historical dumps, IMD weather, timetable PDFs)
@@ -117,7 +117,7 @@ intelligence/train_eta/evaluation/
   ▼
 intelligence/train_eta/models/saved/
   │  - Serialize model (pickle / ONNX)
-  │  - Log to MLflow / WandB (optional)
+  │  - Record experiment parameters and metrics (optional)
   ▼
 intelligence/train_eta/inference/predictor.py
   │  - Load saved model

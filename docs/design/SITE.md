@@ -1,9 +1,11 @@
 # SITE.md: SIH_ETA (Railway Delay Intelligence)
 
+This is the original website design brief, including its planned sitemap and
+backlog. It is not a current delivery report; see [feature status](../FEATURE_STATUS.md).
+
 ## 1. Core Identity
 - **Project Name**: SIH_ETA - Railway Delay Intelligence
-- **Stitch Project ID**: [Pending Creation]
-- **Mission**: An AI-powered railway intelligence platform that visualizes train delays, predicts ETAs, identifies network bottlenecks, and provides recovery scenarios.
+- **Mission**: A railway information platform that visualizes train delays, predicts ETAs, identifies network bottlenecks, and provides recovery scenarios.
 - **Target Audience**: Railway operators, station masters, and network administrators.
 - **Voice**: Professional, Modern, Minimal, Clean, Data-driven, Enterprise-grade.
 

@@ -3,7 +3,7 @@
 These are **genuine application captures**, not design mockups or test fixtures.
 Captured on **17 October 2026** against the public website and the existing
 Android release APK, version **1.1.9+11**. No provider responses were replaced,
-no ML result was fabricated and no API keys or account dashboards were captured.
+no model result was fabricated and no API keys or account dashboards were captured.
 
 The captures predate the website navigation split. Current **Train Tracking**
 and **Simulation** live at `/network/map`; **Past Delay Insights** remains at
@@ -20,7 +20,7 @@ Some screens are scrolled to the feature rather than captured at page top.
 | --- | --- | --- |
 | [dashboard.png](website/dashboard.png) | `/dashboard`, fresh browser profile | Network summary explicitly shows September 2024 history. |
 | [train-search.png](website/train-search.png) | `/trains`, station-pair and number forms | Genuine initial search state. |
-| [eta-prediction.png](website/eta-prediction.png) | `/trains/12423/eta`, selected upcoming station Zamania | Reported-delay fallback, **not an ML inference screenshot**. Early timing/recovery evidence and weather are separate. |
+| [eta-prediction.png](website/eta-prediction.png) | `/trains/12423/eta`, selected upcoming station Zamania | Reported-delay fallback, **not a trained-model inference screenshot**. Early timing/recovery evidence and weather are separate. |
 | [train-route.png](website/train-route.png) | `/network` → Track my train → 12423 → scroll to route | One selected route, reported-station marker, 371/391 points mapped at capture; approximate geometry and exact-position unavailability are visible. |
 | [journey-analytics.png](website/journey-analytics.png) | `/analytics` → 12423 → Analyze journey | Comparable completed arrivals only; missing route observations excluded. |
 | [historical-insights.png](website/historical-insights.png) | `/network` → Past delays → wait for loaded station rows | September 2024 analysis; no live traffic or causal inference claimed. |
@@ -46,7 +46,7 @@ application are labelled IST.
 | [journey-insights.png](mobile/journey-insights.png) | Insights navigation; shared HTTPS workspace rendered inside the Android WebView |
 
 The captured native ETA is also an explicit fallback. A pilot train number alone
-does not prove the selected arrival qualified for ML. Search-result screens are
+does not prove the selected arrival qualified for trained-model inference. Search-result screens are
 not included: the captured flow used direct five-digit lookup into train details.
 No invented “results” screen is substituted for that workflow.
 

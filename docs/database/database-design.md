@@ -11,7 +11,7 @@
 The primary datastore is **PostgreSQL 16**. It holds:
 - Static railway reference data (trains, stations, routes, schedules)
 - Running status data (synced from NTES or manually ingested)
-- Historical delay records (for ML model training)
+- Historical delay records (for prediction-model training)
 - ETA predictions (stored for monitoring and model evaluation)
 
 **Redis 7** is used as a cache and pub/sub broker (see Section 5).
@@ -148,7 +148,7 @@ Per-station running data for each running instance.
 
 ### 3.7 `delay_history`
 
-Aggregated delay statistics — primary training data for the ML model.
+Aggregated delay statistics — primary training data for the prediction model.
 
 | Column | Type | Description |
 |---|---|---|
@@ -162,7 +162,7 @@ Aggregated delay statistics — primary training data for the ML model.
 | `weather_condition` | VARCHAR(50) NULLABLE | Clear, rain, fog, etc. |
 | `season` | VARCHAR(20) | summer, monsoon, winter |
 
-**Indexes:** `(train_id, station_id)`, `(date)`, `(day_of_week, month)` — heavily queried by ML feature pipeline.
+**Indexes:** `(train_id, station_id)`, `(date)`, `(day_of_week, month)` — heavily queried by prediction feature pipeline.
 
 ---
 
@@ -191,7 +191,7 @@ Per-station ETA predictions.
 | `prediction_id` | UUID (FK → eta_predictions) | Parent prediction |
 | `station_id` | UUID (FK → stations) | Which station |
 | `scheduled_arrival` | TIMESTAMPTZ | Timetable arrival |
-| `predicted_arrival` | TIMESTAMPTZ | ML predicted arrival |
+| `predicted_arrival` | TIMESTAMPTZ | Model-predicted arrival |
 | `predicted_delay_minutes` | SMALLINT | Predicted delay |
 | `actual_arrival` | TIMESTAMPTZ NULLABLE | Filled in after train passes (for evaluation) |
 | `actual_delay_minutes` | SMALLINT NULLABLE | Actual delay (for evaluation) |

@@ -5,7 +5,7 @@
 <h1 align="center">Etaernal Railway Intelligence</h1>
 
 <p align="center"><strong>Less guessing. More knowing when you’ll arrive.</strong></p>
-<p align="center">Train tracking, station-specific arrival explanations and an evaluated ML ETA pilot.<br />Built for Smart India Hackathon problem statement <strong>26028 · Ministry of Railways</strong>.</p>
+<p align="center">Train tracking, station-specific arrival explanations and an evaluated arrival-time prediction pilot.<br />Built for Smart India Hackathon problem statement <strong>26028 · Ministry of Railways</strong>.</p>
 
 <p align="center">
   <a href="https://equinox01.vercel.app/dashboard">Open website</a> ·
@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/Next.js-16-111827?logo=nextdotjs" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/Flutter-3.32%2B-02569B?logo=flutter" alt="Flutter 3.32 or newer" />
   <img src="https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi" alt="FastAPI backend" />
-  <img src="https://img.shields.io/badge/ETA-3--train_ML_pilot-315CFF" alt="ETA: three-train machine learning pilot" />
+  <img src="https://img.shields.io/badge/ETA-3--train_prediction_pilot-315CFF" alt="ETA: three-train prediction pilot" />
 </p>
 
 Etaernal helps passengers answer three questions: **Where is my train? When
@@ -54,10 +54,10 @@ No API fixtures or fabricated predictions were inserted. See the
 
 *A passenger-first dashboard: search a train, choose a stop, then see its ETA.*
 
-| Arrival intelligence | Your train’s route |
+| Arrival estimates | Your train’s route |
 | --- | --- |
 | ![Selected-station arrival time, early-running status and separate measured versus possible recovery](docs/screenshots/website/eta-prediction.png) | ![Selected train 12423 shown on a geographic route with reported position provenance](docs/screenshots/website/train-route.png) |
-| Station-specific arrival explanation. This capture uses the reported-delay fallback, not an ML forecast. | Only the selected train is mapped. Approximate station links and missing coordinates are identified. |
+| Station-specific arrival explanation. This capture uses the reported-delay fallback, not a trained-model forecast. | Only the selected train is mapped. Approximate station links and missing coordinates are identified. |
 
 | Journey analytics | Route simulation |
 | --- | --- |
@@ -154,7 +154,7 @@ RailRadar accuracy guarantee**. The pilot does not train on continuous GPS,
 weather, live track occupancy, signals or rake links. Broader coverage and live
 validation remain essential work.
 
-[Training and serving audit](docs/ETA_ML_AUDIT.md) ·
+[Training and serving audit](docs/ETA_MODEL_AUDIT.md) ·
 [Evaluation JSON](backend/data/eta_ml/evaluation.json) ·
 [Source manifest](intelligence/train_eta/reports/source_manifest.json) ·
 [Data attribution](docs/DATA_SOURCES.md)
@@ -257,7 +257,7 @@ errors, use the [complete setup guide](docs/development/setup.md).
 | Backend | [Health endpoint](https://sih-eta-backend-a819.onrender.com/health) | Returned `healthy`; provider availability is a separate concern. |
 | API explorer | [Swagger UI](https://sih-eta-backend-a819.onrender.com/docs) | Runtime API entry point. |
 | ETA model | [Model diagnostic](https://sih-eta-backend-a819.onrender.com/api/v1/eta/model) | Returned `validated_pilot`, enabled, three supported trains. |
-| Android | [Build/install instructions](docs/v1_deployment_guide.md#android-apk) | Source version **1.1.10+12**; gallery captures 1.1.9+11. No public APK release URL is currently published. |
+| Android | [Build/install instructions](docs/v1_deployment_guide.md#android-apk) | Source version **1.1.11+13**; gallery captures 1.1.9+11. No public APK release URL is currently published. |
 
 The Render free service may need time to wake. Responses can be cached or
 unavailable if the upstream allocation is exhausted. MapTiler depends on a valid

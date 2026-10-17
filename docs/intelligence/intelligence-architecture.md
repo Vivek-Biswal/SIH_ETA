@@ -2,7 +2,7 @@
 
 > Historical architecture proposal. Names, features and accuracy expectations
 > below must not be treated as deployed capabilities. See the
-> [trained ETA audit](../ETA_ML_AUDIT.md) and [feature status](../FEATURE_STATUS.md).
+> [trained ETA audit](../ETA_MODEL_AUDIT.md) and [feature status](../FEATURE_STATUS.md).
 
 ## 1. Overview
 
@@ -117,7 +117,7 @@ class ETAPredictor:
         ...
 ```
 
-This interface contract is stable — the ML team can change the model internals freely as long as the interface signature stays the same.
+This interface contract is stable — the prediction team can change the model internals freely as long as the interface signature stays the same.
 
 ---
 

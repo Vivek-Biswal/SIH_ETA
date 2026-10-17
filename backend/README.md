@@ -8,7 +8,7 @@ and dated network insights.
 - [Complete setup](../docs/development/setup.md)
 - [Current architecture](../docs/architecture/system-architecture.md)
 - [API guide and compatibility boundaries](../docs/api/api-contract.md)
-- [Training and inference audit](../docs/ETA_ML_AUDIT.md)
+- [Training and inference audit](../docs/ETA_MODEL_AUDIT.md)
 
 Run **from this directory**:
 

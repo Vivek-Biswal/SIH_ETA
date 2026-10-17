@@ -91,7 +91,7 @@ test('repeated station codes require an unambiguous sequence', () => {
   assert.equal(reasons.selectedPrediction([old, old], 'JP'), undefined);
 });
 
-test('a global model label never claims an individual unsupported stop used ML', () => {
+test('a global model label never claims model coverage for an unsupported stop', () => {
   const { eta, status, prediction } = journey({ prediction_method: undefined }); eta.prediction_method = 'inference';
   const view = reasons.stationArrival(eta, status, prediction, now);
   assert.equal(view.predictedArrival, null); assert.equal(view.basis, 'Scheduled time only');

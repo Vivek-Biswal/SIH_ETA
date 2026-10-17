@@ -1,5 +1,8 @@
 # Design System: SIH_ETA (Railway Delay Intelligence)
 
+This archived design plan preserves the original visual direction. For current
+application behavior, see [feature status](../FEATURE_STATUS.md).
+
 ## 1. Visual Theme & Atmosphere
 A highly restrained, data-driven interface with confident, enterprise-grade layouts and structured grid alignments. The atmosphere is professional, clinical yet modern — like a high-end mission control dashboard. Density is balanced (Daily App Balanced) to handle complex network data without overwhelming the operator. Motion is deliberate, utilizing fluid spring-physics for a premium, weighty feel.
 
@@ -43,10 +46,10 @@ A highly restrained, data-driven interface with confident, enterprise-grade layo
 - No emojis anywhere.
 - No `Inter` font or Serif fonts.
 - No pure black (`#000000`).
-- No neon/outer glow shadows or AI "purple" accents.
+- No neon/outer glow shadows or saturated purple accents.
 - No excessive gradient text.
 - No 3-column equal grids for feature rows; use functional, asymmetric dashboard distributions.
-- No AI copywriting clichés ("Elevate", "Next-Gen").
+- No generic promotional clichés ("Elevate", "Next-Gen").
 - No fake/invented metrics (e.g. "99.9% uptime") — use real API data representations or clear placeholders.
 - No overlapping elements.
 - No custom mouse cursors.

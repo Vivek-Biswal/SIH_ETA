@@ -39,13 +39,13 @@ def run_audit():
     else:
         check("Processed datasets exist", "FAIL", "Missing required files")
 
-    # 3. No ML Model exists
+    # 3. Preparation data contains no trained-model artifact
     ml_artifacts = ["model.pkl", "weights.h5", "xgboost.json", "scaler.pkl"]
     found_ml = [f for f in ml_artifacts if os.path.exists(os.path.join(PROCESSED_DATA_DIR, f))]
     if not found_ml:
-        check("No ML model trained", "PASS", "No ML model artifacts found")
+        check("No trained artifact in preparation data", "PASS", "No model artifacts found in the processed-data directory")
     else:
-        check("No ML model trained", "FAIL", f"Found: {found_ml}")
+        check("No trained artifact in preparation data", "FAIL", f"Found: {found_ml}")
 
     # 4. No Fake Actual Arrivals
     check("No synthetic trajectories", "PASS", "Code inspection", "Verified no generation scripts exist.")

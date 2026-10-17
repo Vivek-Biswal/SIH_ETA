@@ -22,7 +22,7 @@ The color system relies on stark neutrals for structure and highly calibrated se
 - **Critical Red** (`#EF4444`) — Severe delays (15+ mins), critical network conflicts, route blockages.
 - **Brand Blue** (`#3B82F6`) — Interactive elements, primary CTAs, active tab states (Used sparingly).
 
-*Note: Saturation is controlled. No neon glows or "AI purple". Color is always paired with an icon or text label for accessibility.*
+*Note: Saturation is controlled. No neon glows or arbitrary accent colors. Color is always paired with an icon or text label for accessibility.*
 
 ## 3. Typography Rules
 Typography must prioritize absolute legibility for numbers and data.
@@ -55,7 +55,7 @@ Typography must prioritize absolute legibility for numbers and data.
 
 ## 7. Anti-Patterns (Banned)
 - NEVER use generic placeholder names ("John Doe", "Acme"). Use realistic railway data (Train 12301, NDLS, CNB).
-- NEVER fabricate AI filler data ("99% AI Accuracy", "12ms response time").
+- NEVER fabricate performance claims or filler data ("99% prediction accuracy", "12ms response time").
 - NEVER use emojis in the UI.
 - NEVER use glassmorphism on standard data cards (only allowed on floating map controls).
 - NEVER use neon outer glows or massive gradient text.

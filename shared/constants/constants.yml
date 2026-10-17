@@ -17,7 +17,7 @@ TRAIN_TYPES = [
     "Special"
 ]
 
-# Delay Factors (used in ML model and UI explanations)
+# Delay Factors (used in prediction model and UI explanations)
 DELAY_FACTORS = {
     "HISTORICAL": "historical_delay",
     "WEATHER": "weather",

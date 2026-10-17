@@ -1,6 +1,8 @@
 # Web Dashboard — Next.js Route & Component Mapping
 
-Stitch Project: [labs.google.com/stitch/projects/13686356860913469551](https://labs.google.com/stitch/projects/13686356860913469551)
+This document records the original screen design and planned routes/components.
+It is a design reference, not the current implementation inventory; see
+[README.md](README.md) for supported routes and features.
 
 ---
 
@@ -121,7 +123,7 @@ apps/web/web_app/
 
 ---
 
-## Design Token Mapping (Stitch → CSS Variables)
+## Design Token Mapping (Design → CSS Variables)
 
 Defined in `styles/globals.css` as CSS custom properties:
 

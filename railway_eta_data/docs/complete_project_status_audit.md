@@ -1,7 +1,13 @@
 # Complete Project Status Audit
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Executive Summary
-This audit rigorously inspected the `railway_eta_data` repository to evaluate the true status of the SIH ETA Project. **The core deterministic infrastructure (Data Cleaning & ETA Baselines) is 100% complete.** However, the project completely lacks historical live telemetry (individual train journeys). Because of this missing data, **no ML model currently exists, nor can one be trained.** The system currently relies on robust, deterministic fallback baselines (`SCHEDULE_BASELINE` and `DELAY_ADJUSTED_BASELINE`). The next phase requires the backend team (Varun) to build the database infrastructure and the frontend team (Sneha) to build the UI, while intelligence (Ashwin) is blocked until time-series data is collected.
+This audit rigorously inspected the `railway_eta_data` repository to evaluate the true status of the SIH ETA Project. **The core deterministic infrastructure (Data Cleaning & ETA Baselines) is 100% complete.** However, the project completely lacks historical live telemetry (individual train journeys). Because of this missing data, **no trained predictive model exists in this preparation snapshot, nor can one be trained from its available data.** The system currently relies on robust, deterministic fallback baselines (`SCHEDULE_BASELINE` and `DELAY_ADJUSTED_BASELINE`). The next phase requires the backend team (Varun) to build the database infrastructure and the frontend team (Sneha) to build the UI, while intelligence (Ashwin) is blocked until time-series data is collected.
 
 ## 2. Repository Inventory
 The repository is well-organized. 
@@ -43,7 +49,7 @@ Actual record counts from the raw and processed data directories:
 ### Chunk 3 (ETA Baseline)
 - **STATUS: COMPLETE**.
 - Mathematical `SCHEDULE_BASELINE` and `DELAY_ADJUSTED_BASELINE` are accurately implemented and heavily tested. 
-- *CRITICAL VERIFICATION:* This is correctly identified as deterministic math. No ML hallucination.
+- *CRITICAL VERIFICATION:* This is correctly identified as deterministic math. No fabricated model claims.
 
 ### Chunk 4 (Feature Engineering)
 - **STATUS: COMPLETE**.
@@ -65,13 +71,13 @@ The system is currently a mathematically sound, bounded **Deterministic Estimato
 - **Current Position/Speed/GPS**: Not collected. Not available.
 - **Historical Telemetry**: Not collected.
 
-## 9. ML Readiness
+## 9. Model Training Readiness
 **STATUS: NOT_READY**
-A full search of the repository confirms that **NO ML MODEL EXISTS**. There are no scripts using `sklearn`, `tensorflow`, or `xgboost` to predict ETA. 
+A full search of the repository confirms that **NO TRAINED PREDICTIVE MODEL EXISTS IN THIS PREPARATION SNAPSHOT**. There are no scripts using `sklearn`, `tensorflow`, or `xgboost` to predict ETA.
 The project lacks:
 1. Historical individual train journeys
 2. Actual arrival timestamps (the target variable)
-Because the target variable does not exist in any dataset, ML training is impossible until the backend initiates continuous live tracking.
+Because the target variable does not exist in any dataset, model training is impossible until the backend initiates continuous live tracking.
 
 ## 10. Test Status
 **STATUS: EXCELLENT**
@@ -94,7 +100,7 @@ Sneha has the `frontend_handoff.md` defining UI requirements, but no UI applicat
 
 ## 14. Ashwin Readiness
 **STATUS: BLOCKED**.
-Ashwin is responsible for Intelligence/ML Models. He cannot begin training ETA or Recovery models until Varun builds a polling database to collect 30+ days of train telemetry.
+Ashwin is responsible for prediction models. He cannot begin training ETA or Recovery models until Varun builds a polling database to collect 30+ days of train telemetry.
 
 ## 15. Problems Found
 - No system in place to capture time-series actual movement data.

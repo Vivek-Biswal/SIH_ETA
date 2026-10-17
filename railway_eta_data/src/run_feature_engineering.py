@@ -5,7 +5,7 @@ Generates feature registries, runs leakage checks, and generates
 feature quality reports for the SIH Indian Train ETA Project.
 
 Does NOT modify raw or processed datasets.
-Does NOT train ML models.
+Does not train prediction models.
 """
 import os
 import json
@@ -149,7 +149,7 @@ def main():
     print(f"Registry saved to: {registry_path}")
     print(f"Quality report saved to: {quality_path}")
     print("===========================================")
-    print("\nNote: ML Context is INCOMPLETE.")
+    print("\nNote: Model-training context is INCOMPLETE.")
     print("Actual arrival labels and time-aligned observations are missing.")
 
 if __name__ == "__main__":

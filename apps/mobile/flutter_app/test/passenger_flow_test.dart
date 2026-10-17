@@ -113,7 +113,7 @@ void main() {
       expect(repo.lastNumber, '12301');
       expect(find.text('Test Express'), findsOneWidget);
       expect(find.text('Database records'), findsOneWidget);
-      expect(find.text('ML PREDICTION'), findsNothing);
+      expect(find.textContaining('confidence'), findsNothing);
       expect(find.text('20:47'), findsNothing);
       await tester.ensureVisible(find.text('Scheduled: 10:00'));
       await tester.pumpAndSettle();

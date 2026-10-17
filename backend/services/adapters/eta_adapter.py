@@ -1,5 +1,5 @@
 """
-ETA Intelligence Adapter — integration point for Vivek/Ashwin's ML models.
+ETA Intelligence Adapter — integration point for the configured prediction models.
 Delegates to the configured ETAProvider from the factory.
 """
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ETAIntelligenceAdapter:
     """
-    Adapter bridging the backend service layer to the Train ETA ML pipeline.
+    Adapter bridging the backend service layer to the train ETA prediction pipeline.
     """
 
     def __init__(self):
@@ -26,13 +26,13 @@ class ETAIntelligenceAdapter:
         current_delay: int,
         schedule: list[dict],
     ) -> Optional[list[dict]]:
-        """Request an ETA prediction from the ML model."""
+        """Request an ETA prediction from the trained model."""
         return self._provider.predict_eta(train_number, journey_id, current_delay, schedule)
 
     def get_delay_dna(self, train_id: str) -> dict:
-        """Request delay contributors from the ML model."""
+        """Request delay contributors from the trained model."""
         return self._provider.get_delay_dna(train_id)
 
     def get_recovery(self, train_id: str) -> dict:
-        """Request expected recovery from the ML model."""
+        """Request expected recovery from the trained model."""
         return self._provider.get_recovery(train_id)

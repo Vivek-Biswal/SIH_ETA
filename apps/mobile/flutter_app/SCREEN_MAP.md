@@ -1,8 +1,8 @@
 # Mobile App — Flutter Route & Feature Mapping
 
-Stitch Project: [labs.google.com/stitch/projects/13686356860913469551](https://labs.google.com/stitch/projects/13686356860913469551)
-
-This document maps every Stitch design screen to its Flutter route name, feature folder, and primary widget file.
+This document records the original screen design and planned Flutter route names,
+feature folders and widget files. It is a design reference, not the current
+implementation inventory; see [README.md](README.md) for supported features.
 
 ---
 
@@ -103,7 +103,7 @@ apps/mobile/flutter_app/lib/
 
 ---
 
-## Design Token Mapping (Stitch → Flutter/Dart)
+## Design Token Mapping (Design → Flutter/Dart)
 
 | Design Token | Flutter Color Const | Value |
 |---|---|---|

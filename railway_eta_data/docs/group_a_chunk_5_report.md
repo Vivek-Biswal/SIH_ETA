@@ -1,7 +1,13 @@
 # Group A - Chunk 5 Report: Delay-DNA Analytical Profiling
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Work Completed
-- Formally defined Delay-DNA as an analytical context profile (not a predictive ML system).
+- Formally defined Delay-DNA as an analytical context profile (not a predictive model).
 - Analyzed the live delay snapshot (444 records, single timestamp).
 - Analyzed DA323 historical aggregated data (1,479 rows, 270 unique stations).
 - Built station delay context with explicit coverage measurement.
@@ -65,7 +71,7 @@ None. Raw data and previously processed pipelines are completely untouched.
 - DA323: 1,479 rows, 270 unique stations covered
 - Mean historical avg delay: **122.7 min**
 - Only **25.2%** of station arrivals are historically right-time
-- Status: **TEMPORALLY_UNKNOWN** — cannot be used as ML feature
+- Status: **TEMPORALLY_UNKNOWN** — cannot be used as a model feature
 
 ---
 
@@ -95,13 +101,13 @@ None. Raw data and previously processed pipelines are completely untouched.
 
 ## 10. Scientific Limitations
 - Single snapshot cannot represent delay evolution
-- DA323 temporal provenance unknown — leakage risk for ML
+- DA323 temporal provenance unknown — leakage risk for model training
 - 3% station coverage from DA323 is insufficient for station-level feature engineering
 - Recovery measurement requires time-series data not yet collected
 
 ---
 
-## 11. ML Readiness
+## 11. Model Training Readiness
 **NOT READY.** Blocked by:
 - Missing `actual_arrival_time` (no labels)
 - Missing `historical_trajectory` (no time series per train)
@@ -120,4 +126,4 @@ None. Raw data and previously processed pipelines are completely untouched.
 
 The system is now ready for **Chunk 6: API / Delivery Layer** or whatever the next phase specifies.
 
-**STOPPED.** No ML model trained. No synthetic data created. No recovery rates fabricated.
+**STOPPED.** No predictive model trained. No synthetic data created. No recovery rates fabricated.

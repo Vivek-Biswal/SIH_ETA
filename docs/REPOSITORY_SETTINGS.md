@@ -9,9 +9,9 @@ topic editing. Apply these values through the repository's **About → gear**:
 
 | Field | Value |
 | --- | --- |
-| Description | `Railway tracking and station-level ETA intelligence for web and Flutter, with an evaluated three-train ML pilot, clear delay explanations and journey analytics.` |
+| Description | `Railway tracking and station-level ETA intelligence for web and Flutter, with an evaluated three-train prediction pilot, clear delay explanations and journey analytics.` |
 | Website | `https://equinox01.vercel.app/dashboard` |
-| Topics | `railway`, `train-tracking`, `eta-prediction`, `machine-learning`, `gradient-boosting`, `fastapi`, `nextjs`, `flutter`, `smart-india-hackathon`, `data-visualization` |
+| Topics | `railway`, `train-tracking`, `eta-prediction`, `gradient-boosting`, `fastapi`, `nextjs`, `flutter`, `smart-india-hackathon`, `data-visualization` |
 
 The website field already points to this URL at audit time. The current topics
 list is empty. Do not add `official-indian-railways`, nationwide accuracy claims,

@@ -6,7 +6,7 @@ and propose it through a pull request; for example:
 ```bash
 git switch main
 git pull --ff-only
-git switch -c codex/clear-arrival-explanation
+git switch -c feature/clear-arrival-explanation
 ```
 
 Use `git status` before switching or pulling; preserve unrelated local work.

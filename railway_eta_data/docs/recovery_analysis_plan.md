@@ -1,5 +1,11 @@
 # Recovery Analysis Plan
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## Status: FRAMEWORK ONLY — Not Currently Computable
 
 The current project does NOT contain individual time-aligned delay sequences for trains.
@@ -60,4 +66,4 @@ The `recovery.py` module provides:
 | Recovery validators | ✓ READY |
 | Actual recovery measurement | ✗ BLOCKED — no time series |
 | Recovery rate estimation | ✗ BLOCKED — no time series |
-| Recovery prediction | ✗ BLOCKED — no ML training data |
+| Recovery prediction | ✗ BLOCKED — no model-training data |

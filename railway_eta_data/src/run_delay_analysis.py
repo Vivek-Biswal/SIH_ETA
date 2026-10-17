@@ -3,7 +3,7 @@ Delay Analysis Runner
 =====================
 Generates all delay analysis reports, registries, and Delay-DNA profiles.
 Does NOT modify raw or processed datasets.
-Does NOT train ML models. Does NOT fabricate observations.
+Does not train prediction models or fabricate observations.
 """
 import os
 import sys
@@ -150,7 +150,7 @@ def main():
         {"field": "route_distance",               "category": "STATIC_CONTEXT",         "source": "trains_clean.json",    "available_now": "YES", "temporal_status": "VALID_ALWAYS",         "valid_ml_training": "YES", "description": "Total scheduled route distance"},
         {"field": "stop_count",                   "category": "STATIC_CONTEXT",         "source": "journeys_scheduled",   "available_now": "YES", "temporal_status": "VALID_ALWAYS",         "valid_ml_training": "YES", "description": "Number of scheduled stops"},
         {"field": "scheduled_duration_hours",     "category": "STATIC_CONTEXT",         "source": "trains_clean.json",    "available_now": "YES", "temporal_status": "VALID_ALWAYS",         "valid_ml_training": "YES", "description": "Scheduled journey duration"},
-        {"field": "actual_arrival_time",          "category": "NOT_AVAILABLE",          "source": "None",                 "available_now": "NO",  "temporal_status": "NOT_AVAILABLE",        "valid_ml_training": "N/A", "description": "Ground truth label — blocks all ML"},
+        {"field": "actual_arrival_time",          "category": "NOT_AVAILABLE",          "source": "None",                 "available_now": "NO",  "temporal_status": "NOT_AVAILABLE",        "valid_ml_training": "N/A", "description": "Ground truth label — required for supervised model training"},
         {"field": "historical_trajectory",        "category": "NOT_AVAILABLE",          "source": "None",                 "available_now": "NO",  "temporal_status": "NOT_AVAILABLE",        "valid_ml_training": "N/A", "description": "Individual delay time-series — blocks recovery"},
     ]
     save_csv(os.path.join(DELAY_REPORTS_DIR, "delay_feature_registry.csv"), registry)
@@ -165,7 +165,7 @@ def main():
     print("\n===========================================")
     print("Delay Analysis Complete")
     print(f"All reports saved to: {DELAY_REPORTS_DIR}")
-    print("\n[ML Readiness] NOT READY")
+    print("\n[Model Training Readiness] NOT READY")
     print("  - actual_arrival_time: MISSING (blocks training)")
     print("  - historical_trajectory: MISSING (blocks recovery measurement)")
     print("===========================================")

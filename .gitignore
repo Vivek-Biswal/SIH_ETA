@@ -1,6 +1,6 @@
 # =============================================================================
 # SIH_ETA — Root .gitignore
-# Covers: Python/FastAPI backend, Flutter mobile, Next.js web, ML/AI, CI/CD
+# Covers: Python/FastAPI backend, Flutter mobile, Next.js web, prediction models, CI/CD
 # =============================================================================
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ __pypackages__/
 *.ipynb_checkpoints/
 
 # ──────────────────────────────────────────────────────────────────────────────
-# ML / INTELLIGENCE
+# PREDICTION MODELS / ANALYSIS
 # ──────────────────────────────────────────────────────────────────────────────
 # Large model weights — use DVC or model registry instead
 *.pkl
@@ -111,6 +111,9 @@ apps/mobile/flutter_app/coverage/
 # NODE.JS / NEXT.JS (Web App)
 # ──────────────────────────────────────────────────────────────────────────────
 apps/web/web_app/node_modules/
+# Automatically generated local framework guidance; shared notes use DEVELOPMENT.md.
+apps/web/web_app/AGENTS.md
+apps/web/web_app/CLAUDE.md
 apps/web/web_app/.next/
 apps/web/web_app/out/
 apps/web/web_app/dist/

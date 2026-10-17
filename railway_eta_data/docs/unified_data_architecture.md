@@ -1,5 +1,11 @@
 # Unified Data Architecture
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document outlines the structured architecture for the ETA Prediction system, detailing how each dataset is utilized and interconnected. We intentionally avoid a single monolithic CSV merge, instead relying on normalized relation tables.
 
 ## 1. Processed Data Store (`data/processed/`)
@@ -22,7 +28,7 @@ The architecture consists of four distinct layers:
 - `delays_clean.json/csv` (Railpull): Sparse delay snapshot without location.
 - Live Telemetry (RailRadar API): Provides real-time `current_position_station`, `speed_kmh`, and `delay_minutes`.
 
-**Role:** Provides the current state (observation) for the ML model.
+**Role:** Provides the current state (observation) for the prediction model.
 
 ## 2. Dataset Interconnections (Joins)
 

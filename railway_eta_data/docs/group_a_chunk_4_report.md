@@ -1,5 +1,11 @@
 # Group A - Chunk 4 Report: Leakage-Safe Feature Engineering
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document serves as the final report for Group A Chunk 4 of the SIH Indian Train ETA Project.
 
 ---
@@ -10,7 +16,7 @@ This document serves as the final report for Group A Chunk 4 of the SIH Indian T
 - Built a modular feature extraction system (`src/features/`).
 - Handled static, route, time, live, and historical features safely.
 - Generated feature registries and quality reports.
-- Proved that ML training is currently blocked by lack of ground truth labels.
+- Proved that supervised training is currently blocked by lack of ground truth labels.
 
 ---
 
@@ -60,7 +66,7 @@ None. Raw data and previously processed pipelines remain completely untouched.
 ---
 
 ## 6. Leakage Analysis Results
-The `LeakageChecker` correctly identified DA323 (`historical_average_delay`) as `TEMPORALLY_UNSAFE_OR_UNKNOWN` (`UNSAFE` leakage risk) because the date range for the aggregation cannot be guaranteed to pre-date simulated predictions. It was prevented from contaminating the ML context silently.
+The `LeakageChecker` correctly identified DA323 (`historical_average_delay`) as `TEMPORALLY_UNSAFE_OR_UNKNOWN` (`UNSAFE` leakage risk) because the date range for the aggregation cannot be guaranteed to pre-date simulated predictions. It was prevented from contaminating the model context silently.
 
 ---
 
@@ -74,7 +80,7 @@ The `LeakageChecker` correctly identified DA323 (`historical_average_delay`) as 
 
 ---
 
-## 8. Current ML Readiness
+## 8. Model Training Readiness at This Stage
 **Are we ready to train a supervised ETA model?**
 **NO.**
 
@@ -89,6 +95,6 @@ We now have:
 - Baseline models.
 - Leakage-safe feature extraction.
 
-We are ready to package the baselines, features, and analysis for final delivery or integration into a UI/API, while acknowledging the ML blocker.
+We are ready to package the baselines, features, and analysis for final delivery or integration into a UI/API, while acknowledging the training-data blocker.
 
-**STOPPED**. No ML model trained. No synthetic data created.
+**STOPPED**. No predictive model trained. No synthetic data created.

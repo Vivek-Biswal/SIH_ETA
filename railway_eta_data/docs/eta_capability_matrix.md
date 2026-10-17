@@ -1,5 +1,11 @@
 # ETA Capability Matrix
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document clearly defines what the current data and system architecture can and cannot support for ETA estimation.
 
 ---
@@ -55,10 +61,10 @@ This document clearly defines what the current data and system architecture can 
 
 ## Scientific Summary
 
-The current system implements **deterministic schedule-based ETA baselines**. These are honest, reproducible, and scientifically sound given the available data. They are not machine learning models. They do not claim real-world accuracy.
+The current system implements **deterministic schedule-based ETA baselines**. These are honest, reproducible, and scientifically sound given the available data. They are not fitted predictive models. They do not claim real-world accuracy.
 
 The correct progression is:
 
 1. **Now (Chunk 3):** Deterministic baselines using static schedules
 2. **Future Phase 1:** Accumulate live delay observations over time
-3. **Future Phase 2:** Feature engineering + supervised ML using verified ground truth
+3. **Future Phase 2:** Feature engineering + supervised training using verified ground truth

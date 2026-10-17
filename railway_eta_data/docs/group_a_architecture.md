@@ -1,5 +1,11 @@
 # Group A Architecture Map
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document maps how the sequential chunks of Group A's work built upon each other to create the final unified ETA system.
 
 ```mermaid
@@ -37,7 +43,7 @@ graph TD
 
 ### CHUNK 2: Exploratory Data Analysis
 **Role:** Profiled the datasets to identify missing values, impossible delays, and coverage gaps. Concluded that historical individual train sequences were missing.
-*Constraint:* Defined the boundaries of what could be modeled (no ML).
+*Constraint:* Defined the boundaries of what could be modeled (no supervised training from these data).
 
 ### CHUNK 3: ETA Baseline
 **Role:** Built the core deterministic prediction logic (`SCHEDULE_BASELINE` and `DELAY_ADJUSTED_BASELINE`) and time-math utilities.

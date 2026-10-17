@@ -1,5 +1,11 @@
 # Delay-DNA Examples
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Current Delay Observation
 Category: `OBSERVED_CURRENT`
 
@@ -57,7 +63,7 @@ Category: `STATIC_CONTEXT`
   "route_context_status": "STATIC_CONTEXT",
   "actual_arrival_time": null,
   "historical_trajectory": null,
-  "data_completeness_note": "Not suitable for ML training — actual arrivals missing"
+  "data_completeness_note": "Not suitable for model training — actual arrivals missing"
 }
 ```
 

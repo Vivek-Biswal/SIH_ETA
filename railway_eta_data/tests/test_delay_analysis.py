@@ -109,7 +109,7 @@ def test_dna_profile_created():
     profile = DelayDNAProfile(train_number="12001")
     assert profile.actual_arrival_time is None
     assert profile.historical_trajectory is None
-    assert "actual arrival" in profile.data_completeness_note.lower() or "ml training" in profile.data_completeness_note.lower()
+    assert "actual arrival" in profile.data_completeness_note.lower() or "model training" in profile.data_completeness_note.lower()
 
 
 # --- Recovery Tests ---

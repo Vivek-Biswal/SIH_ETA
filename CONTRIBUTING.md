@@ -2,7 +2,7 @@
 
 Thank you for helping make railway arrival information more useful and honest.
 Start with [local setup](docs/development/setup.md), [feature status](docs/FEATURE_STATUS.md)
-and [the ETA audit](docs/ETA_ML_AUDIT.md). The repository has no selected software
+and [the ETA audit](docs/ETA_MODEL_AUDIT.md). The repository has no selected software
 licence yet; discuss substantial external reuse or third-party imports with the
 maintainer before proceeding.
 
@@ -11,7 +11,7 @@ maintainer before proceeding.
 1. Search existing issues. For a large feature, describe the user problem and
    proposed scope in an issue first.
 2. Create a focused branch from the current default branch, `main`:
-   `git switch -c codex/short-description` (another descriptive prefix is fine).
+   `git switch -c feature/short-description` (another descriptive prefix is fine).
 3. Keep application behavior, API contracts and deployment paths stable unless
    the change explicitly needs to alter them.
 4. Use the actual source and runtime OpenAPI as evidence. Older design documents
@@ -43,7 +43,7 @@ Passing isolated tests does not prove that a public deployment has updated.
   occurrence/sequence, not just station code.
 - Keep actual arrivals, reported delay, predicted arrivals and timetable times
   distinct. Do not convert missing values into zero-delay observations.
-- Preserve per-stop `prediction_method`, source and freshness. A top-level ML
+- Preserve per-stop `prediction_method`, source and freshness. A top-level model
   result does not mean every stop used the model.
 - Never infer signal failures, congestion or weather causation from lateness
   alone. Label estimated future recovery separately from recovered minutes.

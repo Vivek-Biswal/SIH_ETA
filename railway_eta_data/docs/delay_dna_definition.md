@@ -1,5 +1,11 @@
 # Delay-DNA Definition
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## What is Delay-DNA?
 
 In the context of the SIH Indian Train ETA Project, **Delay-DNA** represents an **Analytical Delay Context and Pattern Profile**. It is a structured descriptive profile of a train's delay-related characteristics at a specific point in time or over a historical aggregation.
@@ -11,7 +17,7 @@ In the context of the SIH Indian Train ETA Project, **Delay-DNA** represents an 
 
 ### What Delay-DNA IS NOT:
 - **NOT** a causal explanation for why a delay happened.
-- **NOT** a supervised ML feature set for predicting future delay.
+- **NOT** a supervised model feature set for predicting future delay.
 - **NOT** proof of what future delays will definitively be.
 - **NOT** an individual time-series trajectory of historical performance.
 

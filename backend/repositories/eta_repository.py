@@ -1,5 +1,5 @@
 """
-ETA repository — all Supabase queries for ML predictions and delay factors.
+ETA repository — all Supabase queries for stored predictions and delay factors.
 """
 
 from database.connection import get_supabase_client
@@ -13,7 +13,7 @@ class ETARepository:
 
     def get_predictions(self, journey_id: str) -> list[dict]:
         """
-        Fetch stored ML predictions for a journey, newest first.
+        Fetch stored predictions for a journey, newest first.
         Includes joined station reference.
         """
         response = (

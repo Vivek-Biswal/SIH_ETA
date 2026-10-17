@@ -1,7 +1,7 @@
 CHECK,STATUS,EVIDENCE,COMMENTS
 Raw data unchanged,PASS,2037 files found,Raw data directory is populated.
 Processed datasets exist,PASS,"delays_clean.json, trains_clean.json, journeys_scheduled.json, public_historical_delay_clean.csv",
-No ML model trained,PASS,No ML model artifacts found,
+No trained artifact in preparation data,PASS,No model artifacts found in the processed-data directory,
 No synthetic trajectories,PASS,Code inspection,Verified no generation scripts exist.
 No fake actual arrivals,PASS,Code inspection,Verified ETA contracts only predict.
 Baseline methods explicit,PASS,system/orchestrator.py,prediction_method explicitly returned.

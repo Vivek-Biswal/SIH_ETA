@@ -1,8 +1,14 @@
 # ETA Baselines Documentation
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## 1. Objective
 
-This module implements scientifically honest ETA baselines for Indian train arrival estimation. These baselines operate entirely on available static timetable and live snapshot data. They do not use machine learning and do not require verified historical actual arrival records.
+This module implements scientifically honest ETA baselines for Indian train arrival estimation. These baselines operate entirely on available static timetable and live snapshot data. They do not use fitted predictive models and do not require verified historical actual arrival records.
 
 ---
 
@@ -10,7 +16,7 @@ This module implements scientifically honest ETA baselines for Indian train arri
 
 The current dataset **does not contain verified actual arrival timestamps** for individual journeys. Therefore:
 
-- ✗ No supervised ML model can be trained
+- ✗ No supervised predictive model can be trained from these data
 - ✗ No MAE/RMSE can be calculated against real ground truth
 - ✗ Scheduled arrivals cannot be treated as ground truth
 
@@ -134,6 +140,6 @@ See [`eta_baseline_assumptions.md`](eta_baseline_assumptions.md) for comprehensi
 
 ---
 
-## 12. Future ML Architecture
+## 12. Future Trained-Model Architecture
 
-See [`eta_system_architecture.md`](eta_system_architecture.md) for the planned transition from deterministic baselines to a trained ML ETA model, including all data collection prerequisites.
+See [`eta_system_architecture.md`](eta_system_architecture.md) for the planned transition from deterministic baselines to a trained ETA model, including all data collection prerequisites.

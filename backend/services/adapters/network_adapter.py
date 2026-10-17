@@ -23,7 +23,7 @@ class NetworkIntelligenceAdapter:
         self, route_id: str
     ) -> Optional[dict]:
         """Request a congestion score for a route segment from the network model."""
-        # For now, returning None matches original behavior. Can be updated when ML team specifies the method
+        # For now, returning None matches original behavior. Can be updated when model maintainers specifies the method
         return None
 
     def get_propagation(self, train_id: str) -> dict:

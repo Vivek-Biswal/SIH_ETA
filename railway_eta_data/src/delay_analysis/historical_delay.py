@@ -78,7 +78,7 @@ def compute_historical_summary(records: List[HistoricalStationContext]) -> Dict[
         "percent_significant_delay_stats": safe_stats(psds),
         "warning": (
             "The time window of DA323 aggregation is unknown. "
-            "These statistics CANNOT be used as leakage-safe ML features."
+            "These statistics CANNOT be used as leakage-safe model features."
         )
     }
 

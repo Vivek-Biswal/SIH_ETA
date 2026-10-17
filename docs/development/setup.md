@@ -248,7 +248,7 @@ The default importer downloads the bounded three-train sample at a pinned
 revision. Outputs remain ignored. Using a temporary output directory preserves
 the shipped artifact; compare reports before proposing a model replacement.
 Do not tune on final-test errors or claim better accuracy without a fresh,
-independent evaluation. See [the ML audit](../ETA_ML_AUDIT.md).
+independent evaluation. See [the model audit](../ETA_MODEL_AUDIT.md).
 
 ## Troubleshooting
 
@@ -260,7 +260,7 @@ independent evaluation. See [the ML audit](../ETA_ML_AUDIT.md).
 | Wrong journey or stale arrival | Origin date, returned identity, report timestamp and per-stop method. Do not compare a multi-day train against today's unrelated departure. |
 | “Invalid key” on map | MapTiler browser-key validity/domain allowlist; inspect Map options. Preserve the identified fallback. |
 | Phone cannot reach localhost | Use Android emulator `10.0.2.2` or a reachable LAN/HTTPS address. |
-| ML fallback on a pilot train | A fresh confirmed station event, supported pair/horizon and valid features are also required. `/api/v1/eta/model` is artifact status, not proof every stop used ML. |
+| Model fallback on a pilot train | A fresh confirmed station event, supported pair/horizon and valid features are also required. `/api/v1/eta/model` is artifact status, not proof every stop used the trained model. |
 | Python scientific-library import/DLL error | Use the pinned training stack in a separate supported Python 3.12 environment. Runtime JSON inference does not need it. |
 | Flutter SDK/plugin registration mismatch | Check `flutter doctor -v`, SDK consistency and generated plugin registration. Do not promote test-only integration plugins into production dependencies. |
 | OneDrive/build file errors | Ensure files are fully downloaded and toolchains accessible; prefer a local materialized clone for large build caches. |

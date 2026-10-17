@@ -1,5 +1,11 @@
 # Frontend Handoff Contract (For SNEHA)
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document outlines how the frontend should display ETA information provided by the backend API.
 
 ## 1. Frontend Honesty Rule
@@ -7,8 +13,7 @@ This document outlines how the frontend should display ETA information provided 
 The UI must accurately reflect the data source and prediction method. 
 
 **DO NOT display:**
-- "AI Prediction"
-- "Machine Learning ETA"
+- A trained-model prediction label for deterministic baseline output
 - "Live GPS Tracking" (unless GPS is explicitly verified and added to the backend later)
 
 **INSTEAD display:**

@@ -5,7 +5,11 @@ datasets and the deterministic ETA prediction pipeline.
 
 > **This is a local development tool only.**  
 > It is read-only and does not modify any datasets.  
-> The ETA system uses deterministic baselines — it is **NOT** a supervised ML model.
+> This inspection tool uses deterministic baselines, not a trained prediction model.
+
+This dashboard belongs to the original dataset preparation workspace. It is
+separate from the backend's limited trained-model pilot; see the
+[ETA model audit](../docs/ETA_MODEL_AUDIT.md) for the current implementation.
 
 ---
 
@@ -180,5 +184,5 @@ Press `Ctrl+C` in the terminal running uvicorn.
 - **Backend**: FastAPI + Uvicorn, running on `127.0.0.1:8000`
 - **Frontend**: Vanilla HTML/CSS/JS served as static files from `src/dashboard/static/`
 - **Data Loading**: All datasets loaded once on server startup into in-memory dictionaries
-- **ETA Engine**: `ETAOrchestrator` from `src/system/orchestrator.py` — deterministic, no ML
+- **ETA Engine**: `ETAOrchestrator` from `src/system/orchestrator.py` — deterministic baseline, without model inference
 - **DA323 Exclusion**: The `public_historical_delay_clean.csv` dataset is loaded for display only. It is **excluded from ETA calculations** due to unknown temporal provenance (DA323 temporal safety rule).

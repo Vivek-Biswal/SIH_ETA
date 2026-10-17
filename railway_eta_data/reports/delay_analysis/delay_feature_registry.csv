@@ -8,5 +8,5 @@ percent_significant_delay,HISTORICAL_AGGREGATED,DA323,YES,TEMPORALLY_UNKNOWN,NO,
 route_distance,STATIC_CONTEXT,trains_clean.json,YES,VALID_ALWAYS,YES,Total scheduled route distance
 stop_count,STATIC_CONTEXT,journeys_scheduled,YES,VALID_ALWAYS,YES,Number of scheduled stops
 scheduled_duration_hours,STATIC_CONTEXT,trains_clean.json,YES,VALID_ALWAYS,YES,Scheduled journey duration
-actual_arrival_time,NOT_AVAILABLE,None,NO,NOT_AVAILABLE,N/A,Ground truth label — blocks all ML
+actual_arrival_time,NOT_AVAILABLE,None,NO,NOT_AVAILABLE,N/A,Ground truth label — required for supervised model training
 historical_trajectory,NOT_AVAILABLE,None,NO,NOT_AVAILABLE,N/A,Individual delay time-series — blocks recovery

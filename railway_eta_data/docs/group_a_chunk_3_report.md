@@ -1,5 +1,11 @@
 # Group A - Chunk 3 Report: ETA Baseline System Design
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document serves as the final report for Group A Chunk 3 of the SIH Indian Train ETA Project.
 
 ---
@@ -129,7 +135,7 @@ The system cannot:
 
 ---
 
-## 11. What Additional Data Is Required for Real ML
+## 11. What Additional Data Is Required for Model Training
 
 1. **Historical actual arrivals**: Individual records linking each train journey to verified departure/arrival times at each station (minimum ~30 journeys × 500+ trains)
 2. **Time-aligned delay observations**: Time series of delay snapshots across a journey, not just one snapshot
@@ -145,4 +151,4 @@ The following foundation is now in place for Chunk 4:
 - Comprehensive EDA with feature candidates (Chunk 2)
 - Working ETA baseline engine with full validation and documentation (Chunk 3)
 - 44 passing tests covering the full pipeline
-- Clear architectural roadmap from baselines → ML model
+- Clear architectural roadmap from baselines → trained model

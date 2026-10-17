@@ -64,13 +64,13 @@ functionality, not four independent native reimplementations.
 The checked-in artifact is a trained three-train station-event pilot. For each
 target stop, inference requires a supported train/station pair, fresh running
 evidence, a recent confirmed event, consistent provider delay and in-range
-features/horizon. Exceptional, stale or unsupported journeys decline ML.
+features/horizon. Exceptional, stale or unsupported journeys decline trained-model inference.
 
 The fallback is **scheduled arrival + latest reported delay**, clearly labelled.
 No fresh running evidence means timetable/unavailable behavior rather than a
 fabricated live forecast. Stops may use different methods in the same response;
 the per-stop method is authoritative. Route-order adjustments can withhold a
-future-recovery claim. See [the complete ML audit](../ETA_ML_AUDIT.md).
+future-recovery claim. See [the complete model audit](../ETA_MODEL_AUDIT.md).
 
 ## Storage, deployment and security boundaries
 

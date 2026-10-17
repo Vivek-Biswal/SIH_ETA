@@ -16,7 +16,7 @@ NOTEBOOKS_DIR = BASE_DIR / "notebooks" / "outputs"
 class RealNetworkProvider(PropagationProvider, BottleneckProvider, ScenarioProvider):
     """
     Real implementation of Propagation, Bottleneck, and Scenario providers.
-    Delegates to the ML modules and pre-computed CSV files.
+    Delegates to the prediction modules and pre-computed CSV files.
     """
 
     def get_propagation(self, train_id: str) -> dict:

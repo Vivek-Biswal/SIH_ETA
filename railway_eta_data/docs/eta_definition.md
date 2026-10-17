@@ -1,5 +1,11 @@
 # ETA Formal Definition
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document formally defines all key temporal terms used in the SIH Indian Train ETA project. Precise definitions are essential to prevent scientific confusion between different classes of arrival information.
 
 ---
@@ -19,7 +25,7 @@ The planned arrival time at a station as specified in the official railway timet
 ## B. Estimated Arrival Time (ETA)
 
 **Definition:**
-A system-generated estimate of when a train will arrive at a station, computed at a specific moment in time (the *prediction timestamp*). It may be based on static schedules, current delay information, or (in a future ML system) a trained predictive model.
+A system-generated estimate of when a train will arrive at a station, computed at a specific moment in time (the *prediction timestamp*). It may be based on static schedules, current delay information, or a trained predictive model.
 
 - Nature: **Dynamic** — changes as new information becomes available
 - It is an *estimate*, not a guarantee

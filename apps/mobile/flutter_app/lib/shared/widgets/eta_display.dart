@@ -242,7 +242,7 @@ ArrivalTiming _passengerTiming(
   final possible = timing?.expectedRecoveryMinutes;
   final extra = timing?.expectedAdditionalDelayMinutes;
   // Recovery in the future is a selected-stop forecast, never an inference
-  // from a repeated running delay or a journey-wide ML label.
+  // from a repeated running delay or a journey-wide prediction label.
   final futureEstimated =
       method == 'inference' &&
       timing?.futureRecoveryStatus == 'estimated' &&

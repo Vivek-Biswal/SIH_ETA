@@ -164,7 +164,7 @@ void main() {
     expect(timing.futureRecoveryStatus, 'not_estimated');
   });
 
-  test('observed recovery and selected ML recovery remain separate', () {
+  test('observed recovery and selected forecast recovery remain separate', () {
     final result = explanation(
       stop(delay: 9, method: 'inference', reason: recoveryReason()),
     );
@@ -332,7 +332,7 @@ void main() {
     },
   );
 
-  test('a stop never inherits ML coverage from a journey-wide method', () {
+  test('a stop never inherits model coverage from a journey-wide method', () {
     final missingMethod = StationPrediction.fromJson({
       'station': {'code': 'KND'},
       'scheduled_arrival': '2026-10-16T11:00:00Z',

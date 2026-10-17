@@ -1,11 +1,17 @@
 # Group A - Chunk 2 Report: Exploratory Data Analysis (EDA)
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document serves as the final report for the completion of Group A Chunk 2 of the SIH Indian Train ETA Project.
 
 ## 1. Work Completed
 - Created a modular, reproducible EDA architecture within `src/eda/`.
 - Executed exploratory analysis over trains, stations, schedules, routes, and delay datasets.
-- Handled structural dataset analyses safely without fabricating actual history or training ML models.
+- Handled structural dataset analyses safely without fabricating actual history or training predictive models.
 - Produced summary figures for train types, schedule durations, geographical distribution, and arrival patterns.
 - Created robust feature candidates documentation alongside an availability matrix to prevent data leakage in future steps.
 
@@ -23,7 +29,7 @@ This document serves as the final report for the completion of Group A Chunk 2 o
 - `tests/test_eda.py`: Validated aggregation and join mapping logic.
 
 **Documentation:**
-- `docs/eda.md`: Full multi-section analytical summary and ML readiness declaration.
+- `docs/eda.md`: Full multi-section analytical summary and model-training readiness declaration.
 - `docs/feature_candidates_eda.md`: Cataloged static, time, route, and contextual candidate features.
 
 **Reports:**
@@ -57,12 +63,12 @@ This document serves as the final report for the completion of Group A Chunk 2 o
 ## 7. Data Limitations
 The most important limitation mathematically verified is the absence of historical sequential time-series actual movement data. Because we only have static schedules and abstract aggregated historical averages (DA323), we lack individual time-aligned observations mapping a train's past states to its actual outcome.
 
-## 8. ML Readiness Status
+## 8. Model Training Readiness Status
 - **Ready for**: EDA, Network Analysis, Feature Engineering (Static & Scheduled), and Baseline Network Topology Design.
-- **NOT Ready for**: Supervised dynamic ML training (e.g. Random Forests / LSTMs targeting ETA) due to lack of ground-truth target variable logs, which prevents valid loss measurement (MAE/RMSE).
+- **NOT Ready for**: Supervised dynamic model training (e.g. Random Forests / LSTMs targeting ETA) due to lack of ground-truth target variable logs, which prevents valid loss measurement (MAE/RMSE).
 
 ## 9. Test Results
 `pytest tests/test_eda.py` passes completely, ensuring the custom join-mapping algorithms and feature extractors operate deterministically.
 
 ## 10. Ready for Chunk 3
-The dataset characteristics, features, and strict scientific ML bounds are fully mapped. We are ready to proceed to the next Chunk.
+The dataset characteristics, features, and strict model-training boundaries are fully mapped. We are ready to proceed to the next Chunk.

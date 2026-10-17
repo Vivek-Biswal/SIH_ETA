@@ -96,7 +96,7 @@ def model_information():
 
 
 def predict(data, now=None):
-    """Return route-indexed ML forecasts and explicit fallback/model metadata.
+    """Return route-indexed model forecasts and explicit fallback/model metadata.
 
     Recent *confirmed station events* are the available landmark. A moving GPS
     estimate is not silently substituted for station-based training inputs.
@@ -115,7 +115,7 @@ def predict(data, now=None):
         if (data.get('_railradar_stale') or data.get('isLive') is not True or not observed
                 or not timedelta(0) <= now-observed <= timedelta(minutes=5)
                 or state in {'not-started','cancelled','canceled','completed','terminated'}):
-            return fallback('A fresh observation of a running journey is required for ML prediction.')
+            return fallback('A fresh observation of a running journey is required for model prediction.')
         scope=artifact['scope']; train=str(data.get('trainNumber'))
         exceptions=data.get('exceptions') or []
         if ((data.get('currentLocation') or {}).get('isDiverted') is True
@@ -123,7 +123,7 @@ def predict(data, now=None):
                        {'DIVERTED','PARTIALLY_CANCELLED','RESCHEDULED','CANCELLED'} for event in exceptions)):
             return fallback('A reported journey exception changes the normal operating plan. This model has not been validated for that condition.')
         if train not in scope['trains']:
-            return fallback('This train is outside the current three-train ML pilot. Its ETA uses the reported running delay.')
+            return fallback('This train is outside the current three-train prediction pilot. Its ETA uses the reported running delay.')
         evaluated=stamp(scope['evaluation_end'])
         if not evaluated or now-evaluated > timedelta(days=scope['max_evaluation_age_days']):
             return fallback('The trained model needs evaluation on newer journeys before it can be used.')
@@ -132,16 +132,16 @@ def predict(data, now=None):
         if any(type(s) is not int for s in sequences) or sequences != sorted(set(sequences)):
             return fallback('A verified ordered route is required for the station-based model.')
         landmarks=known_events(events,observed)
-        if not landmarks: return fallback('No confirmed recent station arrival or departure is available for ML prediction.')
+        if not landmarks: return fallback('No confirmed recent station arrival or departure is available for model prediction.')
         actual,current,kind,delay=landmarks[-1]
         if minutes(observed,actual) > scope['max_landmark_age_minutes']:
-            return fallback('The latest confirmed station event is too old for this ML model. The reported-delay estimate remains available.')
+            return fallback('The latest confirmed station event is too old for this trained model. The reported-delay estimate remains available.')
         location=data.get('currentLocation') or {}
         if location.get('stationCode') and location['stationCode'] != events[current]['station_code']:
             return fallback('The reported location no longer matches the confirmed station event required by this model.')
         reported_delay=finite(data.get('delayMinutes'))
         if reported_delay is None or abs(reported_delay-delay) > 5:
-            return fallback('Station timestamps and reported running delay disagree; ML prediction has been withheld.')
+            return fallback('Station timestamps and reported running delay disagree; model prediction has been withheld.')
         results={}
         for target,event in enumerate(events):
             row=data['route'][target]
@@ -159,4 +159,4 @@ def predict(data, now=None):
         metadata.update(status='validated_pilot',reason='Trained on past station events for three trains; evaluated on later journeys. This is a limited pilot, with prospective RailRadar validation still needed.')
         return results,metadata
     except (ValueError,TypeError,KeyError,OverflowError,IndexError,AttributeError,struct.error):
-        return fallback('ML inputs could not be verified. The observed-delay estimate remains available where supported.')
+        return fallback('model inputs could not be verified. The observed-delay estimate remains available where supported.')

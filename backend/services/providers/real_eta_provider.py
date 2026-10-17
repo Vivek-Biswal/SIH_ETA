@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class RealETAProvider(ETAProvider, DelayDNAProvider, RecoveryProvider):
     """
     Real implementation of ETA, DelayDNA, and Recovery providers.
-    Delegates to the ML modules. If the ML module raises an exception or
+    Delegates to the prediction modules. If the prediction module raises an exception or
     is not fully implemented, it handles it gracefully.
     """
 
@@ -24,7 +24,7 @@ class RealETAProvider(ETAProvider, DelayDNAProvider, RecoveryProvider):
 
     def get_delay_dna(self, train_id: str) -> dict:
         try:
-            # Future ML integration goes here
+            # Future model integration goes here
             return {
                 "train_id": train_id,
                 "contributors": [],
@@ -40,7 +40,7 @@ class RealETAProvider(ETAProvider, DelayDNAProvider, RecoveryProvider):
 
     def get_recovery(self, train_id: str) -> dict:
         try:
-            # Future ML integration goes here
+            # Future model integration goes here
             return {
                 "current_delay": 0,
                 "expected_recovery": 0,

@@ -8,7 +8,7 @@ IMPORTANT CONSTRAINTS:
 - All endpoints are READ-ONLY. No data is ever created, modified, or deleted.
 - No synthetic or generated data is ever returned. If data is not available, 
   the response will contain "DATA NOT AVAILABLE" or status "NOT_FOUND".
-- The ETA system is a deterministic baseline. It is NOT an ML model.
+- This inspection ETA is a deterministic baseline, not a trained prediction model.
   This is stated explicitly in every /api/data/summary response.
 
 Run with:
@@ -40,7 +40,7 @@ app = FastAPI(
     description=(
         "READ-ONLY data inspection dashboard for the SIH Indian Train ETA project. "
         "Exposes processed datasets and the deterministic ETA baseline. "
-        "NOT a production API. NOT an ML model."
+        "Not a production API or a trained prediction model."
     ),
     version="1.0.0-local",
     docs_url="/docs",
@@ -103,7 +103,7 @@ def data_summary():
     - Record counts and file sizes
     - Schema fields
     - DA323 temporal safety warning
-    - System disclaimer (deterministic baseline, not ML)
+    - System disclaimer (deterministic baseline, without model inference)
     """
     try:
         return svc.get_data_summary()
@@ -196,7 +196,7 @@ def eta_predict(request: ETARequest):
     Run the deterministic ETA baseline for a given train and destination.
 
     IMPORTANT:
-    - This is a deterministic calculation using scheduled data — NOT an ML model.
+    - This is a deterministic calculation using scheduled data, not a trained prediction model.
     - If current_delay_minutes is provided: uses DELAY_ADJUSTED_BASELINE.
     - If not provided: uses SCHEDULE_BASELINE.
     - All assumptions and limitations are returned in the response.

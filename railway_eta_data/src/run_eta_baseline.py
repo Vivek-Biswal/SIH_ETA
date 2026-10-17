@@ -124,7 +124,7 @@ def main():
     print("DEMO COMPLETE")
     print("=" * 60)
     print("\nIMPORTANT: These are schedule-based estimates only.")
-    print("No ML model was used. No actual arrival data exists.")
+    print("No trained model was used. These baseline datasets lack actual arrival timestamps.")
 
 
 if __name__ == "__main__":

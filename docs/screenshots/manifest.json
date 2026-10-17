@@ -4,7 +4,7 @@
   "website_source_revision": "6e3293e0e87ced76acbb2c31cd20faaa4c15f1c3",
   "android_version": "1.1.9+11",
   "android_application_id": "com.siheta.sih_eta",
-  "capture_policy": "Actual deployed website and Android release UI; no fixture interception or fabricated data. Maps show the real OpenStreetMap fallback. Native ETA captures use the explicit delay-adjusted fallback, not ML inference.",
+  "capture_policy": "Actual deployed website and Android release UI; no fixture interception or fabricated data. Maps show the real OpenStreetMap fallback. Native ETA captures use the explicit delay-adjusted fallback, not trained-model inference.",
   "images": [
     {
       "path": "website/dashboard.png",

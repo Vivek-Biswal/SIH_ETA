@@ -2,7 +2,7 @@
 ETA Contract Module
 ===================
 Defines the standard input and output data structures for ETA requests and predictions.
-No ML is performed here — these are plain data containers with validation.
+No prediction or model training is performed here — these are plain data containers with validation.
 """
 from dataclasses import dataclass, field
 from typing import Optional

@@ -1,5 +1,11 @@
 # Leakage-Safe Feature Rules
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document outlines the formal rules governing data leakage prevention in the SIH Indian Train ETA project.
 
 ## 1. Rule 1: No Future Information
@@ -12,7 +18,7 @@ Actual arrival information (if ever collected) represents the target variable. I
 Future delay information cannot be used. If a train is delayed by 20 minutes at Station A, and 40 minutes at Station B, a prediction made while the train is at Station A cannot use the 40-minute delay from Station B as an input.
 
 ## 4. Rule 4: Temporal Provenance of Aggregations
-Aggregated historical statistics (like DA323 average delays) require explicit temporal provenance. Since we do not know the exact time window DA323 was calculated over, it is classified as `TEMPORALLY_UNSAFE` for strict time-series ML modeling. It may only be used as a static regional risk proxy.
+Aggregated historical statistics (like DA323 average delays) require explicit temporal provenance. Since we do not know the exact time window DA323 was calculated over, it is classified as `TEMPORALLY_UNSAFE` for strict time-series predictive modeling. It may only be used as a static regional risk proxy.
 
 ## 5. Rule 5: Live Features Require Timestamps
 Live features (such as `current_delay_minutes`) require a timestamp. Our current dataset `delays_clean.json` is a single snapshot. We assume the snapshot time is the prediction time for baseline testing purposes.

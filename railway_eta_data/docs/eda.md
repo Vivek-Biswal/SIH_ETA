@@ -1,9 +1,15 @@
 # Exploratory Data Analysis (EDA) Report
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document presents the findings from the Exploratory Data Analysis (Group A - Chunk 2).
 
 ## 1. Objective
-To understand the underlying structure, characteristics, and relationships within the SIH Indian Train ETA datasets while scientifically confirming ML readiness and data limitations. This EDA does not modify raw datasets or generate synthetic ML targets.
+To understand the underlying structure, characteristics, and relationships within the SIH Indian Train ETA datasets while scientifically confirming model-training readiness and data limitations. This EDA does not modify raw datasets or generate synthetic training targets.
 
 ## 2. Datasets Analyzed
 - `trains_clean.json`: Train characteristics and schedule metadata.
@@ -64,7 +70,7 @@ Features discovered are cataloged in `docs/feature_candidates_eda.md` and `repor
 ## 14. Data Limitations
 The most crucial limitation is the absence of **Historical Individual Delay Records** (i.e. we do not have logs showing when train 123 arrived at station B yesterday, last week, or last year). We only possess scheduled routes and aggregated averages.
 
-## 15. ML Readiness
+## 15. Model Training Readiness
 **WHAT WE CAN DO:**
 - Baseline system design
 - Static railway network analysis

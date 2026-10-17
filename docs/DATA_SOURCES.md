@@ -28,7 +28,7 @@ journeys.
 - [Import instructions](../intelligence/train_eta/data/README.md).
 - [Pinned source card](https://huggingface.co/datasets/yadavsaurabh/indian-railways-runs/blob/d131017ee61b65681a1908025b93813169e8fb8f/README.md).
 - [Source manifest and SHA-256 hashes](../intelligence/train_eta/reports/source_manifest.json).
-- [Training/evaluation methodology](ETA_ML_AUDIT.md).
+- [Training/evaluation methodology](ETA_MODEL_AUDIT.md).
 
 Raw downloads and canonical JSONL are ignored by Git. Do not add an entire
 downloaded dataset or third-party repository to a presentation commit.
@@ -50,6 +50,6 @@ licence and service terms. The project does not grant rights it does not own.
 2. Broader train, route, season and disruption coverage; independent prospective
    testing against the same delay-carry-forward baseline.
 3. Reliable operational feeds before adding signal, occupancy or rake-delay
-   explanations, and dated weather observations before weather ML experiments.
+   explanations, and dated weather observations before weather prediction-model experiments.
 4. Explicit contributor/project licence decisions and reviewed data provenance
    for the older network-analysis artifacts.

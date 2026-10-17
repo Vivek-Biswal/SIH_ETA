@@ -31,7 +31,7 @@ pending reports. Copies are removed if the user clears app data/uninstalls.
 
 The server stores at most 10,000 reports and prunes records older than 90 days
 on insertion. Reports are **unverified passenger feedback**, have no public
-read endpoint, and are not used as ML labels or confirmed disruption causes.
+read endpoint, and are not used as model-training labels or confirmed disruption causes.
 
 `ETA_FEEDBACK_PATH` defaults to `data/eta-feedback.sqlite3`. On Render's
 ephemeral filesystem, server copies can disappear on deploy/restart. For

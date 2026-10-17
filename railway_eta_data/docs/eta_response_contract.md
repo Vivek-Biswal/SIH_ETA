@@ -1,5 +1,11 @@
 # ETA Response Contract
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document defines the canonical interface for ETA responses returned by the core computational system.
 
 ## Standard Output Response
@@ -30,7 +36,7 @@ This document defines the canonical interface for ETA responses returned by the 
 - `prediction_method` (String): Explicitly declares how the ETA was derived.
   - `SCHEDULE_BASELINE`: Purely from published timetable.
   - `DELAY_ADJUSTED_BASELINE`: Timetable + observed delay.
-  - **CRITICAL**: The phrase "ML prediction" is strictly forbidden until a valid model exists.
+  - **CRITICAL**: Only label an output as a trained-model prediction when it was produced by a valid trained model.
 - `current_delay_minutes` (Float | null): The delay used in the calculation, if applicable.
 - `data_completeness_status` (String): Indicates input quality (e.g., `SCHEDULE_ONLY`, `DELAY_AVAILABLE`). Do NOT treat this as a statistical confidence interval.
 - `assumptions` (List[String]): Explicit list of mathematical/logical assumptions made during calculation. Must be exposed to the user.

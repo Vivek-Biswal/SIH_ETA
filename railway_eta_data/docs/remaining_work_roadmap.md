@@ -1,5 +1,11 @@
 # Remaining Work Roadmap
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 ## PRIORITY 1 — CRITICAL (Required for Prototype MVP)
 
 ### 1. Build Backend API Server & Connect Database
@@ -11,7 +17,7 @@
 - **EXPECTED OUTPUT:** A running backend server exposing `POST /api/v1/eta`.
 
 ### 2. Implement Frontend Dashboard & Apps
-- **TASK:** Build the Next.js/Flutter UI mapping to the established backend endpoints, ensuring ETA displays are clearly labeled as baseline/delay-adjusted (not ML).
+- **TASK:** Build the Next.js/Flutter UI mapping to the established backend endpoints, ensuring ETA displays are clearly labeled as baseline/delay-adjusted.
 - **OWNER:** Sneha
 - **DEPENDENCY:** Varun's API deployment.
 - **WHY IT IS NEEDED:** End-users need a visual interface to track trains.
@@ -22,7 +28,7 @@
 - **TASK:** Build a scheduled polling service (e.g., using Celery or Cron) to fetch live train states (delay, position) every 5 minutes and save them chronologically.
 - **OWNER:** Varun
 - **DEPENDENCY:** None.
-- **WHY IT IS NEEDED:** This is the *only* way to ever unblock ML modeling. Without historical telemetry, AI prediction remains mathematically impossible.
+- **WHY IT IS NEEDED:** Historical journey observations and actual arrival outcomes are required for supervised training. At this preparation stage, these were not available; sustained collection or a suitable external historical source is needed.
 - **ESTIMATED COMPLEXITY:** High
 - **EXPECTED OUTPUT:** Database table `LIVE_OBSERVATIONS` actively populating.
 
@@ -40,7 +46,7 @@
 
 ---
 
-## PRIORITY 3 — IMPROVEMENTS (Future ML Phase)
+## PRIORITY 3 — IMPROVEMENTS (Future Model Training Phase)
 
 ### 5. Train Delay-DNA Recovery Model
 - **TASK:** Utilize the time-series telemetry (once collected for ~30 days) to compute station-to-station delay recovery rates.
@@ -48,12 +54,12 @@
 - **DEPENDENCY:** Task 3 (Time-Series Database) must have 30+ days of data.
 - **WHY IT IS NEEDED:** To predict if a delayed train will make up time.
 - **ESTIMATED COMPLEXITY:** High
-- **EXPECTED OUTPUT:** First true ML inference predicting recovery.
+- **EXPECTED OUTPUT:** A validated trained model predicting recovery.
 
-### 6. Train ETA Machine Learning Model
+### 6. Train ETA Prediction Model
 - **TASK:** Train an XGBoost/LightGBM model to predict `actual_arrival_time` using the static, route, and historical features built by Group A, joined with the new live time-series tracking data.
 - **OWNER:** Ashwin
 - **DEPENDENCY:** Task 3.
-- **WHY IT IS NEEDED:** To replace the deterministic baseline with statistical AI prediction.
+- **WHY IT IS NEEDED:** To replace the deterministic baseline with trained statistical prediction.
 - **ESTIMATED COMPLEXITY:** Very High
-- **EXPECTED OUTPUT:** An ML model outperforming the `DELAY_ADJUSTED_BASELINE`.
+- **EXPECTED OUTPUT:** A trained model outperforming the `DELAY_ADJUSTED_BASELINE`.

@@ -1,5 +1,11 @@
 # ETA System Architecture
 
+> Historical preparation snapshot. Statements about data availability,
+> implementation and next steps describe the `railway_eta_data` preparation
+> stage. For the current trained pilot and application status, see the
+> [model audit](../../docs/ETA_MODEL_AUDIT.md) and
+> [feature status](../../docs/FEATURE_STATUS.md).
+
 This document describes the current and planned future architecture of the SIH Indian Train ETA system.
 
 ---
@@ -26,7 +32,7 @@ flowchart TD
 **Constraints of the Current System:**
 - All ETA estimates are based on static timetable data
 - No live position tracking
-- No ML model; fully deterministic
+- No trained predictive model; fully deterministic
 - Cannot be evaluated for accuracy (no actual arrival ground truth)
 
 ---
@@ -36,7 +42,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Live Train State Stream\nPosition, Delay, Speed, Timestamp] --> B[Feature Engineering\nSegment Progress, Route Context]
-    C[Historical Journey Dataset\nPast States + Actual Arrivals] --> D[ML Model Training\nGradient Boosting / LSTM]
+    C[Historical Journey Dataset\nPast States + Actual Arrivals] --> D[Model Training\nGradient Boosting / LSTM]
     B --> D
     E[Static Route Features\nSchedule, Distance, Zone] --> D
 
@@ -65,4 +71,4 @@ flowchart TD
 | Phase 2 | Schedule-based ETA baselines | ✓ Complete (Chunk 3) |
 | Phase 3 | Live data collection pipeline (sustained) | ⏳ Not started |
 | Phase 4 | Historical dataset assembly + feature engineering | ⏳ Blocked on Phase 3 |
-| Phase 5 | ML model training + evaluation | ⏳ Blocked on Phase 4 |
+| Phase 5 | Predictive model training + evaluation | ⏳ Blocked on Phase 4 |

@@ -5,6 +5,9 @@ route visualization, journey analytics, historical delay patterns and a clearly
 separated what-if simulation. Styling uses Tailwind CSS 4 and component CSS
 modules; maps use Leaflet.
 
+Read the [development notes](DEVELOPMENT.md) for the installed framework's
+documentation and version-specific guidance.
+
 ```bash
 npm ci
 cp .env.example .env.local

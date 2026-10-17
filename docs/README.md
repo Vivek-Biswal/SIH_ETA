@@ -9,7 +9,7 @@ different things; the documentation keeps those distinctions explicit.
 | --- | --- |
 | Run the website, API and Flutter app | [Local setup](development/setup.md) |
 | Understand what works and what is still limited | [Feature status](FEATURE_STATUS.md) |
-| Understand the trained ETA pilot | [ETA training, validation and serving audit](ETA_ML_AUDIT.md) |
+| Understand the trained ETA pilot | [ETA training, validation and serving audit](ETA_MODEL_AUDIT.md) |
 | See how the components communicate | [Runtime architecture](architecture/system-architecture.md) |
 | Integrate with the passenger API | [API guide](api/api-contract.md) |
 | Configure hosted services or build an APK | [Deployment guide](v1_deployment_guide.md) |
