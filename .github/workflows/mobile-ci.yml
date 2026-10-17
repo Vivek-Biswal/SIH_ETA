@@ -13,7 +13,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Keep rendering consistent with the reviewed Windows golden images.
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
