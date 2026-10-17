@@ -21,7 +21,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
+          # Match the SDK used for the verified Android release and lockfile.
+          flutter-version: '3.32.8'
           channel: stable
 
       - name: Install dependencies
