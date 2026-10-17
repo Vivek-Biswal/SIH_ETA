@@ -10,17 +10,30 @@ import { RouteSimulation } from './RouteSimulation';
 
 const JourneyAnalytics = dynamic(() => import('../analytics/JourneyAnalytics'), { loading: () => <p role="status" className="p-6 text-muted-foreground">Loading analytics…</p> });
 type Mode = 'history' | 'live' | 'simulation' | 'analytics';
-export function NetworkWorkspace({ initialMode = 'live', brand = 'Etaernal' }: { initialMode?: Mode; brand?: string }) {
-  const [mode, setMode] = useState<Mode>(initialMode);
+type Section = 'all' | 'tracking' | 'history';
+const modes = [
+  { id: 'live', title: 'Track my train', subtitle: 'Position & arrival times', icon: Radio },
+  { id: 'analytics', title: 'Analytics', subtitle: 'Your journey in numbers', icon: ChartNoAxesCombined },
+  { id: 'history', title: 'Past delays', subtitle: 'Learn from past journeys', icon: Network },
+  { id: 'simulation', title: 'Simulation', subtitle: 'Explore a what-if journey', icon: FlaskConical },
+] as const;
+
+export function NetworkWorkspace({ initialMode = 'live', brand = 'Etaernal', section = 'all' }: { initialMode?: Mode; brand?: string; section?: Section }) {
+  const [selectedMode, setMode] = useState<Mode>(initialMode);
+  const mode = section === 'history' ? 'history' : section === 'tracking' && selectedMode !== 'simulation' ? 'live' : selectedMode;
+  const tabs = section === 'history' ? [] : section === 'tracking' ? modes.filter(item => item.id === 'live' || item.id === 'simulation') : modes;
+  const title = section === 'history' ? 'Learn from past delays.' : section === 'tracking' ? 'Your train. Your route. In view.' : 'Your journey, made clearer.';
+  const label = section === 'history' ? 'Past Delay Insights' : section === 'tracking' ? 'Train Tracking' : 'Journey insights';
+  const intro = section === 'history' ? 'Explore historical station delays and recorded train interactions. These patterns describe past journeys, not current running conditions.' : section === 'tracking' ? 'Follow your train’s latest reported position and arrival times, or explore a clearly labelled what-if simulation.' : 'Follow your train, understand its delays, and explore what could change your arrival.';
   return <div className={`${styles.workspace} max-w-7xl mx-auto space-y-6 pb-10`}>
     <header className={styles.hero}>
-      <p className={styles.eyebrow}>{brand} / Journey insights</p>
-      <h1>Your journey, made clearer.</h1>
-      <p className={styles.intro}>Follow your train, understand its delays, and explore what could change your arrival.</p>
+      <p className={styles.eyebrow}>{brand} / {label}</p>
+      <h1>{title}</h1>
+      <p className={styles.intro}>{intro}</p>
     </header>
-    <nav aria-label="Journey insights sections" className={styles.navigation}>
-      {([{ id: 'live', title: 'Track my train', subtitle: 'Position & arrival times', icon: Radio }, { id: 'analytics', title: 'Analytics', subtitle: 'Your journey in numbers', icon: ChartNoAxesCombined }, { id: 'history', title: 'Past delays', subtitle: 'Learn from past journeys', icon: Network }, { id: 'simulation', title: 'Simulation', subtitle: 'Explore a what-if journey', icon: FlaskConical }] as const).map(item => <button key={item.id} aria-pressed={mode === item.id} aria-controls="journey-content" onClick={() => setMode(item.id)} className={styles.tab}><span className={styles.tabIcon}><item.icon size={20} /></span><span className={styles.tabText}><span className={styles.tabTitle}>{item.title}</span><span className={styles.tabSubtitle}>{item.subtitle}</span></span></button>)}
-    </nav>
+    {tabs.length > 0 && <nav aria-label={`${label} sections`} className={`${styles.navigation} ${section === 'tracking' ? styles.trackingNavigation : ''}`}>
+      {tabs.map(item => <button key={item.id} aria-pressed={mode === item.id} aria-controls="journey-content" onClick={() => setMode(item.id)} className={styles.tab}><span className={styles.tabIcon}><item.icon size={20} /></span><span className={styles.tabText}><span className={styles.tabTitle}>{item.title}</span><span className={styles.tabSubtitle}>{item.subtitle}</span></span></button>)}
+    </nav>}
     <div id="journey-content" className={styles.content}>{mode === 'history' ? <HistoricalInsights /> : mode === 'live' ? <LiveNetwork /> : mode === 'analytics' ? <JourneyAnalytics embedded /> : <Simulation />}</div>
   </div>;
 }

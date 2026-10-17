@@ -5,6 +5,11 @@ Captured on **17 October 2026** against the public website and the existing
 Android release APK, version **1.1.9+11**. No provider responses were replaced,
 no ML result was fabricated and no API keys or account dashboards were captured.
 
+The captures predate the website navigation split. Current **Train Tracking**
+and **Simulation** live at `/network/map`; **Past Delay Insights** remains at
+`/network`. The original capture URLs below are retained as provenance. The
+mobile shared workspace continues to expose all four tools.
+
 ## Website gallery
 
 Chrome at 1440 CSS pixels wide, device scale 1.5. Most captures are 2160×1500;

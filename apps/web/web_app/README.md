@@ -21,7 +21,8 @@ Missing/rejected map configuration triggers an identified OpenStreetMap fallback
 | --- | --- |
 | `/dashboard` | Passenger search and dated historical summary |
 | `/trains`, `/trains/[id]`, `/trains/[id]/eta` | Route search, status and selected-station arrival |
-| `/network`, `/network/map` | Journey insights / selected-train geographic view |
+| `/network` | Past Delay Insights: historical station delays and interactions only |
+| `/network/map` | Train Tracking: selected-train tracking and what-if simulation |
 | `/analytics` | Confirmed-arrival analytics for one selected journey |
 | `/journey-insights` | Compact shared workspace used by the mobile WebView |
 | `/stations`, `/settings` | Station tools and local preferences |

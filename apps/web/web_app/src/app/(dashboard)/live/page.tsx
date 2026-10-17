@@ -1,2 +1,2 @@
-import { NetworkWorkspace } from '@/components/network/NetworkWorkspace';
-export default function Page() { return <NetworkWorkspace initialMode="live" />; }
+import { redirect } from 'next/navigation';
+export default function Page() { redirect('/network/map'); }

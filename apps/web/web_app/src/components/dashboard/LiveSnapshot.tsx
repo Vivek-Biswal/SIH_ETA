@@ -13,7 +13,7 @@ export function LiveSnapshot() {
   useEffect(() => {
     const controller = new AbortController(); setLoading(true); setError('');
     loadInsights('', controller.signal).then(result => { if (!controller.signal.aborted) setData(result); })
-      .catch(() => { if (!controller.signal.aborted) setError('Network insights are unavailable right now. Try again in a moment.'); })
+      .catch(() => { if (!controller.signal.aborted) setError('Past delay insights are unavailable right now. Try again in a moment.'); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [revision]);
@@ -23,7 +23,7 @@ export function LiveSnapshot() {
 
   return <section className={styles.panel} aria-labelledby="network-summary-title" aria-busy={loading}>
     <div className={styles.header}><div><p className={styles.eyebrow}>A wider perspective</p><h2 id="network-summary-title">Learn from past journeys</h2></div>
-      <button disabled={loading} onClick={() => refresh(n => n + 1)} aria-label="Refresh network insights" className={styles.refresh}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></button>
+      <button disabled={loading} onClick={() => refresh(n => n + 1)} aria-label="Refresh past delay insights" className={styles.refresh}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></button>
     </div>
     <p className={styles.intro}>See where delays have built up in the past.</p>
     {error && <p role="status" className={styles.error}>{error}{data ? ' Showing the previously loaded records.' : ''}</p>}
@@ -32,6 +32,6 @@ export function LiveSnapshot() {
       <div><dt><span className={styles.metricIcon}><Network size={18} strokeWidth={1.7} /></span>Recorded train interactions</dt><dd>{loading && !data ? '…' : data ? data.interaction_count.toLocaleString('en-IN') : '—'}</dd></div>
     </dl>
     <div className={styles.period}><CalendarDays size={13} /><span>{data ? `${date(data.period_start)} – ${date(data.period_end)}` : loading ? 'Loading the observation period…' : 'Observation period unavailable'}</span></div>
-    <div className={styles.footer}><span className={styles.badge}>Historical data</span><Link href="/network?mode=history" prefetch={false}>Explore insights <ArrowUpRight size={15} /></Link></div>
+    <div className={styles.footer}><span className={styles.badge}>Historical data</span><Link href="/network" prefetch={false}>Past Delay Insights <ArrowUpRight size={15} /></Link></div>
   </section>;
 }

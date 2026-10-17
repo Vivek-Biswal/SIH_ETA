@@ -17,9 +17,9 @@ import {
 
 const primaryNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Live Network', href: '/network/map', icon: MapPin },
+  { name: 'Train Tracking', href: '/network/map', icon: MapPin },
   { name: 'ETA Intelligence', href: '/trains', icon: Train },
-  { name: 'Journey insights', href: '/network', icon: Network },
+  { name: 'Past Delay Insights', href: '/network', icon: Network },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Alerts', href: '/alerts', icon: Bell },
 ];
